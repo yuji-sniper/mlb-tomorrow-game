@@ -8,6 +8,7 @@ import {
   Card,
   CardContent,
 } from "@mui/material";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useEffect, useState } from "react";
 
 type Team = {
@@ -28,10 +29,11 @@ type GroupedTeams = {
   };
 }
 
-export default function Home() {
+export default function Teams() {
   const { liff, liffError } = useLiffContext();
   const [isLoading, setIsLoading] = useState(true);
   const [groupedTeams, setGroupedTeams] = useState<GroupedTeams>();
+  const [selectedTeams, setSelectedTeams] = useState<number[]>([]);
 
   const getGroupedTeams = async () => {
     try {
@@ -60,6 +62,14 @@ export default function Home() {
     getGroupedTeams();
   }, [liff]);
 
+  const handleCardClick = (teamId: number) => {
+    setSelectedTeams((prev) =>
+      prev.includes(teamId)
+        ? prev.filter((id) => id !== teamId)
+        : [...prev, teamId]
+    );
+  };
+
   if (isLoading) {
     return (
       <Box 
@@ -79,31 +89,63 @@ export default function Home() {
     <Box p={2}>
       {groupedTeams && Object.entries(groupedTeams).map(([leagueId, league]) => (
         <Box key={leagueId} mb={4}>
-          <Typography variant="h6" fontWeight="bold" mb={2}>
+          <Typography variant="h6" fontWeight="bold" mb={1}>
             {league.name}
           </Typography>
           {Object.entries(league.divisions).map(([divisionId, division]) => (
-            <Box key={divisionId} mb={3}>
+            <Box key={divisionId} mb={2}>
               <Typography variant="subtitle2" fontWeight="medium" mb={1} sx={{ pl: 0.5 }}>
                 {division.name}
               </Typography>
               <Box display="flex" flexDirection="row" flexWrap="wrap" gap={0.5} justifyContent="center">
-                {division.teams.map((team) => (
-                  <Card key={team.id} sx={{ minWidth: 56, maxWidth: 64, flex: '0 0 auto', textAlign: 'center' }}>
-                    <CardContent sx={{ p: 0.5, '&:last-child': { pb: 0.5 }, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <Avatar 
-                        src={team.image} 
-                        alt={team.name} 
-                        sx={{ width: 32, height: 32, mb: 0.5, bgcolor: 'white', borderRadius: 0, objectFit: 'contain' }} 
-                        variant="square"
-                        slotProps={{ img: { style: { objectFit: 'contain' } } }}
-                      />
-                      <Typography variant="caption" sx={{ mt: 0.2, fontSize: '0.65rem', wordBreak: 'break-word' }}>
-                        {team.name}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                ))}
+                {division.teams.map((team) => {
+                  const selected = selectedTeams.includes(team.id);
+                  return (
+                    <Card
+                      key={team.id}
+                      onClick={() => handleCardClick(team.id)}
+                      sx={{
+                        minWidth: 56,
+                        maxWidth: 64,
+                        flex: '0 0 auto',
+                        textAlign: 'center',
+                        cursor: 'pointer',
+                        position: 'relative',
+                        bgcolor: 'white',
+                        transition: 'border-color 0.2s',
+                        border: '3px solid',
+                        borderColor: selected ? 'primary.main' : 'white',
+                      }}
+                    >
+                      <CardContent sx={{ p: 0.5, '&:last-child': { pb: 0.5 }, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <Avatar 
+                          src={team.image} 
+                          alt={team.name} 
+                          sx={{ width: 32, height: 32, mb: 0.5, bgcolor: 'white', borderRadius: 0, objectFit: 'contain' }} 
+                          variant="square"
+                          slotProps={{ img: { style: { objectFit: 'contain' } } }}
+                        />
+                        <Typography variant="caption" sx={{ mt: 0.2, fontSize: '0.5rem', wordBreak: 'break-word' }}>
+                          {team.name}
+                        </Typography>
+                        {selected && (
+                          <CheckCircleIcon 
+                            sx={{
+                              position: 'absolute',
+                              top: 2,
+                              right: 2,
+                              fontSize: 16,
+                              color: 'primary.main',
+                              backgroundColor: 'white',
+                              pointerEvents: 'none',
+                              borderRadius: '50%',
+                            }}
+                          />
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </Box>
             </Box>
           ))}

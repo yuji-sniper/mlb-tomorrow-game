@@ -1,11 +1,11 @@
 "use client";
 
-import Home from "./_components/home";
+import Teams from "./_components/teams";
 
 export default function Page() {
   return (
     <div>
-      <Home />
+      <Teams />
     </div>
   );
 }
