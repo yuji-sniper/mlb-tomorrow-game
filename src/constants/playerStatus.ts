@@ -1,46 +1,82 @@
-export const PLAYER_STATUS_DISPLAY = {
-  A: 'アクティブ',
-  BRV: '忌引きリスト',
-  D7: '7日間故障者リスト',
-  D10: '10日間故障者リスト',
-  D15: '15日間故障者リスト',
-  D60: '60日間故障者リスト',
-  DFA: 'DFA（戦力外）',
-  FA: 'フリーエージェント',
-  FME: '家族の医療緊急',
-  LV: '有給休暇',
-  MIN: 'マイナー降格',
-  RM: 'マイナー降格',
-  NRI: 'ノンロスター招待',
-  PL: '父親休暇',
-  RST: '制限リスト',
-  RET: '引退',
-  SUS: '出場停止',
-  UDP: '未契約ドラフト指名',
-  WV: 'ウェーバー',
-  '': 'トレードまたは未登録',
+export const PLAYER_STATUS = {
+  A: {
+    display: 'アクティブ',
+    priority: 100,
+  },
+  BRV: {
+    display: '忌引きリスト',
+    priority: 90,
+  },
+  D7: {
+    display: '7日間故障者リスト',
+    priority: 85,
+  },
+  D10: {
+    display: '10日間故障者リスト',
+    priority: 85,
+  },
+  D15: {
+    display: '15日間故障者リスト',
+    priority: 80,
+  },
+  D60: {
+    display: '60日間故障者リスト',
+    priority: 70,
+  },
+  PL: {
+    display: '父親休暇',
+    priority: 60,
+  },
+  FME: {
+    display: '家族の医療緊急',
+    priority: 50,
+  },
+  LV: {
+    display: '有給休暇',
+    priority: 45,
+  },
+  RM: {
+    display: 'マイナー降格',
+    priority: 42,
+  },
+  MIN: {
+    display: 'マイナー降格',
+    priority: 40,
+  },
+  NRI: {
+    display: '招待選手（NRI）',
+    priority: 30,
+  },
+  DFA: {
+    display: 'DFA（戦力外）',
+    priority: 25,
+  },
+  WV: {
+    display: 'ウェーバー',
+    priority: 20,
+  },
+  RST: {
+    display: '制限リスト',
+    priority: 15,
+  },
+  SUS: {
+    display: '出場停止',
+    priority: 10,
+  },
+  FA: {
+    display: 'フリーエージェント',
+    priority: 5,
+  },
+  RET: {
+    display: '引退',
+    priority: 3,
+  },
+  UDP: {
+    display: '未契約ドラフト指名',
+    priority: 2,
+  },
+  '': {
+    display: 'トレードまたは未登録',
+    priority: 0,
+  },
 } as const;
-
-export const PLAYER_STATUS_PRIORITY = {
-  A: 100,
-  D7: 90,
-  D10: 85,
-  D15: 80,
-  D60: 70,
-  PL: 60,
-  BRV: 55,
-  FME: 50,
-  LV: 45,
-  RM: 42,
-  MIN: 40,
-  NRI: 30,
-  DFA: 25,
-  WV: 20,
-  RST: 15,
-  SUS: 10,
-  FA: 5,
-  RET: 3,
-  UDP: 2,
-  '': 0,
-} as const;
-

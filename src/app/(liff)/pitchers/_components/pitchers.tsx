@@ -4,7 +4,7 @@ import { LEAGUE } from "@/constants/league";
 import { Box, Typography, Card, CardContent, Avatar, CircularProgress, Dialog, DialogTitle, DialogContent, List, ListItem, ListItemAvatar, ListItemText, Checkbox, DialogActions, Button } from "@mui/material";
 import { Dialog as MuiDialog, DialogTitle as MuiDialogTitle, DialogContent as MuiDialogContent, DialogActions as MuiDialogActions } from "@mui/material";
 import { POSITION } from "@/constants/position";
-import { PLAYER_STATUS_DISPLAY, PLAYER_STATUS_PRIORITY } from "@/constants/playerStatus";
+import { PLAYER_STATUS } from "@/constants/playerStatus";
 
 type Team = {
   id: number;
@@ -28,7 +28,7 @@ type Pitcher = {
   id: number;
   name: string;
   teamName: string;
-  status: string;
+  status: keyof typeof PLAYER_STATUS;
   image: string;
 }
 
@@ -82,13 +82,15 @@ export default function Pitchers() {
         if (player.position.code !== POSITION.pitcher.code) continue;
 
         const id = player.person.id;
-        const status = player.status.code as keyof typeof PLAYER_STATUS_PRIORITY;
+        const status = PLAYER_STATUS[player.status.code as keyof typeof PLAYER_STATUS]
+          ? player.status.code
+          : '';
 
         const pitcher: Pitcher = {
           id,
           name: player.person.fullName,
           teamName: teamName,
-          status: PLAYER_STATUS_DISPLAY[status] ?? '',
+          status,
           image: `https://img.mlbstatic.com/mlb-photos/image/upload/w_60,d_people:generic:headshot:silo:current.png,q_auto:best,f_auto/v1/people/${id}/headshot/67/current`,
         };
 
@@ -96,9 +98,9 @@ export default function Pitchers() {
         const duplicatePitcher = pitcherMap.get(id);
         
         if (duplicatePitcher) {
-          const duplicatePitcherStatus = duplicatePitcher.status as keyof typeof PLAYER_STATUS_PRIORITY;
+          const duplicatePitcherStatus = PLAYER_STATUS[duplicatePitcher.status];
 
-          if (PLAYER_STATUS_PRIORITY[status] > PLAYER_STATUS_PRIORITY[duplicatePitcherStatus]) {
+          if (PLAYER_STATUS[pitcher.status].priority > duplicatePitcherStatus.priority) {
             pitcherMap.set(id, pitcher);
           }
         } else {
@@ -106,7 +108,11 @@ export default function Pitchers() {
         }
       }
 
-      setPitchers(Array.from(pitcherMap.values()));
+      const sortedPitchers = Array.from(pitcherMap.values()).sort((a, b) => {
+        return PLAYER_STATUS[b.status].priority - PLAYER_STATUS[a.status].priority;
+      });
+
+      setPitchers(sortedPitchers);
     } catch (error) {
       console.error(error);
       setPitchers([]);
@@ -253,7 +259,7 @@ export default function Pitchers() {
                   </ListItemAvatar>
                   <ListItemText
                     primary={pitcher.name}
-                    secondary={pitcher.status}
+                    secondary={PLAYER_STATUS[pitcher.status].display}
                     slotProps={{
                       secondary: {
                         sx: { fontSize: '0.6rem' },
@@ -312,7 +318,15 @@ export default function Pitchers() {
                   <ListItemAvatar>
                     <Avatar src={pitcher.image} alt={pitcher.name} />
                   </ListItemAvatar>
-                  <ListItemText primary={pitcher.name} secondary={`${pitcher.teamName} ${pitcher.status}`} />
+                  <ListItemText
+                    primary={pitcher.name}
+                    secondary={`[${pitcher.teamName}] ${PLAYER_STATUS[pitcher.status].display}`}
+                    slotProps={{
+                      secondary: {
+                        sx: { fontSize: '0.6rem' },
+                      },
+                    }}
+                  />
                 </ListItem>
               ))}
             </List>
@@ -338,7 +352,7 @@ export default function Pitchers() {
   );
 }
 
-const createEmptyGroupedTeams = () => ({
+const createEmptyGroupedTeams= (): GroupedTeams => ({
   [LEAGUE.american.id]: {
     name: LEAGUE.american.name,
     divisions: {
