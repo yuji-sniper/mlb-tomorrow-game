@@ -8,6 +8,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const [liffObject, setLiffObject] = useState<Liff | null>(null);
   const [liffError, setLiffError] = useState<string | null>(null);
 
+  // TODO: liffが必要な箇所だけClient Componentにする
   useEffect(() => {
     liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID! })
       .then(() => {
