@@ -13,10 +13,10 @@ type Team = {
 }
 
 type GroupedTeams = {
-  [leagueId: number]: {
+  [leagueId: string]: {
     name: string;
     divisions: {
-      [divisionId: number]: {
+      [divisionId: string]: {
         name: string;
         teams: Team[];
       };
@@ -31,6 +31,23 @@ type Pitcher = {
   status: keyof typeof PLAYER_STATUS;
   image: string;
 }
+
+type DivisionOrder = {
+  [leagueId: string]: string[];
+}
+
+const divisionOrder: DivisionOrder = {
+  [LEAGUE.american.id]: [
+    LEAGUE.american.divisions.east.id.toString(),
+    LEAGUE.american.divisions.central.id.toString(),
+    LEAGUE.american.divisions.west.id.toString(),
+  ],
+  [LEAGUE.national.id]: [
+    LEAGUE.national.divisions.east.id.toString(),
+    LEAGUE.national.divisions.central.id.toString(),
+    LEAGUE.national.divisions.west.id.toString(),
+  ],
+};
 
 export default function Pitchers() {
   const { liff, liffError } = useLiffContext();
@@ -50,8 +67,8 @@ export default function Pitchers() {
       const data = await response.json();
       const teams = data.teams;
       const newGroupedTeams = teams.reduce((acc: GroupedTeams, team: any) => {
-        const leagueId = team.league.id
-        const divisionId = team.division.id
+        const leagueId = team.league.id.toString();
+        const divisionId = team.division.id.toString();
         acc[leagueId].divisions[divisionId].teams.push({
           id: team.id,
           name: team.teamName,
@@ -94,7 +111,6 @@ export default function Pitchers() {
           image: `https://img.mlbstatic.com/mlb-photos/image/upload/w_60,d_people:generic:headshot:silo:current.png,q_auto:best,f_auto/v1/people/${id}/headshot/67/current`,
         };
 
-        // 重複した選手がある場合、優先度の高いステータスの方を残す
         const duplicatePitcher = pitcherMap.get(id);
         
         if (duplicatePitcher) {
@@ -108,10 +124,10 @@ export default function Pitchers() {
         }
       }
 
-      const sortedPitchers = Array.from(pitcherMap.values()).sort((a, b) => {
-        return PLAYER_STATUS[b.status].priority - PLAYER_STATUS[a.status].priority;
-      });
-
+      const sortedPitchers = Array.from(pitcherMap.values()).sort(
+        (a, b) =>
+          (PLAYER_STATUS[b.status].priority ?? 0) - (PLAYER_STATUS[a.status].priority ?? 0)
+      );
       setPitchers(sortedPitchers);
     } catch (error) {
       console.error(error);
@@ -156,52 +172,54 @@ export default function Pitchers() {
   }
 
   return (
-    <Box p={2} maxWidth={360} mx="auto">
+    <Box p={2} maxWidth={320} mx="auto">
       {/* [start]チーム一覧 */}
       {groupedTeams && Object.entries(groupedTeams).map(([leagueId, league]) => (
-        <Box key={leagueId} mb={4}>
-          <Typography variant="h6" fontWeight="bold" mb={1}>
+        <Box key={leagueId} mb={2}>
+          <Typography variant="h6" fontWeight="bold">
             {league.name}
           </Typography>
-          {Object.entries(league.divisions).map(([divisionId, division]) => (
-            <Box key={divisionId} mb={2}>
-              <Typography variant="subtitle2" fontWeight="medium" mb={1} sx={{ pl: 0.5 }}>
-                {division.name}
-              </Typography>
-              <Box display="flex" flexDirection="row" flexWrap="wrap" gap={0.5} justifyContent="center">
-                {division.teams.map((team) => (
-                  <Card
-                    key={team.id}
-                    onClick={() => handleCardClick(team.id, team.name)}
-                    sx={{
-                      width: 54,
-                      flex: '0 0 auto',
-                      textAlign: 'center',
-                      cursor: 'pointer',
-                      position: 'relative',
-                      bgcolor: 'white',
-                      transition: 'border-color 0.2s',
-                      border: '3px solid',
-                      borderColor: selectedTeamId === team.id ? 'primary.main' : 'white',
-                    }}
-                  >
-                    <CardContent sx={{ p: 0.5, '&:last-child': { pb: 0.5 }, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <Avatar 
-                        src={team.image} 
-                        alt={team.name} 
-                        sx={{ width: 32, height: 32, mb: 0.5, bgcolor: 'white', borderRadius: 0, objectFit: 'contain' }} 
-                        variant="square"
-                        slotProps={{ img: { style: { objectFit: 'contain' } } }}
-                      />
-                      <Typography variant="caption" sx={{ mt: 0.2, fontSize: '0.5rem', wordBreak: 'break-word' }}>
-                        {team.name}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                ))}
+          {divisionOrder[leagueId].map((divisionId) => {
+            return (
+              <Box key={divisionId} mb={1}>
+                <Typography variant="subtitle2" fontSize="0.7rem" fontWeight="medium" mb={0.5} sx={{ pl: 0.5 }}>
+                  {league.divisions[divisionId].name}
+                </Typography>
+                <Box display="flex" flexDirection="row" flexWrap="wrap" gap={0.5} justifyContent="center">
+                  {league.divisions[divisionId].teams.map((team) => (
+                    <Card
+                      key={team.id}
+                      onClick={() => handleCardClick(team.id, team.name)}
+                      sx={{
+                        width: 54,
+                        flex: '0 0 auto',
+                        textAlign: 'center',
+                        cursor: 'pointer',
+                        position: 'relative',
+                        bgcolor: 'white',
+                        transition: 'border-color 0.2s',
+                        border: '3px solid',
+                        borderColor: selectedTeamId === team.id ? 'primary.main' : 'white',
+                      }}
+                    >
+                      <CardContent sx={{ p: 0.5, '&:last-child': { pb: 0 }, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <Avatar 
+                          src={team.image} 
+                          alt={team.name} 
+                          sx={{ width: 32, height: 32, bgcolor: 'white', borderRadius: 0, objectFit: 'contain' }} 
+                          variant="square"
+                          slotProps={{ img: { style: { objectFit: 'contain' } } }}
+                        />
+                        <Typography variant="caption" sx={{ mt: 0.2, fontSize: '0.5rem', wordBreak: 'break-word' }}>
+                          {team.name}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Box>
               </Box>
-            </Box>
-          ))}
+            );
+          })}
         </Box>
       ))}
       {/* [end]チーム一覧 */}
@@ -214,12 +232,6 @@ export default function Pitchers() {
               <Avatar
                 src={`https://www.mlbstatic.com/team-logos/${selectedTeamId}.svg`}
                 alt={selectedTeamName}
-                sx={{
-                  width: 32,
-                  height: 32,
-                  bgcolor: 'white',
-                  borderRadius: 0,
-                }}
                 variant="square"
                 slotProps={{ img: { style: { objectFit: 'contain' } } }}
               />
@@ -309,7 +321,7 @@ export default function Pitchers() {
 
       {/* [start]確認ダイアログ */}
       <MuiDialog open={confirmOpen} onClose={() => setConfirmOpen(false)} maxWidth="xs" fullWidth>
-        <MuiDialogTitle sx={{ fontSize: '1rem' }}>選択中の選手を保存しますか？</MuiDialogTitle>
+        <MuiDialogTitle sx={{ fontSize: '0.8rem' }}>選択中の選手を保存しますか？</MuiDialogTitle>
         <MuiDialogContent dividers>
           {selectedPitchers.length > 0 ? (
             <List dense sx={{ p: 0 }}>
@@ -352,19 +364,19 @@ export default function Pitchers() {
   );
 }
 
-const createEmptyGroupedTeams= (): GroupedTeams => ({
+const createEmptyGroupedTeams = (): GroupedTeams => ({
   [LEAGUE.american.id]: {
     name: LEAGUE.american.name,
     divisions: {
-      [LEAGUE.american.divisions.east.id]: {
+      [LEAGUE.american.divisions.east.id.toString()]: {
         name: LEAGUE.american.divisions.east.name,
         teams: [],
       },
-      [LEAGUE.american.divisions.central.id]: {
+      [LEAGUE.american.divisions.central.id.toString()]: {
         name: LEAGUE.american.divisions.central.name,
         teams: [],
       },
-      [LEAGUE.american.divisions.west.id]: {
+      [LEAGUE.american.divisions.west.id.toString()]: {
         name: LEAGUE.american.divisions.west.name,
         teams: [],
       },
@@ -373,15 +385,15 @@ const createEmptyGroupedTeams= (): GroupedTeams => ({
   [LEAGUE.national.id]: {
     name: LEAGUE.national.name,
     divisions: {
-      [LEAGUE.national.divisions.east.id]: {
+      [LEAGUE.national.divisions.east.id.toString()]: {
         name: LEAGUE.national.divisions.east.name,
         teams: [],
       },
-      [LEAGUE.national.divisions.central.id]: {
+      [LEAGUE.national.divisions.central.id.toString()]: {
         name: LEAGUE.national.divisions.central.name,
         teams: [],
       },
-      [LEAGUE.national.divisions.west.id]: {
+      [LEAGUE.national.divisions.west.id.toString()]: {
         name: LEAGUE.national.divisions.west.name,
         teams: [],
       },
