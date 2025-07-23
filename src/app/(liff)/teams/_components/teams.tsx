@@ -7,6 +7,15 @@ import {
   Box,
   Card,
   CardContent,
+  Button,
+  Dialog as MuiDialog,
+  DialogTitle as MuiDialogTitle,
+  DialogContent as MuiDialogContent,
+  DialogActions as MuiDialogActions,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
 } from "@mui/material";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useEffect, useState } from "react";
@@ -14,6 +23,7 @@ import { useEffect, useState } from "react";
 type Team = {
   id: number;
   name: string;
+  fullName: string;
   image: string;
 }
 
@@ -34,6 +44,7 @@ export default function Teams() {
   const [isLoading, setIsLoading] = useState(true);
   const [groupedTeams, setGroupedTeams] = useState<GroupedTeams>();
   const [selectedTeams, setSelectedTeams] = useState<number[]>([]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const getGroupedTeams = async () => {
     try {
@@ -46,6 +57,7 @@ export default function Teams() {
         acc[leagueId].divisions[divisionId].teams.push({
           id: team.id,
           name: team.teamName,
+          fullName: team.name,
           image: `https://www.mlbstatic.com/team-logos/${team.id}.svg`,
         });
         return acc;
@@ -76,7 +88,7 @@ export default function Teams() {
         display="flex" 
         justifyContent="center" 
         alignItems="center" 
-        height="200px"
+        height="100vh"
         flexDirection="column"
         gap={2}
       >
@@ -86,7 +98,8 @@ export default function Teams() {
   }
 
   return (
-    <Box p={2}>
+    <Box p={2} maxWidth={360} mx="auto">
+      {/* [start]チーム選択 */}
       {groupedTeams && Object.entries(groupedTeams).map(([leagueId, league]) => (
         <Box key={leagueId} mb={4}>
           <Typography variant="h6" fontWeight="bold" mb={1}>
@@ -105,8 +118,7 @@ export default function Teams() {
                       key={team.id}
                       onClick={() => handleCardClick(team.id)}
                       sx={{
-                        minWidth: 56,
-                        maxWidth: 64,
+                        width: 54,
                         flex: '0 0 auto',
                         textAlign: 'center',
                         cursor: 'pointer',
@@ -151,6 +163,83 @@ export default function Teams() {
           ))}
         </Box>
       ))}
+      {/* [end]チーム選択 */}
+
+      {/* [start]保存ボタン */}
+      <Box
+        sx={{
+          width: { xs: '100%', sm: 360 },
+          maxWidth: 480,
+          display: 'flex',
+          justifyContent: 'center',
+          mt: 4,
+          mb: 2,
+        }}
+      >
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={confirmOpen}
+          onClick={() => setConfirmOpen(true)}
+          sx={{
+            minWidth: 180,
+            fontWeight: 'bold',
+            fontSize: '1rem',
+            boxShadow: 3,
+          }}
+        >
+          選択した{selectedTeams.length}チームを保存
+        </Button>
+      </Box>
+      {/* [end]保存ボタン */}
+
+      {/* [start]確認ダイアログ */}
+      <MuiDialog open={confirmOpen} onClose={() => setConfirmOpen(false)} maxWidth="xs" fullWidth>
+        <MuiDialogTitle sx={{ fontSize: '1rem' }}>選択したチームを保存しますか？</MuiDialogTitle>
+        <MuiDialogContent dividers>
+          {selectedTeams.length > 0 ? (
+            <List dense sx={{ p: 0 }}>
+              {groupedTeams &&
+                Object.values(groupedTeams).flatMap((league) =>
+                  Object.values(league.divisions).flatMap((division) =>
+                    division.teams.filter((team) => selectedTeams.includes(team.id))
+                  )
+                ).map((team) => (
+                  <ListItem key={team.id}>
+                    <ListItemAvatar>
+                      <Avatar
+                        src={team.image}
+                        alt={team.name}
+                        sx={{ width: 32, height: 32, mb: 0.5, bgcolor: 'white', borderRadius: 0, objectFit: 'contain' }}
+                        variant="square"
+                        slotProps={{ img: { style: { objectFit: 'contain' } } }}
+                      />
+                    </ListItemAvatar>
+                    <ListItemText primary={team.fullName} />
+                  </ListItem>
+                ))}
+            </List>
+          ) : (
+            <Typography align="center" color="text.secondary">
+              未選択
+            </Typography>
+          )}
+        </MuiDialogContent>
+        <MuiDialogActions>
+          <Button onClick={() => setConfirmOpen(false)} color="inherit">キャンセル</Button>
+          <Button
+            onClick={() => {
+              console.log('保存するチームID:', selectedTeams);
+              setConfirmOpen(false);
+            }}
+            color="primary"
+            variant="contained"
+          >
+            保存
+          </Button>
+        </MuiDialogActions>
+      </MuiDialog>
+      {/* [end]確認ダイアログ */}
     </Box>
   );
 }
