@@ -5,17 +5,24 @@ import { Team } from "@/features/teams/types/team";
 
 type LeagueDivisionsListProps = {
   league: League;
+  divisionOrder: string[];
   selectedTeamIds: number[];
   handleTeamCardClick: (team: Team) => void;
 }
 
-export function LeagueDivisionsList({ league, selectedTeamIds, handleTeamCardClick }: LeagueDivisionsListProps) {
+export default function LeagueDivisionsList({
+  league,
+  divisionOrder,
+  selectedTeamIds,
+  handleTeamCardClick,
+}: LeagueDivisionsListProps) {
   return (
     <Box mb={2}>
       <Typography variant="h6" fontWeight="bold">
         {league.name}
       </Typography>
-      {Object.entries(league.divisions).map(([divisionId, division]) => {
+      {divisionOrder.map((divisionId) => {
+        const division = league.divisions[divisionId];
         return (
           <DivisionTeamsList
             key={divisionId}

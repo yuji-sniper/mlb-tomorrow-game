@@ -7,11 +7,11 @@ import { useEffect, useState } from "react";
 import { Leagues } from "@/types/league";
 import { useTeams } from "@/features/teams/hooks/useTeams";
 import { createLeaguesFromTeams } from "@/utils/league";
-import { LeagueDivisionsList } from "@/features/teams/components/league-divisions-list";
-import { SaveTeamsDialog } from "@/features/teams/components/save-teams-dialog";
+import LeagueDivisionsList from "@/features/teams/components/league-divisions-list";
+import SaveTeamsDialog from "@/features/teams/components/save-teams-dialog";
 import { Team } from "@/features/teams/types/team";
 import { Button } from "@/components/ui/button/button";
-
+import { LEAGUE_DISPLAY_ORDER } from "@/constants/league";
 
 export default function Teams() {
   const { liff, liffError } = useLiffContext();
@@ -62,14 +62,18 @@ export default function Teams() {
   return (
     <Box p={2} maxWidth={320} mx="auto">
       {/* [start]チーム選択 */}
-      {leagues && Object.entries(leagues).map(([leagueId, league]) => (
-        <LeagueDivisionsList
-          key={leagueId}
-          league={league}
-          selectedTeamIds={selectedTeamIds}
-          handleTeamCardClick={handleTeamCardClick}
-        />
-      ))}
+      {leagues && Object.entries(LEAGUE_DISPLAY_ORDER).map(([leagueId, divisionOrder]) => {
+        const league = leagues[leagueId];
+        return (
+          <LeagueDivisionsList
+            key={leagueId}
+            league={league}
+            divisionOrder={divisionOrder}
+            selectedTeamIds={selectedTeamIds}
+            handleTeamCardClick={handleTeamCardClick}
+          />
+        );
+      })}
       {/* [end]チーム選択 */}
 
       {/* [start]保存ボタン */}

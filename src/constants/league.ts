@@ -36,3 +36,16 @@ export const LEAGUE = {
     }
   }
 }
+
+export const LEAGUE_DISPLAY_ORDER = {
+  [LEAGUE.american.id.toString()]: [
+    LEAGUE.american.divisions.east.id.toString(),
+    LEAGUE.american.divisions.central.id.toString(),
+    LEAGUE.american.divisions.west.id.toString(),
+  ],
+  [LEAGUE.national.id.toString()]: [
+    LEAGUE.national.divisions.east.id.toString(),
+    LEAGUE.national.divisions.central.id.toString(),
+    LEAGUE.national.divisions.west.id.toString(),
+  ],
+};
