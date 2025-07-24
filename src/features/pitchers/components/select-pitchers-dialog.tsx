@@ -38,7 +38,6 @@ export default function SelectPitchersDialog({ isOpen, onClose, team, isPitchers
                 secondaryAction={
                   <Checkbox
                     edge="end"
-                    onChange={() => handlePitcherToggle(pitcher)}
                     checked={isSelected}
                     color="primary"
                   />

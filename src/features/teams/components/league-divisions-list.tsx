@@ -8,6 +8,7 @@ type LeagueDivisionsListProps = {
   divisionOrder: string[];
   selectedTeamIds: number[];
   handleTeamCardClick: (team: Team) => void;
+  selectedCountByTeam?: { [teamId: number]: number };
 }
 
 export default function LeagueDivisionsList({
@@ -15,6 +16,7 @@ export default function LeagueDivisionsList({
   divisionOrder,
   selectedTeamIds,
   handleTeamCardClick,
+  selectedCountByTeam,
 }: LeagueDivisionsListProps) {
   return (
     <Box mb={2}>
@@ -29,6 +31,7 @@ export default function LeagueDivisionsList({
             division={division}
             selectedTeamIds={selectedTeamIds}
             handleTeamCardClick={handleTeamCardClick}
+            selectedCountByTeam={selectedCountByTeam}
           />
         );
       })}

@@ -7,12 +7,14 @@ type DivisionTeamsListProps = {
   division: Division;
   selectedTeamIds: number[];
   handleTeamCardClick: (team: Team) => void;
+  selectedCountByTeam?: { [teamId: number]: number };
 }
 
 export function DivisionTeamsList({
   division,
   selectedTeamIds,
   handleTeamCardClick,
+  selectedCountByTeam,
 }: DivisionTeamsListProps) {
   return (
     <Box mb={1}>
@@ -27,6 +29,7 @@ export function DivisionTeamsList({
               team={team}
               isSelected={selectedTeamIds.includes(team.id)}
               onClick={() => handleTeamCardClick(team)}
+              count={selectedCountByTeam?.[team.id] || 0}
             />
           );
         })}

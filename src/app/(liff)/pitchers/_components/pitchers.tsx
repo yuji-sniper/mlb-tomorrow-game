@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLiffContext } from "@/hooks/useLiffContext";
 import { LEAGUE_DISPLAY_ORDER } from "@/constants/league";
 import { Box, CircularProgress } from "@mui/material";
-import { POSITION } from "@/constants/position";
+import { PITCHER_POSITIONS } from "@/constants/position";
 import { PLAYER_STATUS } from "@/constants/playerStatus";
 import { Pitcher } from "@/features/pitchers/types/pitcher";
 import { useTeams } from "@/features/teams/hooks/useTeams";
@@ -15,6 +15,10 @@ import { Button } from "@/components/ui/button/button";
 import SavePitchersDialog from "@/features/pitchers/components/save-pitchers-dialog";
 import CenterButtonBox from "@/components/ui/button-box/center-button-box/center-button-box";
 
+type SelectedPitchers = {
+  [teamId: number]: Pitcher[];
+}
+
 export default function Pitchers() {
   const { liff, liffError } = useLiffContext();
   const { teams, isLoading, error } = useTeams();
@@ -23,8 +27,21 @@ export default function Pitchers() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pitchers, setPitchers] = useState<Pitcher[]>([]);
   const [isPitchersLoading, setIsPitchersLoading] = useState(false);
-  const [selectedPitchers, setSelectedPitchers] = useState<Pitcher[]>([]);
+  const [selectedPitchers, setSelectedPitchers] = useState<SelectedPitchers>({});
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const selectedPitchersFlattened = useMemo(() => {
+    return Object.values(selectedPitchers).flat();
+  }, [selectedPitchers]);
+
+  // 各チームごとの選択中人数を計算
+  const selectedPitchersCountByTeam = useMemo(() => {
+    const counts: { [teamId: number]: number } = {};
+    Object.entries(selectedPitchers).forEach(([teamId, pitchers]) => {
+      counts[Number(teamId)] = pitchers.length;
+    });
+    return counts;
+  }, [selectedPitchers]);
 
   const getLeagues = () => {
     if (!teams) { return; }
@@ -43,7 +60,7 @@ export default function Pitchers() {
       const pitcherMap = new Map<number, Pitcher>();
 
       for (const player of roster) {
-        if (player.position.code !== POSITION.pitcher.code) continue;
+        if (!PITCHER_POSITIONS.includes(player.position.code)) continue;
 
         const id = player.person.id;
         const status = PLAYER_STATUS[player.status.code as keyof typeof PLAYER_STATUS]
@@ -53,6 +70,7 @@ export default function Pitchers() {
         const pitcher: Pitcher = {
           id,
           name: player.person.fullName,
+          teamId: team.id,
           teamName: team.name,
           status,
           image: `https://img.mlbstatic.com/mlb-photos/image/upload/w_60,d_people:generic:headshot:silo:current.png,q_auto:best,f_auto/v1/people/${id}/headshot/67/current`,
@@ -91,11 +109,18 @@ export default function Pitchers() {
   };
 
   const handlePitcherToggle = (pitcher: Pitcher) => {
-    setSelectedPitchers((prev) =>
-      prev.some((prevPitcher) => prevPitcher.id === pitcher.id)
-        ? prev.filter((prevPitcher) => prevPitcher.id !== pitcher.id)
-        : [...prev, pitcher]
-    );
+    setSelectedPitchers((prev) => {
+      const teamId = pitcher.teamId;
+      const teamPitchers = prev[teamId] || [];
+      const isSelected = teamPitchers.some((prevPitcher) => prevPitcher.id === pitcher.id);
+      const newTeamPitchers = isSelected
+        ? teamPitchers.filter((prevPitcher) => prevPitcher.id !== pitcher.id)
+        : [...teamPitchers, pitcher];
+      return {
+        ...prev,
+        [teamId]: newTeamPitchers,
+      };
+    });
   };
 
   useEffect(() => {
@@ -128,6 +153,7 @@ export default function Pitchers() {
             divisionOrder={divisionOrder}
             selectedTeamIds={selectedTeam ? [selectedTeam.id] : []}
             handleTeamCardClick={handleTeamCardClick}
+            selectedCountByTeam={selectedPitchersCountByTeam} // 追加
           />
         );
       })}
@@ -141,7 +167,7 @@ export default function Pitchers() {
           team={selectedTeam}
           isPitchersLoading={isPitchersLoading}
           pitchers={pitchers}
-          selectedPitchers={selectedPitchers}
+          selectedPitchers={selectedPitchers[selectedTeam.id] || []}
           handlePitcherToggle={handlePitcherToggle}
         />
       )}
@@ -153,7 +179,7 @@ export default function Pitchers() {
           disabled={confirmOpen}
           onClick={() => setConfirmOpen(true)}
         >
-          選択した{selectedPitchers.length}人を保存
+          選択した{selectedPitchersFlattened.length}人を保存
         </Button>
       </CenterButtonBox>
       {/* [end]確認ボタン */}
@@ -162,7 +188,7 @@ export default function Pitchers() {
       <SavePitchersDialog
         isOpen={confirmOpen}
         onClose={() => setConfirmOpen(false)}
-        selectedPitchers={selectedPitchers}
+        pitchers={selectedPitchersFlattened}
       />
       {/* [end]確認ダイアログ */}
     </Box>

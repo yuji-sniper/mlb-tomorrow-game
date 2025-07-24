@@ -1,16 +1,19 @@
 import { Team } from "@/features/teams/types/team";
 import { Card, CardContent, Avatar, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 type TeamCardProps = {
   team: Team;
   isSelected: boolean;
+  count?: number;
   onClick: () => void;
 }
 
 export default function TeamCard({ 
   team, 
   isSelected, 
+  count = 0,
   onClick,
 }: TeamCardProps) {
   return (
@@ -26,7 +29,7 @@ export default function TeamCard({
         bgcolor: 'white',
         transition: 'border-color 0.2s',
         border: '3px solid',
-        borderColor: isSelected ? 'primary.main' : 'white',
+        borderColor: (isSelected || count > 0) ? 'primary.main' : 'white',
       }}
     >
       <CardContent sx={{ p: 0.5, '&:last-child': { pb: 0 }, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -40,6 +43,7 @@ export default function TeamCard({
         <Typography variant="caption" sx={{ mt: 0.2, fontSize: '0.5rem', wordBreak: 'break-word' }}>
           {team.name}
         </Typography>
+        {/* [start]選択マーク */}
         {isSelected && (
           <CheckCircleIcon 
             sx={{
@@ -54,6 +58,31 @@ export default function TeamCard({
             }}
           />
         )}
+        {/* [end]選択マーク */}
+
+        {/* [start]バッジ表示 */}
+        {count > 0 && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 2,
+              right: 2,
+              minWidth: 18,
+              height: 18,
+              bgcolor: 'primary.main',
+              color: 'white',
+              borderRadius: '50%',
+              fontSize: '0.65rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1.5px solid #fff',
+            }}
+          >
+            {count}
+          </Box>
+        )}
+        {/* [end]バッジ表示 */}
       </CardContent>
     </Card>
   )

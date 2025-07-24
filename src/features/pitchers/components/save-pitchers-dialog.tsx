@@ -6,13 +6,13 @@ import { PLAYER_STATUS } from "@/constants/playerStatus";
 type SavePitchersDialogProps = {
   isOpen: boolean;
   onClose: () => void;
-  selectedPitchers: Pitcher[];
+  pitchers: Pitcher[];
 }
 
 export default function SavePitchersDialog({
   isOpen,
   onClose,
-  selectedPitchers,
+  pitchers,
 }: SavePitchersDialogProps) {
   return (
     <SaveDialog
@@ -21,9 +21,9 @@ export default function SavePitchersDialog({
       onSave={() => {}}
       title="選択したピッチャーを保存しますか？"
     >
-      {selectedPitchers.length > 0 ? (
+      {pitchers.length > 0 ? (
         <List dense sx={{ p: 0 }}>
-          {selectedPitchers.map((pitcher) => (
+          {pitchers.map((pitcher) => (
             <ListItem key={pitcher.id}>
               <ListItemAvatar>
                 <Avatar src={pitcher.image} alt={pitcher.name} />
