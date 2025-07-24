@@ -1,27 +1,23 @@
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
 
-type SaveDialogProps = {
+type DefaultDialogProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSave: () => void;
   title: string;
   children: React.ReactNode;
-  saveLabel?: string;
-  cancelLabel?: string;
+  closeLabel?: string;
 }
 
-export default function SaveDialog({
+export default function DefaultDialog({
   isOpen,
   onClose,
-  onSave,
   title,
   children,
-  saveLabel = '保存',
-  cancelLabel = 'キャンセル',
-}: SaveDialogProps) {  
+  closeLabel = 'キャンセル',
+}: DefaultDialogProps) {  
   return (
     <Dialog open={isOpen} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle fontSize="1rem" sx={{ p: 1.5 }}>
+      <DialogTitle fontSize="1rem">
         {title}
       </DialogTitle>
       <DialogContent dividers>
@@ -29,10 +25,7 @@ export default function SaveDialog({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="inherit">
-          {cancelLabel}
-        </Button>
-        <Button onClick={onSave} color="primary" variant="contained">
-          {saveLabel}
+          {closeLabel}
         </Button>
       </DialogActions>
     </Dialog>

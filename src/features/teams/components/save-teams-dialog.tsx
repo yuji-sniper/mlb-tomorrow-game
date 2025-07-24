@@ -23,23 +23,23 @@ export default function SaveTeamsDialog({
       {selectedTeams.length > 0 ? (
         <List dense sx={{ p: 0 }}>
           {selectedTeams.map((team) => (
-              <ListItem key={team.id}>
-                <ListItemAvatar>
-                  <Avatar
-                    src={team.image}
-                    alt={team.name}
-                    sx={{ width: 32, height: 32, mb: 0.5, bgcolor: 'white', borderRadius: 0, objectFit: 'contain' }}
-                    variant="square"
-                    slotProps={{
-                      img: {
-                        style: { objectFit: 'contain' },
-                      },
-                    }}
-                  />
-                </ListItemAvatar>
-                <ListItemText primary={team.fullName} />
-              </ListItem>
-            ))}
+            <ListItem key={team.id}>
+              <ListItemAvatar>
+                <Avatar
+                  src={team.image}
+                  alt={team.name}
+                  sx={{ width: 32, height: 32, mb: 0.5, bgcolor: 'white', borderRadius: 0, objectFit: 'contain' }}
+                  variant="square"
+                  slotProps={{
+                    img: {
+                      style: { objectFit: 'contain' },
+                    },
+                  }}
+                />
+              </ListItemAvatar>
+              <ListItemText primary={team.fullName} />
+            </ListItem>
+          ))}
         </List>
       ) : (
         <Typography align="center" color="text.secondary">

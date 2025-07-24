@@ -12,6 +12,7 @@ import SaveTeamsDialog from "@/features/teams/components/save-teams-dialog";
 import { Team } from "@/features/teams/types/team";
 import { Button } from "@/components/ui/button/button";
 import { LEAGUE_DISPLAY_ORDER } from "@/constants/league";
+import CenterButtonBox from "@/components/ui/button-box/center-button-box/center-button-box";
 
 export default function Teams() {
   const { liff, liffError } = useLiffContext();
@@ -63,11 +64,10 @@ export default function Teams() {
     <Box p={2} maxWidth={320} mx="auto">
       {/* [start]チーム選択 */}
       {leagues && Object.entries(LEAGUE_DISPLAY_ORDER).map(([leagueId, divisionOrder]) => {
-        const league = leagues[leagueId];
         return (
           <LeagueDivisionsList
             key={leagueId}
-            league={league}
+            league={leagues[leagueId]}
             divisionOrder={divisionOrder}
             selectedTeamIds={selectedTeamIds}
             handleTeamCardClick={handleTeamCardClick}
@@ -77,21 +77,14 @@ export default function Teams() {
       {/* [end]チーム選択 */}
 
       {/* [start]保存ボタン */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          mt: 4,
-          mb: 2,
-        }}
-      >
+      <CenterButtonBox>
         <Button
           disabled={confirmOpen}
           onClick={handleConfirmClick}
         >
           選択した{selectedTeamIds.length}チームを保存
         </Button>
-      </Box>
+      </CenterButtonBox>
       {/* [end]保存ボタン */}
 
       {/* [start]確認ダイアログ */}
