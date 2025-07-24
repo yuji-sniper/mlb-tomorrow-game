@@ -2,7 +2,7 @@ import { Team } from '@/features/teams/types/team';
 import { useState, useEffect } from 'react';
 
 type UseTeams = {
-  teams: Team[];
+  teams?: Team[];
   isLoading: boolean;
   error: unknown;
 }
