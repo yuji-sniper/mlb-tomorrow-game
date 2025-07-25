@@ -48,8 +48,8 @@ export default function TeamCard({
           <CheckCircleIcon 
             sx={{
               position: 'absolute',
-              top: 2,
-              right: 2,
+              top: 0,
+              right: 0,
               fontSize: 16,
               color: 'primary.main',
               backgroundColor: 'white',
@@ -60,18 +60,18 @@ export default function TeamCard({
         )}
         {/* [end]選択マーク */}
 
-        {/* [start]バッジ表示 */}
+        {/* [start]カウントバッジ表示 */}
         {count > 0 && (
           <Box
             sx={{
               position: 'absolute',
-              top: 2,
-              right: 2,
+              top: 0,
+              right: 0,
               minWidth: 18,
               height: 18,
               bgcolor: 'primary.main',
               color: 'white',
-              borderRadius: '50%',
+              borderRadius: 8,
               fontSize: '0.65rem',
               display: 'flex',
               alignItems: 'center',
@@ -82,7 +82,7 @@ export default function TeamCard({
             {count}
           </Box>
         )}
-        {/* [end]バッジ表示 */}
+        {/* [end]カウントバッジ表示 */}
       </CardContent>
     </Card>
   )

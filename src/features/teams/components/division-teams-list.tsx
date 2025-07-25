@@ -5,16 +5,16 @@ import { Team } from "@/features/teams/types/team";
 
 type DivisionTeamsListProps = {
   division: Division;
-  selectedTeamIds: number[];
-  handleTeamCardClick: (team: Team) => void;
+  selectedTeamIds?: number[];
   selectedCountByTeam?: { [teamId: number]: number };
+  handleTeamCardClick: (team: Team) => void;
 }
 
 export function DivisionTeamsList({
   division,
   selectedTeamIds,
-  handleTeamCardClick,
   selectedCountByTeam,
+  handleTeamCardClick,
 }: DivisionTeamsListProps) {
   return (
     <Box mb={1}>
@@ -27,9 +27,9 @@ export function DivisionTeamsList({
             <TeamCard
               key={team.id}
               team={team}
-              isSelected={selectedTeamIds.includes(team.id)}
-              onClick={() => handleTeamCardClick(team)}
+              isSelected={selectedTeamIds?.includes(team.id) || false}
               count={selectedCountByTeam?.[team.id] || 0}
+              onClick={() => handleTeamCardClick(team)}
             />
           );
         })}

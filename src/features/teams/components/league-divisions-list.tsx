@@ -6,7 +6,7 @@ import { Team } from "@/features/teams/types/team";
 type LeagueDivisionsListProps = {
   league: League;
   divisionOrder: string[];
-  selectedTeamIds: number[];
+  selectedTeamIds?: number[];
   handleTeamCardClick: (team: Team) => void;
   selectedCountByTeam?: { [teamId: number]: number };
 }

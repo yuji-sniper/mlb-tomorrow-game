@@ -150,9 +150,8 @@ export default function Pitchers() {
             key={leagueId}
             league={leagues[leagueId]}
             divisionOrder={divisionOrder}
-            selectedTeamIds={selectedTeam ? [selectedTeam.id] : []}
             handleTeamCardClick={handleTeamCardClick}
-            selectedCountByTeam={selectedPitchersCountByTeam} // 追加
+            selectedCountByTeam={selectedPitchersCountByTeam}
           />
         );
       })}
