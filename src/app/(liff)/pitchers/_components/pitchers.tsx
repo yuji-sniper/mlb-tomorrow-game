@@ -34,7 +34,6 @@ export default function Pitchers() {
     return Object.values(selectedPitchers).flat();
   }, [selectedPitchers]);
 
-  // 各チームごとの選択中人数を計算
   const selectedPitchersCountByTeam = useMemo(() => {
     const counts: { [teamId: number]: number } = {};
     Object.entries(selectedPitchers).forEach(([teamId, pitchers]) => {

@@ -35,7 +35,7 @@ export default function TeamDialog({
         {children}
       </DialogContent>
       <DialogActions sx={{ justifyContent: 'center' }}>
-        <Button onClick={onClose} color="primary">
+        <Button onClick={onClose} color="primary" fullWidth>
           {closeLabel}
         </Button>
       </DialogActions>
