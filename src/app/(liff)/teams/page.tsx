@@ -1,11 +1,14 @@
-"use client";
-
+import { fetchTeams } from "@/features/teams/api/fetch-teams";
+import { createLeaguesFromTeams } from "@/utils/league";
 import Teams from "./_components/teams";
 
-export default function Page() {
+export default async function Page() {
+  const teams = await fetchTeams();
+  const leagues = createLeaguesFromTeams(teams);
+
   return (
-    <div>
-      <Teams />
-    </div>
+    <Teams
+      leagues={leagues}
+    />
   );
 }

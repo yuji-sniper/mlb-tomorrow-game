@@ -1,4 +1,4 @@
-import { PLAYER_STATUS } from "@/constants/playerStatus";
+import { PLAYER_STATUS } from "@/constants/player-status";
 
 export type Pitcher = {
   id: number;

@@ -2,7 +2,7 @@ import { Box, CircularProgress, List, ListItem, ListItemAvatar, ListItemText, Ty
 import TeamDialog from "@/features/teams/components/team-dialog";
 import { Pitcher } from "@/features/pitchers/types/pitcher";
 import { Team } from "@/features/teams/types/team";
-import { PLAYER_STATUS } from "@/constants/playerStatus";
+import { PLAYER_STATUS } from "@/constants/player-status";
 
 type SelectPitchersDialogProps = {
   isOpen: boolean;

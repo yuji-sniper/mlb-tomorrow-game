@@ -1,67 +1,48 @@
-import { useLiffContext } from "@/hooks/useLiffContext";
-import { 
-  CircularProgress,
-  Box,
-} from "@mui/material";
+"use client";
+
+import { useLiffContext } from "@/contexts/liff-context";
 import { useEffect, useState } from "react";
 import { Leagues } from "@/types/league";
-import { useTeams } from "@/features/teams/hooks/useTeams";
-import { createLeaguesFromTeams } from "@/utils/league";
 import LeagueDivisionsList from "@/features/teams/components/league-divisions-list";
 import SaveTeamsDialog from "@/features/teams/components/save-teams-dialog";
 import { Team } from "@/features/teams/types/team";
 import { Button } from "@/components/ui/button/button";
 import { LEAGUE_DISPLAY_ORDER } from "@/constants/league";
 import CenterButtonBox from "@/components/ui/button-box/center-button-box/center-button-box";
+import LiffLayout from "@/components/layouts/liff-layout";
 
-export default function Teams() {
+type TeamsProps = {
+  leagues: Leagues;
+};
+
+export default function Teams({ leagues }: TeamsProps) {
   const { liff, liffError } = useLiffContext();
-  const [leagues, setLeagues] = useState<Leagues>();
-  const [selectedTeamIds, setSelectedTeamIds] = useState<number[]>([]);
+  const [mounted, setMounted] = useState(false);
   const [selectedTeams, setSelectedTeams] = useState<Team[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const { teams, isLoading, error } = useTeams();
-
-  const getLeagues = () => {
-    if (!teams) { return; }
-    const newLeagues = createLeaguesFromTeams(teams);
-    setLeagues(newLeagues);
-  }
 
   const handleTeamCardClick = (team: Team) => {
-    setSelectedTeamIds((prev) =>
-      prev.includes(team.id)
-        ? prev.filter((id) => id !== team.id)
-        : [...prev, team.id]
+    setSelectedTeams((prev) =>
+      prev.includes(team)
+        ? prev.filter((t) => t.id !== team.id)
+        : [...prev, team]
     );
   };
 
   const handleConfirmClick = () => {
-    setSelectedTeams(teams?.filter((team) => selectedTeamIds.includes(team.id)) || []);
     setConfirmOpen(true);
   }
 
   useEffect(() => {
-    getLeagues();
-  }, [teams]);
+    setMounted(true);
+  }, []);
 
-  if (isLoading) {
-    return (
-      <Box 
-        display="flex" 
-        justifyContent="center" 
-        alignItems="center" 
-        height="100vh"
-        flexDirection="column"
-        gap={2}
-      >
-        <CircularProgress />
-      </Box>
-    );
+  if (!mounted) {
+    return null;
   }
 
   return (
-    <Box p={2} maxWidth={320} mx="auto">
+    <LiffLayout>
       {/* [start]チーム選択 */}
       {leagues && Object.entries(LEAGUE_DISPLAY_ORDER).map(([leagueId, divisionOrder]) => {
         return (
@@ -69,7 +50,7 @@ export default function Teams() {
             key={leagueId}
             league={leagues[leagueId]}
             divisionOrder={divisionOrder}
-            selectedTeamIds={selectedTeamIds}
+            selectedTeamIds={selectedTeams.map((team) => team.id)}
             handleTeamCardClick={handleTeamCardClick}
           />
         );
@@ -82,7 +63,7 @@ export default function Teams() {
           disabled={confirmOpen}
           onClick={handleConfirmClick}
         >
-          選択した{selectedTeamIds.length}チームを保存
+          選択した{selectedTeams.length}チームを保存
         </Button>
       </CenterButtonBox>
       {/* [end]保存ボタン */}
@@ -94,6 +75,6 @@ export default function Teams() {
         selectedTeams={selectedTeams}
       />
       {/* [end]確認ダイアログ */}
-    </Box>
+    </LiffLayout>
   );
 }

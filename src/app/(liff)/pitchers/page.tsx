@@ -1,11 +1,14 @@
-"use client";
-
+import { fetchTeams } from "@/features/teams/api/fetch-teams";
+import { createLeaguesFromTeams } from "@/utils/league";
 import Pitchers from "./_components/pitchers";
 
-export default function Page() {
+export default async function Page() {
+  const teams = await fetchTeams();
+  const leagues = createLeaguesFromTeams(teams);
+
   return (
-    <div>
-      <Pitchers />
-    </div>
+    <Pitchers
+      leagues={leagues}
+    />
   );
 }

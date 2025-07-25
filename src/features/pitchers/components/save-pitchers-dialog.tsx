@@ -1,7 +1,7 @@
 import SaveDialog from "@/components/ui/dialog/save-dialog/save-dialog";
 import { Pitcher } from "../types/pitcher";
 import { List, ListItem, ListItemAvatar, ListItemText, Typography, Avatar } from "@mui/material";
-import { PLAYER_STATUS } from "@/constants/playerStatus";
+import { PLAYER_STATUS } from "@/constants/player-status";
 
 type SavePitchersDialogProps = {
   isOpen: boolean;

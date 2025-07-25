@@ -1,12 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
-import { useLiffContext } from "@/hooks/useLiffContext";
+"use client";
+
+import { useMemo, useState, useEffect } from "react";
+import { useLiffContext } from "@/contexts/liff-context";
 import { LEAGUE_DISPLAY_ORDER } from "@/constants/league";
-import { Box, CircularProgress } from "@mui/material";
 import { PITCHER_POSITIONS } from "@/constants/position";
-import { PLAYER_STATUS } from "@/constants/playerStatus";
+import { PLAYER_STATUS } from "@/constants/player-status";
 import { Pitcher } from "@/features/pitchers/types/pitcher";
-import { useTeams } from "@/features/teams/hooks/useTeams";
-import { createLeaguesFromTeams } from "@/utils/league";
 import { Leagues } from "@/types/league";
 import LeagueDivisionsList from "@/features/teams/components/league-divisions-list";
 import { Team } from "@/features/teams/types/team";
@@ -14,24 +13,31 @@ import SelectPitchersDialog from "@/features/pitchers/components/select-pitchers
 import { Button } from "@/components/ui/button/button";
 import SavePitchersDialog from "@/features/pitchers/components/save-pitchers-dialog";
 import CenterButtonBox from "@/components/ui/button-box/center-button-box/center-button-box";
+import LiffLayout from "@/components/layouts/liff-layout";
 
 type SelectedPitchers = {
   [teamId: number]: Pitcher[];
-}
+};
 
-export default function Pitchers() {
+type PitchersProps = {
+  leagues: Leagues;
+};
+
+export default function Pitchers({ leagues }: PitchersProps) {
   const { liff, liffError } = useLiffContext();
-  const { teams, isLoading, error } = useTeams();
-  const [leagues, setLeagues] = useState<Leagues>();
+  const [mounted, setMounted] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<Team>();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pitchers, setPitchers] = useState<Pitcher[]>([]);
   const [isPitchersLoading, setIsPitchersLoading] = useState(false);
   const [selectedPitchers, setSelectedPitchers] = useState<SelectedPitchers>({});
+  const [selectedPitchersFlattened, setSelectedPitchersFlattened] = useState<Pitcher[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const selectedPitchersFlattened = useMemo(() => {
-    return Object.values(selectedPitchers).flat();
+  const selectedPitchersCount = useMemo(() => {
+    return Object.values(selectedPitchers).reduce((acc, pitchers) => {
+      return acc + pitchers.length;
+    }, 0);
   }, [selectedPitchers]);
 
   const selectedPitchersCountByTeam = useMemo(() => {
@@ -41,12 +47,6 @@ export default function Pitchers() {
     });
     return counts;
   }, [selectedPitchers]);
-
-  const getLeagues = () => {
-    if (!teams) { return; }
-    const newLeagues = createLeaguesFromTeams(teams);
-    setLeagues(newLeagues);
-  }
 
   const handleTeamCardClick = async (team: Team) => {
     setSelectedTeam(team);
@@ -101,7 +101,7 @@ export default function Pitchers() {
     }
   };
 
-  const handleDialogClose = () => {
+  const handleSelectPitchersDialogClose = () => {
     setDialogOpen(false);
     setSelectedTeam(undefined);
     setPitchers([]);
@@ -122,29 +122,24 @@ export default function Pitchers() {
     });
   };
 
-  useEffect(() => {
-    getLeagues();
-  }, [teams]);
+  const handleConfirmClick = () => {
+    const selectedPitchersFlattened = Object.values(selectedPitchers).flat();
+    setSelectedPitchersFlattened(selectedPitchersFlattened);
+    setConfirmOpen(true);
+  }
 
-  if (isLoading) {
-    return (
-      <Box 
-        display="flex" 
-        justifyContent="center" 
-        alignItems="center" 
-        height="100vh"
-        flexDirection="column"
-        gap={2}
-      >
-        <CircularProgress />
-      </Box>
-    );
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
   }
 
   return (
-    <Box p={2} maxWidth={320} mx="auto">
+    <LiffLayout>
       {/* [start]チーム一覧 */}
-      {leagues && Object.entries(LEAGUE_DISPLAY_ORDER).map(([leagueId, divisionOrder]) => {
+      {Object.entries(LEAGUE_DISPLAY_ORDER).map(([leagueId, divisionOrder]) => {
         return (
           <LeagueDivisionsList
             key={leagueId}
@@ -157,11 +152,11 @@ export default function Pitchers() {
       })}
       {/* [end]チーム一覧 */}
 
-      {/* [start]ピッチャー一覧ダイアログ */}
+      {/* [start]ピッチャー選択ダイアログ */}
       {selectedTeam && (
         <SelectPitchersDialog
           isOpen={dialogOpen}
-          onClose={handleDialogClose}
+          onClose={handleSelectPitchersDialogClose}
           team={selectedTeam}
           isPitchersLoading={isPitchersLoading}
           pitchers={pitchers}
@@ -169,15 +164,15 @@ export default function Pitchers() {
           handlePitcherToggle={handlePitcherToggle}
         />
       )}
-      {/* [end]ピッチャー一覧ダイアログ */}
+      {/* [end]ピッチャー選択ダイアログ */}
 
       {/* [start]確認ボタン */}
       <CenterButtonBox>
         <Button
           disabled={confirmOpen}
-          onClick={() => setConfirmOpen(true)}
+          onClick={handleConfirmClick}
         >
-          選択した{selectedPitchersFlattened.length}人を保存
+          選択した{selectedPitchersCount}人を保存
         </Button>
       </CenterButtonBox>
       {/* [end]確認ボタン */}
@@ -189,6 +184,6 @@ export default function Pitchers() {
         pitchers={selectedPitchersFlattened}
       />
       {/* [end]確認ダイアログ */}
-    </Box>
+    </LiffLayout>
   );
 }

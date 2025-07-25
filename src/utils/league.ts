@@ -43,5 +43,5 @@ export const createLeaguesFromTeams = (teams: Team[]): Leagues => {
   return teams.reduce((acc: Leagues, team: Team) => {
     acc[team.leagueId].divisions[team.divisionId].teams.push(team);
     return acc;
-  }, initialLeagues);
+  }, JSON.parse(JSON.stringify(initialLeagues)));
 }
