@@ -1,4 +1,5 @@
-import { LiffProvider } from "@/contexts/liff-context";
+import { ClientOnly, ClientOnlyProvider } from "@/shared/contexts/client-only-context";
+import { LiffProvider } from "@/shared/contexts/liff-context";
 
 export default function LiffLayout({
   children,
@@ -6,8 +7,12 @@ export default function LiffLayout({
   children: React.ReactNode;
 }) {
   return (
-    <LiffProvider>
-      {children}
-    </LiffProvider>
+    <ClientOnlyProvider>
+      <LiffProvider>
+        <ClientOnly>
+          {children}
+        </ClientOnly>
+      </LiffProvider>
+    </ClientOnlyProvider>
   );
 } 

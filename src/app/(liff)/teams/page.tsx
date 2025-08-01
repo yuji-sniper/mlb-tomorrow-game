@@ -1,5 +1,5 @@
 import { fetchTeams } from "@/features/teams/api/fetch-teams";
-import { createLeaguesFromTeams } from "@/utils/league";
+import { createLeaguesFromTeams } from "@/features/leagues/utils/league";
 import Teams from "./_components/teams";
 
 export default async function Page() {

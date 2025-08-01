@@ -1,4 +1,4 @@
-import { Team } from "@/features/teams/types/team";
+import { Team } from "@/shared/types/team";
 import { Card, CardContent, Avatar, Typography } from "@mui/material";
 import { Box } from "@mui/material";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -18,7 +18,6 @@ export default function TeamCard({
 }: TeamCardProps) {
   return (
     <Card
-      key={team.id}
       onClick={onClick}
       sx={{
         width: 54,
@@ -35,13 +34,13 @@ export default function TeamCard({
       <CardContent sx={{ p: 0.5, '&:last-child': { pb: 0 }, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Avatar 
           src={team.image} 
-          alt={team.name} 
+          alt={team.teamName} 
           sx={{ width: 32, height: 32, bgcolor: 'white', borderRadius: 0, objectFit: 'contain' }} 
           variant="square"
           slotProps={{ img: { style: { objectFit: 'contain' } } }}
         />
         <Typography variant="caption" sx={{ mt: 0.2, fontSize: '0.5rem', wordBreak: 'break-word' }}>
-          {team.name}
+          {team.teamName}
         </Typography>
         {/* [start]選択マーク */}
         {isSelected && (

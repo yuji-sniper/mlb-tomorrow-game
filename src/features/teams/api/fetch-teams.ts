@@ -1,4 +1,4 @@
-import { Team } from "../types/team";
+import { Team } from "@/shared/types/team";
 
 export async function fetchTeams(): Promise<Team[]> {
   const res = await fetch("https://statsapi.mlb.com/api/v1/teams?sportId=1");
@@ -7,8 +7,8 @@ export async function fetchTeams(): Promise<Team[]> {
 
   return data.teams.map((team: any) => ({
     id: team.id,
-    name: team.teamName,
-    fullName: team.name,
+    name: team.name,
+    teamName: team.teamName,
     image: `https://www.mlbstatic.com/team-logos/${team.id}.svg`,
     leagueId: team.league.id,
     divisionId: team.division.id,

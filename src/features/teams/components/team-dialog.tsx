@@ -1,8 +1,9 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Avatar } from "@mui/material";
-import { Team } from "@/features/teams/types/team";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Avatar, CircularProgress } from "@mui/material";
+import { Team } from "@/shared/types/team";
 
 type TeamDialogProps = {
   isOpen: boolean;
+  isLoading: boolean;
   onClose: () => void;
   team: Team;
   children: React.ReactNode;
@@ -11,6 +12,7 @@ type TeamDialogProps = {
 
 export default function TeamDialog({
   isOpen,
+  isLoading = false,
   onClose,
   team,
   children,
@@ -32,7 +34,13 @@ export default function TeamDialog({
         </Box>
       </DialogTitle>
       <DialogContent dividers>
-        {children}
+        {isLoading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight={120}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          children
+        )}
       </DialogContent>
       <DialogActions sx={{ justifyContent: 'center' }}>
         <Button onClick={onClose} color="primary" fullWidth>
