@@ -17,8 +17,8 @@ export default function Teams({ leagues }: TeamsProps) {
 
   const {
     selectedTeams,
-    handleTeamSelectionToggle,
-    handleRegisterTeams,
+    toggleTeamSelection,
+    submit,
   } = useTeamsRegistration();
 
   return (
@@ -27,7 +27,7 @@ export default function Teams({ leagues }: TeamsProps) {
       <TeamsList
         leagues={leagues}
         selectedTeams={selectedTeams}
-        onTeamCardClick={handleTeamSelectionToggle}
+        onTeamClick={toggleTeamSelection}
       />
       {/* [end]チーム選択 */}
 
@@ -37,7 +37,7 @@ export default function Teams({ leagues }: TeamsProps) {
           title="選択したチームを保存しますか？"
           buttonLabel={`選択した${selectedTeams.length}チームを保存`}
           selectedTeams={selectedTeams}
-          onSubmit={handleRegisterTeams}
+          onSubmit={submit}
         />
       </Box>
       {/* [end]チーム保存ボタン・ダイアログ */}

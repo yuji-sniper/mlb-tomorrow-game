@@ -35,17 +35,17 @@ export const usePitchersRegistration = () => {
     fetchPlayers();
   }, [selectedTeam]);
 
-  const handleTeamSelect = (team: Team) => {
+  const openPlayersSelectionDialog = (team: Team) => {
     setSelectedTeam(team);
     setPlayersSelectionDialogOpen(true);
   };
 
-  const handlePlayersSelectionDialogClose = () => {
+  const closePlayersSelectionDialog = () => {
     setSelectedTeam(undefined);
     setPlayersSelectionDialogOpen(false);
   };
 
-  const handlePlayerSelectionToggle = (player: Player) => {
+  const togglePlayerSelection = (player: Player) => {
     setSelectedPlayers((prev) => {
       const isSelected = prev.some((p) => p.id === player.id);
       return isSelected
@@ -54,7 +54,7 @@ export const usePitchersRegistration = () => {
     });
   };
 
-  const handleRegisterPlayers = () => {
+  const submit = () => {
     console.log("handleRegisterPlayers");
   };
 
@@ -65,9 +65,9 @@ export const usePitchersRegistration = () => {
     isPlayersLoading,
     selectedPlayers,
     selectedPlayersCountByTeam,
-    handleTeamSelect,
-    handlePlayersSelectionDialogClose,
-    handlePlayerSelectionToggle,
-    handleRegisterPlayers,
+    openPlayersSelectionDialog,
+    closePlayersSelectionDialog,
+    togglePlayerSelection,
+    submit,
   };
 }

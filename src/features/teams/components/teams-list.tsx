@@ -7,14 +7,14 @@ type TeamsListProps = {
   leagues: League[];
   selectedTeams: Team[];
   countByTeam?: Record<Team["id"], number>;
-  onTeamCardClick: (team: Team) => void;
+  onTeamClick: (team: Team) => void;
 };
 
 export default function TeamsList({
   leagues,
   selectedTeams,
   countByTeam,
-  onTeamCardClick,
+  onTeamClick,
 }: TeamsListProps) {
   return (
     <>
@@ -50,7 +50,7 @@ export default function TeamsList({
                     team={team}
                     isSelected={selectedTeams.some((t) => t.id === team.id)}
                     count={countByTeam?.[team.id] || 0}
-                    onClick={() => onTeamCardClick(team)}
+                    onClick={() => onTeamClick(team)}
                   />
                 ))}
               </Box>

@@ -23,10 +23,10 @@ export default function Pitchers({ leagues }: PitchersProps) {
     isPlayersLoading,
     selectedPlayers,
     selectedPlayersCountByTeam,
-    handleTeamSelect,
-    handlePlayersSelectionDialogClose,
-    handlePlayerSelectionToggle,
-    handleRegisterPlayers,
+    openPlayersSelectionDialog,
+    closePlayersSelectionDialog,
+    togglePlayerSelection,
+    submit,
   } = usePitchersRegistration();
 
   return (
@@ -36,7 +36,7 @@ export default function Pitchers({ leagues }: PitchersProps) {
         leagues={leagues}
         selectedTeams={selectedTeam ? [selectedTeam] : []}
         countByTeam={selectedPlayersCountByTeam}
-        onTeamCardClick={handleTeamSelect}
+        onTeamClick={openPlayersSelectionDialog}
       />
       {/* [end]チーム一覧 */}
 
@@ -44,14 +44,14 @@ export default function Pitchers({ leagues }: PitchersProps) {
       {selectedTeam && (
         <PlayersSelectionDialog
           isOpen={playersSelectionDialogOpen}
-          onClose={handlePlayersSelectionDialogClose}
+          onClose={closePlayersSelectionDialog}
           team={selectedTeam}
           isPlayersLoading={isPlayersLoading}
           players={players}
           selectedPlayers={selectedPlayers}
-          handlePlayerSelectionToggle={handlePlayerSelectionToggle}
+          handlePlayerSelectionToggle={togglePlayerSelection}
         />
-      )}
+      )}  
       {/* [end]ピッチャー選択ダイアログ */}
 
       {/* [start]選手登録ボタン・ダイアログ */}
@@ -60,7 +60,7 @@ export default function Pitchers({ leagues }: PitchersProps) {
           title="選択したピッチャーを保存しますか？"
           buttonLabel={`選択した${selectedPlayers.length}人を保存`}
           players={selectedPlayers}
-          onSubmit={handleRegisterPlayers}
+          onSubmit={submit}
         />
       </Box>
       {/* [end]選手登録ボタン・ダイアログ */}
