@@ -2,18 +2,19 @@ import { Box, Typography } from "@mui/material";
 import TeamCard from "./team-card";
 import { League } from "@/shared/types/league";
 import { Team } from "@/shared/types/team";
+import React from "react";
 
 type TeamsListProps = {
   leagues: League[];
-  selectedTeams: Team[];
-  countByTeam?: Record<Team["id"], number>;
-  onTeamClick: (team: Team) => void;
+  activeTeamIds?: Team['id'][];
+  getTeamBadge: (teamId: Team["id"]) => React.ReactNode;
+  onTeamClick: (teamId: Team["id"]) => void;
 };
 
 export default function TeamsList({
   leagues,
-  selectedTeams,
-  countByTeam,
+  activeTeamIds,
+  getTeamBadge,
   onTeamClick,
 }: TeamsListProps) {
   return (
@@ -48,9 +49,9 @@ export default function TeamsList({
                   <TeamCard
                     key={team.id}
                     team={team}
-                    isSelected={selectedTeams.some((t) => t.id === team.id)}
-                    count={countByTeam?.[team.id] || 0}
-                    onClick={() => onTeamClick(team)}
+                    badge={getTeamBadge(team.id)}
+                    isActive={activeTeamIds?.includes(team.id)}
+                    onClick={() => onTeamClick(team.id)}
                   />
                 ))}
               </Box>

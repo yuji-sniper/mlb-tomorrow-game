@@ -1,38 +1,32 @@
 import { Typography, List, ListItem, ListItemAvatar, ListItemText, Avatar } from "@mui/material";
 import { Team } from "../../../shared/types/team";
 import SaveDialog from "@/shared/components/ui/dialog/save-dialog/save-dialog";
-import { Button } from "@/shared/components/ui/button/button";
-import { useState } from "react";
 
 type SaveTeamsDialogProps = {
+  isOpen: boolean;
+  onCancel?: () => void;
   title?: string;
-  buttonLabel?: string;
   selectedTeams: Team[];
-  onSubmit: () => void;
+  onSubmit: () => Promise<void>;
+  disabled?: boolean;
 }
 
 export default function SaveTeamsDialog({
+  isOpen,
+  onCancel,
   title = "選択したチームを保存しますか？",
-  buttonLabel = "選択したチームを保存",
   selectedTeams,
   onSubmit,
+  disabled = false,
 }: SaveTeamsDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
   return (
     <>
-      <Button
-        disabled={isOpen}
-        onClick={() => setIsOpen(true)}
-      >
-        {buttonLabel}
-      </Button>
-
       <SaveDialog
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        onCancel={onCancel ?? (() => {})}
         onSubmit={onSubmit}
         title={title}
+        disabled={disabled}
       >
         {selectedTeams.length > 0 ? (
           <List dense sx={{ p: 0 }}>

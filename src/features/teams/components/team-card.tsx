@@ -1,19 +1,18 @@
 import { Team } from "@/shared/types/team";
 import { Card, CardContent, Avatar, Typography } from "@mui/material";
 import { Box } from "@mui/material";
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 type TeamCardProps = {
   team: Team;
-  isSelected: boolean;
-  count?: number;
+  isActive?: boolean;
+  badge?: React.ReactNode;
   onClick: () => void;
 }
 
 export default function TeamCard({ 
   team, 
-  isSelected, 
-  count = 0,
+  isActive = false,
+  badge = undefined,
   onClick,
 }: TeamCardProps) {
   return (
@@ -25,10 +24,11 @@ export default function TeamCard({
         textAlign: 'center',
         cursor: 'pointer',
         position: 'relative',
-        bgcolor: 'white',
         transition: 'border-color 0.2s',
         border: '3px solid',
-        borderColor: (isSelected || count > 0) ? 'primary.main' : 'white',
+        borderColor: isActive ? 'primary.main' : 'white',
+        bgcolor: 'white',
+        opacity: isActive ? 0.85 : 1,
       }}
     >
       <CardContent sx={{ p: 0.5, '&:last-child': { pb: 0 }, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -42,46 +42,18 @@ export default function TeamCard({
         <Typography variant="caption" sx={{ mt: 0.2, fontSize: '0.5rem', wordBreak: 'break-word' }}>
           {team.teamName}
         </Typography>
-        {/* [start]選択マーク */}
-        {isSelected && (
-          <CheckCircleIcon 
-            sx={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              fontSize: 16,
-              color: 'primary.main',
-              backgroundColor: 'white',
-              pointerEvents: 'none',
-              borderRadius: '50%',
-            }}
-          />
-        )}
-        {/* [end]選択マーク */}
-
-        {/* [start]カウントバッジ表示 */}
-        {count > 0 && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              minWidth: 18,
-              height: 18,
-              bgcolor: 'primary.main',
-              color: 'white',
-              borderRadius: 8,
-              fontSize: '0.65rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1.5px solid #fff',
-            }}
-          >
-            {count}
-          </Box>
-        )}
-        {/* [end]カウントバッジ表示 */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 1,
+            right: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {badge}
+        </Box>
       </CardContent>
     </Card>
   )

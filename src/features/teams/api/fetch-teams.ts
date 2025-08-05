@@ -2,7 +2,10 @@ import { Team } from "@/shared/types/team";
 
 export async function fetchTeams(): Promise<Team[]> {
   const res = await fetch("https://statsapi.mlb.com/api/v1/teams?sportId=1");
-  if (!res.ok) throw new Error("Failed to fetch teams");
+  if (!res.ok) {
+    throw new Error("Failed to fetch teams");
+  }
+
   const data = await res.json();
 
   return data.teams.map((team: any) => ({

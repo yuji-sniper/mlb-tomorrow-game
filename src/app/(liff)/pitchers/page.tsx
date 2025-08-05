@@ -3,6 +3,8 @@ import Pitchers from "./_components/pitchers";
 import { createLeaguesFromTeams } from "@/features/leagues/utils/league";
 
 export default async function Page() {
+  return null;
+
   const teams = await fetchTeams();
   const leagues = createLeaguesFromTeams(teams);
 

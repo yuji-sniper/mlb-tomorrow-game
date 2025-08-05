@@ -2,25 +2,27 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/
 
 type SaveDialogProps = {
   isOpen: boolean;
-  onClose: () => void;
-  onSubmit: () => void;
+  onCancel: () => void;
+  onSubmit: () => Promise<void>;
   title: string;
   children: React.ReactNode;
   saveLabel?: string;
   cancelLabel?: string;
+  disabled?: boolean;
 }
 
 export default function SaveDialog({
   isOpen,
-  onClose,
+  onCancel,
   onSubmit,
   title,
   children,
   saveLabel = '保存',
   cancelLabel = 'キャンセル',
+  disabled = false,
 }: SaveDialogProps) {  
   return (
-    <Dialog open={isOpen} onClose={onClose} maxWidth="xs" fullWidth>
+    <Dialog open={isOpen} maxWidth="xs" fullWidth>
       <DialogTitle fontSize="1rem" sx={{ p: 1.5 }}>
         {title}
       </DialogTitle>
@@ -28,10 +30,22 @@ export default function SaveDialog({
         {children}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="inherit">
+        <Button
+          onClick={onCancel}
+          color="inherit"
+          disabled={disabled}
+          sx={{
+            cursor: disabled ? 'not-allowed' : 'pointer',
+          }}
+        >
           {cancelLabel}
         </Button>
-        <Button onClick={onSubmit} color="primary" variant="contained">
+        <Button
+          onClick={onSubmit}
+          color="primary"
+          variant="contained"
+          disabled={disabled}
+        >
           {saveLabel}
         </Button>
       </DialogActions>

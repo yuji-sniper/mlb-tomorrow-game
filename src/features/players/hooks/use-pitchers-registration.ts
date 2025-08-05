@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Team } from "@/shared/types/team";
 import { Player } from "@/shared/types/player";
 import { PITCHER_POSITIONS } from "../constants/position";
-import { fetchPlayersByTeamIdAction } from "../actions/fetch-players-action";
+import { fetchPlayersByTeamAction } from "../actions/fetch-players-action";
 
 export const usePitchersRegistration = () => {
   const [selectedTeam, setSelectedTeam] = useState<Team>();
@@ -28,7 +28,7 @@ export const usePitchersRegistration = () => {
 
       setIsPlayersLoading(true);
       try {
-        const fetchedPlayers = await fetchPlayersByTeamIdAction(selectedTeam, PITCHER_POSITIONS);
+        const fetchedPlayers = await fetchPlayersByTeamAction(selectedTeam, PITCHER_POSITIONS);
         setPlayers(fetchedPlayers);
       } catch (error) {
         console.error("Failed to fetch players:", error);

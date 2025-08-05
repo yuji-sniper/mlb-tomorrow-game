@@ -1,9 +1,7 @@
 "use client";
 
-import { useLiffContext } from "@/shared/contexts/liff-context";
 import { League } from "@/shared/types/league";
 import PlayersSelectionDialog from "@/features/players/components/players-selection-dialog";
-import LiffLayout from "@/shared/components/layouts/liff-layout";
 import TeamsList from "@/features/teams/components/teams-list";
 import RegisterPlayersDialog from "@/features/players/components/register-players-dialog";
 import { usePitchersRegistration } from "@/features/players/hooks/use-pitchers-registration";
@@ -14,8 +12,6 @@ type PitchersProps = {
 };
 
 export default function Pitchers({ leagues }: PitchersProps) {
-  const { liff, liffError } = useLiffContext();
-
   const {
     selectedTeam,
     playersSelectionDialogOpen,
@@ -30,7 +26,7 @@ export default function Pitchers({ leagues }: PitchersProps) {
   } = usePitchersRegistration();
 
   return (
-    <LiffLayout>
+    <>
       {/* [start]チーム一覧 */}
       <TeamsList
         leagues={leagues}
@@ -64,6 +60,6 @@ export default function Pitchers({ leagues }: PitchersProps) {
         />
       </Box>
       {/* [end]選手登録ボタン・ダイアログ */}
-    </LiffLayout>
+    </>
   );
 }
