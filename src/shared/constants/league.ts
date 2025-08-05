@@ -4,6 +4,6 @@ export const LEAGUE_ID = {
 } as const;
 
 export const LEAGUE_NAME_JP = {
-  [LEAGUE_ID.AMERICAN]: "ア・リーグ",
-  [LEAGUE_ID.NATIONAL]: "ナ・リーグ",
+  [LEAGUE_ID.AMERICAN]: "アメリカン・リーグ",
+  [LEAGUE_ID.NATIONAL]: "ナショナル・リーグ",
 } as const;

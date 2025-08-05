@@ -23,7 +23,7 @@ export default function SaveDialog({
 }: SaveDialogProps) {  
   return (
     <Dialog open={isOpen} maxWidth="xs" fullWidth>
-      <DialogTitle fontSize="1rem" sx={{ p: 1.5 }}>
+      <DialogTitle fontSize="0.8rem" sx={{ p: 1.5 }}>
         {title}
       </DialogTitle>
       <DialogContent dividers>

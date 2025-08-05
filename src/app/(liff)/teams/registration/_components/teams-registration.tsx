@@ -4,7 +4,7 @@ import { Team } from "@/shared/types/team";
 import { League } from "@/shared/types/league";
 import SaveTeamsDialog from "@/features/teams/components/save-teams-dialog";
 import TeamsList from "@/features/teams/components/teams-list";
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useTeamsRegistration } from "../_hooks/use-teams-registration";
 import { Button } from "@/shared/components/ui/button/button";
 import { AddBadge } from "@/shared/components/ui/badge/add-badge/add-badge";
@@ -51,6 +51,14 @@ export default function TeamsRegistration({
   };
   return (
     <InitializationGuard>
+      {/* [start]タイトル */}
+      <Box sx={{ textAlign: 'center', mb: 1 }}>
+        <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
+          チーム登録
+        </Typography>
+      </Box>
+      {/* [end]タイトル */}
+
       {/* [start]チーム選択 */}
       <TeamsList
         leagues={leagues}

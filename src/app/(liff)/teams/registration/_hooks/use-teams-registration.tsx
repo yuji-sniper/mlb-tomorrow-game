@@ -27,7 +27,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (
   teams: Team[]
 ) => {
   const { isInitialized, setIsInitialized } = useInitialization();
-  const {liff, logout} = useLiffContext();
+  const {liff, relogin} = useLiffContext();
   const { handleError } = useErrorHandlerContext();
   const { showSuccessSnackbar, showErrorSnackbar } = useSnackbarContext();
   const [selectedTeamIds, setSelectedTeamIds] = useState<Team['id'][]>([]);
@@ -91,7 +91,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (
       const response = await getTeamsRegistrationApiAction(request);
       if (!response.ok) {
         if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
-          logout();
+          relogin();
           return;
         }
         throw new Error(response.error.message);
@@ -158,7 +158,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (
 
       const lineIdToken = liff.getIDToken();
       if (!lineIdToken) {
-        logout();
+        relogin();
         return;
       }
 
@@ -169,7 +169,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (
       const response = await postTeamsRegistrationApiAction(request);
       if (!response.ok) {
         if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
-          logout();
+          relogin();
           return;
         }
         throw new Error(response.error.message);
@@ -177,7 +177,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (
 
       const { registeredTeamIds } = response.data;
       setSelectedTeamIds(registeredTeamIds);
-      showSuccessSnackbar('チームの登録に成功しました');
+      showSuccessSnackbar('チームを登録しました');
     } catch (error) {
       console.error(error);
       showErrorSnackbar('チームの登録に失敗しました');

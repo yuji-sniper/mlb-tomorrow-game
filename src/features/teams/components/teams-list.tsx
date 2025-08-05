@@ -27,6 +27,8 @@ export default function TeamsList({
           <Typography
             variant="h6"
             fontWeight="bold"
+            fontSize="1rem"
+            sx={{ mb: 0.5 }}
           >
             {league.name}
           </Typography>
