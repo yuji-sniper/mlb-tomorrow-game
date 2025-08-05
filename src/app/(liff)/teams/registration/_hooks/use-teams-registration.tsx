@@ -27,7 +27,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (
   teams: Team[]
 ) => {
   const { isInitialized, setIsInitialized } = useInitialization();
-  const {liff} = useLiffContext();
+  const {liff, logout} = useLiffContext();
   const { handleError } = useErrorHandlerContext();
   const { showSuccessSnackbar, showErrorSnackbar } = useSnackbarContext();
   const [selectedTeamIds, setSelectedTeamIds] = useState<Team['id'][]>([]);
@@ -91,7 +91,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (
       const response = await getTeamsRegistrationApiAction(request);
       if (!response.ok) {
         if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
-          liff.logout();
+          logout();
           return;
         }
         throw new Error(response.error.message);
@@ -158,7 +158,8 @@ export const useTeamsRegistration: UseTeamsRegistration = (
 
       const lineIdToken = liff.getIDToken();
       if (!lineIdToken) {
-        throw new Error('LINE ID token is not found');
+        logout();
+        return;
       }
 
       const request = {
@@ -168,7 +169,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (
       const response = await postTeamsRegistrationApiAction(request);
       if (!response.ok) {
         if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
-          liff.logout();
+          logout();
           return;
         }
         throw new Error(response.error.message);

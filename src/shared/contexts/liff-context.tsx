@@ -7,6 +7,7 @@ import { ERROR_CODE } from "@/shared/constants/error";
 
 type LiffContextType = {
   liff: Liff | null;
+  logout: (redirectPath?: string) => void;
 };
 
 const LiffContext = createContext<LiffContextType | undefined>(undefined);
@@ -58,10 +59,19 @@ export function LiffProvider({ children }: { children: React.ReactNode }) {
     initializeLiff();
   }, []);
 
+  const logout = (redirectPath?: string) => {
+    if (!liffObject) {
+      return;
+    }
+    liffObject.logout();
+    window.location.href = redirectPath || '/';
+  }
+
   return (
     <LiffContext.Provider
       value={{
         liff: liffObject,
+        logout,
       }}
     >
       {children}
