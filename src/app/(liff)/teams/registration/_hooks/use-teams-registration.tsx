@@ -36,36 +36,34 @@ export const useTeamsRegistration: UseTeamsRegistration = (
   /**
    * 選択されているチーム
    */
-  const selectedTeams = useMemo(() => {
-    return teams.filter((team) => {
-      return newSelectedTeamIds.includes(team.id);
-    });
-  }, [teams, newSelectedTeamIds]);
+  const selectedTeams = useMemo(() => (
+    teams.filter((team) => 
+      newSelectedTeamIds.includes(team.id)
+    )
+  ), [teams, newSelectedTeamIds]);
 
   /**
    * 追加されたチーム
    */
-  const addedTeamIds = useMemo(() => {
-    return newSelectedTeamIds.filter((id) => !selectedTeamIds.includes(id));
-  }, [newSelectedTeamIds, selectedTeamIds]);
+  const addedTeamIds = useMemo(() => (
+    newSelectedTeamIds.filter((id) => !selectedTeamIds.includes(id))
+  ), [newSelectedTeamIds, selectedTeamIds]);
 
   /**
    * 削除されたチーム
    */
-  const removedTeamIds = useMemo(() => {
-    return selectedTeamIds.filter((id) => !newSelectedTeamIds.includes(id));
-  }, [selectedTeamIds, newSelectedTeamIds]);
+  const removedTeamIds = useMemo(() => (
+    selectedTeamIds.filter((id) => !newSelectedTeamIds.includes(id))
+  ), [selectedTeamIds, newSelectedTeamIds]);
 
   /**
    * 保存ボタンの無効化判定
    */
-  const isSaveButtonDisabled = useMemo(() => {
-    return (
-      isOpenSaveTeamsDialog ||
-      isSubmitting ||
-      (addedTeamIds.length === 0 && removedTeamIds.length === 0)
-    );
-  }, [
+  const isSaveButtonDisabled = useMemo(() => (
+    isOpenSaveTeamsDialog ||
+    isSubmitting ||
+    (addedTeamIds.length === 0 && removedTeamIds.length === 0)
+  ), [
     isOpenSaveTeamsDialog,
     isSubmitting,
     addedTeamIds,
