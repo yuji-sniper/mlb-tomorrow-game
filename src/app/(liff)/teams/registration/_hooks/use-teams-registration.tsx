@@ -180,6 +180,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (
 
       const { registeredTeamIds } = response.data;
       setSelectedTeamIds(registeredTeamIds);
+
       showSuccessSnackbar('チームを登録しました');
     } catch (error) {
       console.error(error);
