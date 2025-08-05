@@ -40,15 +40,16 @@ export default function TeamsRegistration({
     const badgeType = getTeamBadgeType(teamId);
     switch (badgeType) {
       case 'add':
-        return <AddBadge />;
+        return <AddBadge/>;
       case 'remove':
-        return <RemoveBadge />;
+        return <RemoveBadge/>;
       case 'check':
-        return <CheckBadge />;
+        return <CheckBadge/>;
       default:
         return null;
     }
   };
+
   return (
     <InitializationGuard>
       {/* [start]タイトル */}
@@ -71,11 +72,10 @@ export default function TeamsRegistration({
       {/* [start]チーム保存ボタン・ダイアログ */}
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
         <Button
+          text="保存"
           disabled={isSaveButtonDisabled}
           onClick={() => setIsOpenSaveTeamsDialog(true)}
-        >
-          保存
-        </Button>
+        />
         <SaveTeamsDialog
           isOpen={isOpenSaveTeamsDialog}
           onCancel={() => setIsOpenSaveTeamsDialog(false)}

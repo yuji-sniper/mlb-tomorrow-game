@@ -1,24 +1,44 @@
-import { Button as MuiButton, ButtonProps } from "@mui/material";
+import { Button as MuiButton } from "@mui/material";
 
-export function Button({ children, ...props }: ButtonProps) {
+type ButtonProps = {
+  text: string;
+  variant?: 'contained' | 'outlined';
+  disabled?: boolean;
+  onClick?: () => void;
+}
+
+export function Button({
+  text,
+  variant = 'contained',
+  disabled = false,
+  onClick,
+}: ButtonProps) {
+
   return (
     <MuiButton
-      variant="contained"
+      variant={variant}
       color="primary"
       sx={{
         minWidth: 180,
         fontWeight: 'bold',
         fontSize: '1rem',
         boxShadow: 3,
-        '&.Mui-disabled': {
-          opacity: 0.5,
-          color: 'white',
-          backgroundColor: 'grey.500',
-        },
+        '&.Mui-disabled': variant === 'contained' 
+        ? {
+            opacity: 0.5,
+            color: 'white',
+            backgroundColor: 'grey.500',
+          }
+        : {
+            opacity: 0.5,
+            color: 'grey.500',
+            borderColor: 'grey.500',
+          },
       }}
-      {...props}
+      disabled={disabled}
+      onClick={onClick}
     >
-      {children}
+      {text}
     </MuiButton>
   );
 }

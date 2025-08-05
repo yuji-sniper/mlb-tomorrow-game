@@ -24,11 +24,10 @@ export default function RegisterPlayersDialog({
   return (
     <>
       <Button
+        text={buttonLabel}
         disabled={isOpen}
         onClick={() => setIsOpen(true)}
-      >
-        {buttonLabel}
-      </Button>
+      />
 
       <SaveDialog
         isOpen={isOpen}
