@@ -27,7 +27,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (
   teams: Team[]
 ) => {
   const { isInitialized, setIsInitialized } = useInitialization();
-  const {liff, getLineIdToken} = useLiffContext();
+  const {liff} = useLiffContext();
   const { handleError } = useErrorHandlerContext();
   const { showSuccessSnackbar, showErrorSnackbar } = useSnackbarContext();
   const [selectedTeamIds, setSelectedTeamIds] = useState<Team['id'][]>([]);
@@ -78,9 +78,9 @@ export const useTeamsRegistration: UseTeamsRegistration = (
     if (isInitialized || !liff) {
       return;
     }
-
+    
     try {
-      const lineIdToken = await getLineIdToken();
+      const lineIdToken = liff.getIDToken();
       if (!lineIdToken) {
         throw new Error('LINE ID token is not found');
       }
@@ -90,11 +90,8 @@ export const useTeamsRegistration: UseTeamsRegistration = (
       };
       const response = await getTeamsRegistrationApiAction(request);
       if (!response.ok) {
-        // TODO: handleErrorで対応したい
         if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
-          liff.login({
-            redirectUri: window.location.href,
-          });
+          liff.logout();
           return;
         }
         throw new Error(response.error.message);
@@ -103,14 +100,14 @@ export const useTeamsRegistration: UseTeamsRegistration = (
 
       setSelectedTeamIds(registeredTeamIds);
       setNewSelectedTeamIds(registeredTeamIds);
+
+      setIsInitialized(true);
     } catch (error) {
       handleError(
         ERROR_CODE.ERROR,
         'Failed to fetch registered teams',
         error,
       );
-    } finally {
-      setIsInitialized(true);
     }
   };
 
@@ -159,7 +156,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (
         throw new Error('LIFF is not initialized');
       }
 
-      const lineIdToken = await getLineIdToken();
+      const lineIdToken = liff.getIDToken();
       if (!lineIdToken) {
         throw new Error('LINE ID token is not found');
       }
@@ -170,11 +167,8 @@ export const useTeamsRegistration: UseTeamsRegistration = (
       };
       const response = await postTeamsRegistrationApiAction(request);
       if (!response.ok) {
-        // TODO: handleErrorで対応したい
         if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
-          liff.login({
-            redirectUri: window.location.href,
-          });
+          liff.logout();
           return;
         }
         throw new Error(response.error.message);

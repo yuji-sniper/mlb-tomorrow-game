@@ -7,7 +7,6 @@ import { ERROR_CODE } from "@/shared/constants/error";
 
 type LiffContextType = {
   liff: Liff | null;
-  getLineIdToken: () => Promise<string | null>;
 };
 
 const LiffContext = createContext<LiffContextType | undefined>(undefined);
@@ -16,6 +15,9 @@ export function LiffProvider({ children }: { children: React.ReactNode }) {
   const [liffObject, setLiffObject] = useState<Liff | null>(null);
   const { handleError } = useErrorHandlerContext();
 
+  /**
+   * LIFF初期化
+   */
   const initializeLiff = async () => {
     if (liffObject) {
       return;
@@ -29,7 +31,16 @@ export function LiffProvider({ children }: { children: React.ReactNode }) {
 
       await liff.init({liffId});
 
+      // ログインテスト用
       // liff.logout();
+
+      if (!liff.isLoggedIn()) {
+        liff.login({
+          redirectUri: window.location.href,
+        });
+        return;
+      }
+
       setLiffObject(liff);
     } catch (error) {
       handleError(
@@ -40,39 +51,17 @@ export function LiffProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  /**
+   * LIFF初期化実行
+   */
   useEffect(() => {
     initializeLiff();
   }, []);
-
-  const getLineIdToken = async (): Promise<string | null> => {
-    if (!liffObject) {
-      return null;
-    }
-
-    try {
-      if (!liffObject.isLoggedIn()) {
-        liffObject.login({
-          redirectUri: window.location.href,
-        });
-        return null;
-      }
-
-      return liffObject.getIDToken();
-    } catch (error) {
-      handleError(
-        ERROR_CODE.ERROR,
-        'Failed to get LINE ID token',
-        error,
-      );
-      return null;
-    }
-  };
 
   return (
     <LiffContext.Provider
       value={{
         liff: liffObject,
-        getLineIdToken,
       }}
     >
       {children}

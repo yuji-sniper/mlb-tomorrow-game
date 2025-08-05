@@ -6,7 +6,7 @@ type RemoveBadgeProps = {
 };
 
 export const RemoveBadge = ({
-  size = 18,
+  size = 16,
   color = 'error.main',
 }: RemoveBadgeProps) => (
   <RemoveCircle

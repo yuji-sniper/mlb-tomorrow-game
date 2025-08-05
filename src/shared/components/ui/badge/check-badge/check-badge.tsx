@@ -6,7 +6,7 @@ type CheckBadgeProps = {
 };
 
 export const CheckBadge = ({
-  size = 18,
+  size = 16,
   color = 'primary.main',
 }: CheckBadgeProps) => (
   <CheckCircle

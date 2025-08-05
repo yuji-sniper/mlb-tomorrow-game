@@ -1,4 +1,4 @@
-import { ServerError } from '@/shared/errors/error';
+import { CustomError } from '@/shared/errors/error';
 import { ApiErrorResponse, ApiSuccessResponse } from '@/shared/types/api';
 import { ERROR_CODE } from '@/shared/constants/error';
 
@@ -28,9 +28,11 @@ export function generateApiErrorResponse(
   defaultMessage: string,
   error: unknown,
 ): ApiErrorResponse {
-  if (error instanceof ServerError) {
+  if (error instanceof CustomError) {
     if (error.code === ERROR_CODE.INTERNAL_SERVER_ERROR) {
       console.error(`[${logPrefix}]`, error);
+    } else {
+      console.log(`[${logPrefix}]`, error);
     }
     return {
       ok: false,

@@ -21,7 +21,7 @@ export default function Snackbar({
       }}
       open={open}
       onClose={onClose}
-      autoHideDuration={4000}
+      autoHideDuration={3000}
       message={message}
       slotProps={{
         content: {

@@ -6,7 +6,7 @@ type AddBadgeProps = {
 };
 
 export const AddBadge = ({
-  size = 18,
+  size = 16,
   color = 'success.main',
 }: AddBadgeProps) => (
   <AddCircle

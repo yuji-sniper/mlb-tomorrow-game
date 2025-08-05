@@ -49,7 +49,6 @@ export default function TeamsRegistration({
         return null;
     }
   };
-
   return (
     <InitializationGuard>
       {/* [start]チーム選択 */}

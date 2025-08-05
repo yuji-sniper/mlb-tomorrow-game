@@ -19,7 +19,12 @@ type ErrorHandlerContextType = {
 const ErrorHandlerContext = createContext<ErrorHandlerContextType | undefined>(undefined);
 
 export function ErrorHandlerProvider({ children }: { children: React.ReactNode }) {
-  const [code, setCode] = useState<keyof typeof ERROR_CODE | null>(null)
+  const [code, setCode] = useState<keyof typeof ERROR_CODE | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+
+  if (error) {
+    throw error;
+  }
 
   const handleError: HandleError = (
     code,
@@ -31,9 +36,9 @@ export function ErrorHandlerProvider({ children }: { children: React.ReactNode }
     console.error(error);
 
     if (error instanceof Error) {
-      throw error;
+      setError(error);
     } else {
-      throw new Error(defaultMessage);
+      setError(new Error(defaultMessage));
     }
   }
 

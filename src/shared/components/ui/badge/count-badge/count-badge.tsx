@@ -8,7 +8,7 @@ type CountBadgeProps = {
 
 export const CountBadge = ({
   count,
-  size = 18,
+  size = 16,
   color = 'primary.main',
 }: CountBadgeProps) => (
   <Box

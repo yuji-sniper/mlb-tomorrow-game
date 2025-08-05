@@ -28,7 +28,7 @@ export default function TeamCard({
         border: '3px solid',
         borderColor: isActive ? 'primary.main' : 'white',
         bgcolor: 'white',
-        opacity: isActive ? 0.85 : 1,
+        opacity: isActive ? 0.8 : 1,
       }}
     >
       <CardContent sx={{ p: 0.5, '&:last-child': { pb: 0 }, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

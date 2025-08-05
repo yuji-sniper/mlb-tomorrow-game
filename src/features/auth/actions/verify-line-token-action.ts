@@ -1,6 +1,6 @@
 "use server";
 
-import { ServerError } from "@/shared/errors/error";
+import { CustomError } from "@/shared/errors/error";
 import { ERROR_CODE } from "@/shared/constants/error";
 
 type LineVerifyDataSuccess = {
@@ -21,7 +21,7 @@ export async function verifyLineTokenAction(
 ): Promise<LineVerifyDataSuccess> {
   const clientId = process.env.NEXT_PUBLIC_LINE_CHANNEL_ID;
   if (!clientId) {
-    throw new ServerError(
+    throw new CustomError(
       ERROR_CODE.INTERNAL_SERVER_ERROR,
       'LINE_CHANNEL_ID is not set in environment variables',
     );
@@ -37,7 +37,7 @@ export async function verifyLineTokenAction(
   const data = await lineVerifyResponse.json();
   if (!lineVerifyResponse.ok) {
     const lineVerifyData = data as LineVerifyDataError;
-    throw new ServerError(
+    throw new CustomError(
       ERROR_CODE.UNAUTHORIZED,
       `Failed to verify LINE ID token: ${lineVerifyData.error_description}`,
     );

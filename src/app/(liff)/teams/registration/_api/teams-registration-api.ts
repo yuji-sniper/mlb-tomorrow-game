@@ -8,7 +8,7 @@ import { fetchUserTeamsByUserIdAction } from "@/features/user-teams/actions/fetc
 import { ERROR_CODE } from "@/shared/constants/error";
 import prisma from "@/shared/lib/prisma/prisma";
 import { ApiResponse } from "@/shared/types/api";
-import { ServerError } from "@/shared/errors/error";
+import { CustomError } from "@/shared/errors/error";
 import { generateApiErrorResponse, generateApiSuccessResponse } from "@/shared/utils/api";
 import { z } from "zod";
 
@@ -39,7 +39,7 @@ export async function getTeamsRegistrationApiAction(
     });
     const parsedRequest = schema.safeParse(request);
     if (!parsedRequest.success) {
-      throw new ServerError(
+      throw new CustomError(
         ERROR_CODE.BAD_REQUEST,
         'Invalid request',
         z.treeifyError(parsedRequest.error),
@@ -83,7 +83,7 @@ export async function postTeamsRegistrationApiAction(
     });
     const parsedRequest = schema.safeParse(request);
     if (!parsedRequest.success) {
-      throw new ServerError(
+      throw new CustomError(
         ERROR_CODE.BAD_REQUEST,
         'Invalid request',
         z.treeifyError(parsedRequest.error),
