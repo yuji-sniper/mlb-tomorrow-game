@@ -133,7 +133,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (
   };
 
   /**
-   * チームカードに表示するバッジを取得する
+   * チームカードに表示するバッジタイプを取得する
    */
   const getTeamBadgeType = (teamId: Team["id"]) => {
     if (removedTeamIds.includes(teamId)) {
