@@ -58,6 +58,9 @@ export const useTeamsRegistration: UseTeamsRegistration = (
     return selectedTeamIds.filter((id) => !newSelectedTeamIds.includes(id));
   }, [selectedTeamIds, newSelectedTeamIds]);
 
+  /**
+   * 保存ボタンの無効化判定
+   */
   const isSaveButtonDisabled = useMemo(() => {
     return (
       isOpenSaveTeamsDialog ||
