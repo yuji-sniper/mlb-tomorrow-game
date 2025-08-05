@@ -12,8 +12,6 @@ type UseTeamsRegistration = (
 ) => {
   selectedTeams: Team[];
   newSelectedTeamIds: Team['id'][];
-  addedTeamIds: Team['id'][];
-  removedTeamIds: Team['id'][];
   isSaveButtonDisabled: boolean;
   isSubmitting: boolean;
   isOpenSaveTeamsDialog: boolean;
@@ -194,8 +192,6 @@ export const useTeamsRegistration: UseTeamsRegistration = (
   return {
     selectedTeams,
     newSelectedTeamIds,
-    addedTeamIds,
-    removedTeamIds,
     isSaveButtonDisabled,
     isSubmitting,
     isOpenSaveTeamsDialog,
