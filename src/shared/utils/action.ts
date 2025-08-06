@@ -1,5 +1,5 @@
 import { CustomError } from '@/shared/errors/error';
-import { ApiErrorResponse, ApiSuccessResponse } from '@/shared/types/api';
+import { ActionErrorResponse, ActionSuccessResponse } from '@/shared/types/action';
 import { ERROR_CODE } from '@/shared/constants/error';
 
 /**
@@ -7,9 +7,9 @@ import { ERROR_CODE } from '@/shared/constants/error';
  * @param data
  * @returns
  */
-export function generateApiSuccessResponse<T>(
+export function generateActionSuccessResponse<T>(
   data: T
-): ApiSuccessResponse<T> {
+): ActionSuccessResponse<T> {
   return {
     ok: true,
     data,
@@ -23,11 +23,11 @@ export function generateApiSuccessResponse<T>(
  * @param error
  * @returns
  */
-export function generateApiErrorResponse(
+export function generateActionErrorResponse(
   logPrefix: string,
   defaultMessage: string,
   error: unknown,
-): ApiErrorResponse {
+): ActionErrorResponse {
   const logError = (shouldLogAsError: boolean = true) => {
     const logMethod = shouldLogAsError ? console.error : console.log;
     logMethod(`[${logPrefix}]`, error);
@@ -37,7 +37,7 @@ export function generateApiErrorResponse(
     code: keyof typeof ERROR_CODE,
     message: string,
     data?: Record<string, unknown>,
-  ): ApiErrorResponse => ({
+  ): ActionErrorResponse => ({
     ok: false,
     error: { code, message, ...(data && { data }) },
   });

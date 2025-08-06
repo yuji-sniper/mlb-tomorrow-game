@@ -1,15 +1,15 @@
 import { ERROR_CODE } from '@/shared/constants/error';
 
-export type ApiResponse<T> =
-  ApiSuccessResponse<T> |
-  ApiErrorResponse;
+export type ActionResponse<T> =
+  ActionSuccessResponse<T> |
+  ActionErrorResponse;
 
-export type ApiSuccessResponse<T> = {
+export type ActionSuccessResponse<T> = {
   ok: true;
   data: T;
 }
 
-export type ApiErrorResponse = {
+export type ActionErrorResponse = {
   ok: false;
   error: {
     code: keyof typeof ERROR_CODE;

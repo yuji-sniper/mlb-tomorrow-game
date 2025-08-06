@@ -7,31 +7,31 @@ import { deleteUserTeamsByUserIdAction } from "@/features/user-teams/actions/del
 import { fetchUserTeamsByUserIdAction } from "@/features/user-teams/actions/fetch-user-teams-action";
 import { ERROR_CODE } from "@/shared/constants/error";
 import prisma from "@/shared/lib/prisma/prisma";
-import { ApiResponse } from "@/shared/types/api";
+import { ActionResponse } from "@/shared/types/action";
 import { CustomError } from "@/shared/errors/error";
-import { generateApiErrorResponse, generateApiSuccessResponse } from "@/shared/utils/api";
+import { generateActionErrorResponse, generateActionSuccessResponse } from "@/shared/utils/action";
 import { z } from "zod";
 
-type GetTeamsRegistrationApiActionRequest = {
+type GetTeamsRegistrationActionRequest = {
   lineIdToken: string;
 }
 
-type GetTeamsRegistrationApiActionResponse = {
+type GetTeamsRegistrationActionResponse = {
   registeredTeamIds: number[];
 }
 
-type PostTeamsRegistrationApiActionRequest = {
+type PostTeamsRegistrationActionRequest = {
   lineIdToken: string;
   selectedTeamIds: number[];
 }
 
-type PostTeamsRegistrationApiActionResponse = {
+type PostTeamsRegistrationActionResponse = {
   registeredTeamIds: number[];
 }
 
-export async function getTeamsRegistrationApiAction(
-  request: GetTeamsRegistrationApiActionRequest,
-): Promise<ApiResponse<GetTeamsRegistrationApiActionResponse>> {
+export async function getTeamsRegistrationAction(
+  request: GetTeamsRegistrationActionRequest,
+): Promise<ActionResponse<GetTeamsRegistrationActionResponse>> {
   try {
     // リクエストパラメータ取得
     const schema = z.object({
@@ -60,11 +60,11 @@ export async function getTeamsRegistrationApiAction(
       : await fetchUserTeamsByUserIdAction(user.id);
     const registeredTeamIds = userTeams.map((userTeam) => userTeam.teamId);
 
-    return generateApiSuccessResponse({
+    return generateActionSuccessResponse({
       registeredTeamIds,
     });
   } catch (error) {
-    return generateApiErrorResponse(
+    return generateActionErrorResponse(
       'getTeamsRegistrationAction',
       'Failed to get teams registration',
       error,
@@ -72,9 +72,9 @@ export async function getTeamsRegistrationApiAction(
   }
 }
 
-export async function postTeamsRegistrationApiAction(
-  request: PostTeamsRegistrationApiActionRequest,
-): Promise<ApiResponse<PostTeamsRegistrationApiActionResponse>> {
+export async function postTeamsRegistrationAction(
+  request: PostTeamsRegistrationActionRequest,
+): Promise<ActionResponse<PostTeamsRegistrationActionResponse>> {
   try {
     // リクエストボディ取得
     const schema = z.object({
@@ -119,11 +119,11 @@ export async function postTeamsRegistrationApiAction(
       return userTeams.map((userTeam) => userTeam.teamId);
     });
 
-    return generateApiSuccessResponse({
+    return generateActionSuccessResponse({
       registeredTeamIds,
     });
   } catch (error) {
-    return generateApiErrorResponse(
+    return generateActionErrorResponse(
       'postTeamsRegistrationAction',
       'Failed to post teams registration',
       error,

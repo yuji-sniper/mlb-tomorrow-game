@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Team } from "@/shared/types/team";
 import { useLiffContext } from "@/shared/contexts/liff-context";
-import { getTeamsRegistrationApiAction, postTeamsRegistrationApiAction } from "../_api/teams-registration-api";
+import { getTeamsRegistrationAction, postTeamsRegistrationAction } from "../_actions/teams-registration-action";
 import { useErrorHandlerContext } from "@/shared/contexts/error-handler-context";
 import { useSnackbarContext } from "@/shared/contexts/snackbar-context";
 import { ERROR_CODE } from "@/shared/constants/error";
@@ -87,7 +87,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (
       const request = {
         lineIdToken,
       };
-      const response = await getTeamsRegistrationApiAction(request);
+      const response = await getTeamsRegistrationAction(request);
       if (!response.ok) {
         if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
           relogin();
@@ -165,7 +165,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (
         lineIdToken,
         selectedTeamIds: newSelectedTeamIds,
       };
-      const response = await postTeamsRegistrationApiAction(request);
+      const response = await postTeamsRegistrationAction(request);
       if (!response.ok) {
         if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
           relogin();
