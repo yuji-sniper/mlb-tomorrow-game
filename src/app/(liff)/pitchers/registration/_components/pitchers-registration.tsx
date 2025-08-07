@@ -4,7 +4,7 @@ import { League } from "@/shared/types/league";
 import PlayersSelectionDialog from "@/features/players/components/players-selection-dialog";
 import TeamsList from "@/features/teams/components/teams-list";
 import RegisterPlayersDialog from "@/features/players/components/register-players-dialog";
-import { Box } from "@mui/material";
+import { Box, Divider } from "@mui/material";
 import { LoadingUntilInitialized } from "@/shared/contexts/initialization-context";
 import Title from "@/shared/components/ui/title/title";
 import { Button } from "@/shared/components/ui/button/button";
@@ -55,7 +55,7 @@ export default function PitchersRegistration({
     <LoadingUntilInitialized>
       {/* [start]タイトル */}
       <Title>
-        ピッチャー登録
+        好きなピッチャーを登録
       </Title>
       {/* [end]タイトル */}
 

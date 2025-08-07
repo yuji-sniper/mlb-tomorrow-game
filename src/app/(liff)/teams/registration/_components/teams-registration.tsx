@@ -50,7 +50,7 @@ export default function TeamsRegistration({
     <LoadingUntilInitialized>
       {/* [start]タイトル */}
       <Title>
-        チーム登録
+        好きなチームを登録
       </Title>
       {/* [end]タイトル */}
 
