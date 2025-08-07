@@ -55,7 +55,7 @@ export async function fetchTeamRoster40ManApi(
 }
 
 /**
- * 指定したIDの選手情報を取得する
+ * 指定したID群の選手情報を取得する
  */
 export async function fetchPlayersByIdsApi(
   personIds: number[],
