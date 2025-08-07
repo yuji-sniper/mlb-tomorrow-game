@@ -39,7 +39,7 @@ export default function TeamsRegistration({
   /**
    * チームカードに表示するバッジを取得する
    */
-  const getTeamBadge = (teamId: Team["id"]) => {
+  const getTeamBadge = (teamId: Team['id']) => {
     const badgeType = getTeamBadgeType(teamId);
     return badgeType
       ? <Badge type={badgeType} />

@@ -1,4 +1,4 @@
-import { Player } from "@/shared/types/player";
+import { Player, PlayerStatusCode } from "@/shared/types/player";
 import { PLAYER_STATUS } from "@/shared/constants/player-status";
 import { Team } from "@/shared/types/team";
 
@@ -39,8 +39,8 @@ export async function fetchTeamRoster40ManApi(
 
   const players: Player[] = data.roster.map((player: any) => {
     const id = player.person.id;
-    const statusCode = PLAYER_STATUS[player.status.code as keyof typeof PLAYER_STATUS]
-      ? player.status.code as keyof typeof PLAYER_STATUS
+    const statusCode = PLAYER_STATUS[player.status.code as PlayerStatusCode]
+      ? player.status.code as PlayerStatusCode
       : '';
     return {
       id,
