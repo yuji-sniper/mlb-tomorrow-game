@@ -76,7 +76,7 @@ export const PLAYER_STATUS = {
     priority: 2,
   },
   '': {
-    display: 'トレードまたは未登録',
+    display: '???',
     priority: 0,
   },
 } as const;

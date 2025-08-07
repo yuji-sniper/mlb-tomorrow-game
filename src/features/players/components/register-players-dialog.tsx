@@ -1,39 +1,33 @@
 import SaveDialog from "@/shared/components/ui/dialog/save-dialog/save-dialog";
 import { List, ListItem, ListItemAvatar, ListItemText, Typography, Avatar } from "@mui/material";
-import { PLAYER_STATUS } from "@/shared/constants/player-status";
 import { Player } from "@/shared/types/player";
-import { Button } from "@/shared/components/ui/button/button";
-import { useState } from "react";
 import { generatePlayerImageUrl } from "../utils/player-image";
 
 type RegisterPlayersDialogProps = {
+  isOpen: boolean;
+  onCancel?: () => void;
   title: string;
-  buttonLabel: string;
   players: Player[];
-  onSubmit: () => void;
+  onSubmit: () => Promise<void>;
+  disabled?: boolean;
 }
 
 export default function RegisterPlayersDialog({
+  isOpen,
+  onCancel,
   title,
-  buttonLabel,
   players,
   onSubmit,
+  disabled = false,
 }: RegisterPlayersDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
   return (
     <>
-      <Button
-        text={buttonLabel}
-        disabled={isOpen}
-        onClick={() => setIsOpen(true)}
-      />
-
       <SaveDialog
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        onCancel={onCancel ?? (() => {})}
         onSubmit={onSubmit}
         title={title}
+        disabled={disabled}
       >
         {players.length > 0 ? (
           <List dense sx={{ p: 0 }}>
@@ -48,20 +42,17 @@ export default function RegisterPlayersDialog({
                 </ListItemAvatar>
                 <ListItemText
                   primary={player.name}
-                  secondary={
-                    player.team
-                      ? `[${player.team.teamName}] ${PLAYER_STATUS[player.statusCode].display}`
-                      : `${PLAYER_STATUS[player.statusCode].display}`
-                  }
-                  slotProps={{
-                    secondary: { sx: { fontSize: '0.6rem' } },
-                  }}
                 />
               </ListItem>
             ))}
           </List>
         ) : (
-          <Typography align="center" color="text.secondary">未選択</Typography>
+          <Typography
+            align="center"
+            color="text.secondary"
+          >
+            未選択
+          </Typography>
         )}
       </SaveDialog>
     </>

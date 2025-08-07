@@ -17,13 +17,13 @@ datasource db {
 model User {
   id        String   @id @default(uuid())
   lineId    String   @unique
-  players   UserPlayers[]
-  teams     UserTeams[]
+  players   UserPlayer[]
+  teams     UserTeam[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model UserTeams {
+model UserTeam {
   id        String   @id @default(uuid())
   userId    String
   teamId    Int
@@ -35,7 +35,7 @@ model UserTeams {
   @@unique([userId, teamId])
 }
 
-model UserPlayers {
+model UserPlayer {
   id        String   @id @default(uuid())
   userId    String
   playerId  Int
@@ -43,6 +43,5 @@ model UserPlayers {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId])
   @@unique([userId, playerId])
 }

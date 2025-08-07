@@ -1,7 +1,9 @@
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
+import { CenterSpinner } from "@/shared/components/ui/spinner/center-spinner/center-spinner";
 
 type SaveDialogProps = {
   isOpen: boolean;
+  isLoading?: boolean;
   onCancel: () => void;
   onSubmit: () => Promise<void>;
   title: string;
@@ -13,6 +15,7 @@ type SaveDialogProps = {
 
 export default function SaveDialog({
   isOpen,
+  isLoading = false,
   onCancel,
   onSubmit,
   title,
@@ -23,13 +26,18 @@ export default function SaveDialog({
 }: SaveDialogProps) {  
   return (
     <Dialog open={isOpen} maxWidth="xs" fullWidth>
+
       <DialogTitle fontSize="0.8rem" sx={{ p: 1.5 }}>
         {title}
       </DialogTitle>
+
       <DialogContent dividers>
+        {isLoading && <CenterSpinner />}
         {children}
       </DialogContent>
+
       <DialogActions>
+
         <Button
           onClick={onCancel}
           color="inherit"
@@ -40,15 +48,18 @@ export default function SaveDialog({
         >
           {cancelLabel}
         </Button>
+
         <Button
           onClick={onSubmit}
           color="primary"
           variant="contained"
-          disabled={disabled}
+          disabled={disabled || isLoading}
         >
           {saveLabel}
         </Button>
+
       </DialogActions>
+
     </Dialog>
   )
 }

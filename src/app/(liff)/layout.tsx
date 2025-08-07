@@ -1,6 +1,6 @@
 import { LiffProvider } from "@/shared/contexts/liff-context";
 import { Suspense } from "react";
-import { FullScreenSpinner } from "@/shared/components/ui/spinner/full-screen-spinner";
+import { FullScreenSpinner } from "@/shared/components/ui/spinner/full-screen-spinner/full-screen-spinner";
 import { Metadata } from "next";
 import { ErrorHandlerProvider } from "@/shared/contexts/error-handler-context";
 import LiffLayout from "@/shared/components/layouts/liff-layout";

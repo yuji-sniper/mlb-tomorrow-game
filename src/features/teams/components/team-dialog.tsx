@@ -1,5 +1,6 @@
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Avatar, CircularProgress } from "@mui/material";
 import { Team } from "@/shared/types/team";
+import { generateTeamImageUrl } from "../utils/team-image";
 
 type TeamDialogProps = {
   isOpen: boolean;
@@ -19,12 +20,12 @@ export default function TeamDialog({
   closeLabel = '閉じる',
 }: TeamDialogProps) {
   return (
-    <Dialog open={isOpen} onClose={onClose} maxWidth="xs" fullWidth>
+    <Dialog open={isOpen} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ py: 1 }}>
         <Box display="flex" flexDirection="column" alignItems="center">
           {team && (
             <Avatar
-              src={`https://www.mlbstatic.com/team-logos/${team.id}.svg`}
+              src={generateTeamImageUrl(team.id)}
               alt={team.name}
               variant="square"
               sx={{ width: 32, height: 32 }}

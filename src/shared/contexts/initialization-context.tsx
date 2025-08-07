@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState } from "react";
-import { FullScreenSpinner } from "../components/ui/spinner/full-screen-spinner";
+import { FullScreenSpinner } from "../components/ui/spinner/full-screen-spinner/full-screen-spinner";
 
 type InitializationContextType = {
   isInitialized: boolean;
@@ -35,7 +35,7 @@ export const useInitialization = () => {
   return context;
 };
 
-export function InitializationGuard({
+export function LoadingUntilInitialized({
   children,
 }: {
   children: React.ReactNode;

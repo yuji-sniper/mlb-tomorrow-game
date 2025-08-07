@@ -1,23 +1,29 @@
 import { useEffect, useMemo, useState } from "react";
 import { Team } from "@/shared/types/team";
 import { useLiffContext } from "@/shared/contexts/liff-context";
-import { getTeamsRegistrationAction, postTeamsRegistrationAction } from "../_actions/teams-registration-action";
 import { useErrorHandlerContext } from "@/shared/contexts/error-handler-context";
 import { useSnackbarContext } from "@/shared/contexts/snackbar-context";
 import { ERROR_CODE } from "@/shared/constants/error";
 import { useInitialization } from "@/shared/contexts/initialization-context";
+import { initializeAction } from "../_actions/initialize-action";
+import { registerTeamsAction } from "../_actions/register-teams-action";
+import { BADGE_TYPE, BadgeType } from "@/shared/constants/badge";
 
 type UseTeamsRegistration = (
   teams: Team[]
 ) => {
-  selectedTeams: Team[];
-  newSelectedTeamIds: Team['id'][];
-  isSaveButtonDisabled: boolean;
-  isSubmitting: boolean;
+  // 状態
   isOpenSaveTeamsDialog: boolean;
-  toggleTeamIdSelection: (teamId: Team["id"]) => void;
-  getTeamBadgeType: (teamId: Team["id"]) => 'add' | 'remove' | 'check' | null;
-  setIsOpenSaveTeamsDialog: (isOpen: boolean) => void;
+  isSubmitting: boolean;
+  // メモ化
+  selectedTeams: Team[];
+  isSaveButtonDisabled: boolean;
+  // 関数
+  handleTeamCardClick: (team: Team) => void;
+  handleSaveButtonClick: () => void;
+  handleSaveTeamsDialogCancel: () => void;
+  isTeamCardActive: (teamId: Team['id']) => boolean;
+  getTeamBadgeType: (teamId: Team["id"]) => BadgeType | undefined;
   submit: () => Promise<void>;
 }
 
@@ -79,15 +85,18 @@ export const useTeamsRegistration: UseTeamsRegistration = (
     }
     
     try {
+      // LINE IDトークン取得
       const lineIdToken = liff.getIDToken();
       if (!lineIdToken) {
-        throw new Error('LINE ID token is not found');
+        relogin();
+        return;
       }
 
+      // 初期化APIを呼び出し
       const request = {
         lineIdToken,
       };
-      const response = await getTeamsRegistrationAction(request);
+      const response = await initializeAction(request);
       if (!response.ok) {
         if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
           relogin();
@@ -97,6 +106,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (
       }
       const { registeredTeamIds } = response.data;
 
+      // データをセット
       setSelectedTeamIds(registeredTeamIds);
       setNewSelectedTeamIds(registeredTeamIds);
 
@@ -104,7 +114,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (
     } catch (error) {
       handleError(
         ERROR_CODE.ERROR,
-        'Failed to fetch registered teams',
+        'Failed to initialize teams registration',
         error,
       );
     }
@@ -120,28 +130,49 @@ export const useTeamsRegistration: UseTeamsRegistration = (
   /**
    * チームの選択を切り替える
    */
-  const toggleTeamIdSelection = (teamId: Team["id"]) => {
+  const handleTeamCardClick = (team: Team) => {
     setNewSelectedTeamIds((prev) =>
-      prev.includes(teamId)
-        ? prev.filter((id) => id !== teamId)
-        : [...prev, teamId]
+      prev.includes(team.id)
+        ? prev.filter((id) => id !== team.id)
+        : [...prev, team.id]
     );
   };
+
+  /**
+   * 保存ボタンをクリックする
+   */
+  const handleSaveButtonClick = () => {
+    setIsOpenSaveTeamsDialog(true);
+  };
+
+  /**
+   * 保存ダイアログを閉じる
+   */
+  const handleSaveTeamsDialogCancel = () => {
+    setIsOpenSaveTeamsDialog(false);
+  };
+
+  /**
+   * チームカードのアクティブ状態を返す
+   */
+  const isTeamCardActive = (teamId: Team['id']) => {
+    return newSelectedTeamIds.includes(teamId);
+  }
 
   /**
    * チームカードに表示するバッジタイプを取得する
    */
   const getTeamBadgeType = (teamId: Team["id"]) => {
     if (removedTeamIds.includes(teamId)) {
-      return 'remove';
+      return BADGE_TYPE.REMOVE;
     }
     if (addedTeamIds.includes(teamId)) {
-      return 'add';
+      return BADGE_TYPE.ADD;
     }
     if (selectedTeamIds.includes(teamId)) {
-      return 'check';
+      return BADGE_TYPE.CHECK;
     }
-    return null;
+    return;
   };
 
   /**
@@ -155,17 +186,19 @@ export const useTeamsRegistration: UseTeamsRegistration = (
         throw new Error('LIFF is not initialized');
       }
 
+      // LINE IDトークン取得
       const lineIdToken = liff.getIDToken();
       if (!lineIdToken) {
         relogin();
         return;
       }
 
+      // 送信APIを呼び出し
       const request = {
         lineIdToken,
         selectedTeamIds: newSelectedTeamIds,
       };
-      const response = await postTeamsRegistrationAction(request);
+      const response = await registerTeamsAction(request);
       if (!response.ok) {
         if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
           relogin();
@@ -173,8 +206,9 @@ export const useTeamsRegistration: UseTeamsRegistration = (
         }
         throw new Error(response.error.message);
       }
-
       const { registeredTeamIds } = response.data;
+
+      // データをセット
       setSelectedTeamIds(registeredTeamIds);
 
       showSuccessSnackbar('チームを登録しました');
@@ -188,14 +222,18 @@ export const useTeamsRegistration: UseTeamsRegistration = (
   };
 
   return {
-    selectedTeams,
-    newSelectedTeamIds,
-    isSaveButtonDisabled,
-    isSubmitting,
+    // 状態
     isOpenSaveTeamsDialog,
-    toggleTeamIdSelection,
+    isSubmitting,
+    // メモ化
+    selectedTeams,
+    isSaveButtonDisabled,
+    // 関数
+    handleTeamCardClick,
+    handleSaveButtonClick,
+    handleSaveTeamsDialogCancel,
+    isTeamCardActive,
     getTeamBadgeType,
-    setIsOpenSaveTeamsDialog,
     submit,
   };
 }

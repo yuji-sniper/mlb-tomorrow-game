@@ -1,6 +1,7 @@
 import { Team } from "@/shared/types/team";
 import { Card, CardContent, Avatar, Typography } from "@mui/material";
 import { Box } from "@mui/material";
+import { generateTeamImageUrl } from "../utils/team-image";
 
 type TeamCardProps = {
   team: Team;
@@ -33,7 +34,7 @@ export default function TeamCard({
     >
       <CardContent sx={{ p: 0.5, '&:last-child': { pb: 0 }, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Avatar 
-          src={team.image} 
+          src={generateTeamImageUrl(team.id)} 
           alt={team.teamName} 
           sx={{ width: 32, height: 32, bgcolor: 'white', borderRadius: 0, objectFit: 'contain' }} 
           variant="square"

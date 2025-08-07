@@ -1,11 +1,12 @@
 import { Typography, List, ListItem, ListItemAvatar, ListItemText, Avatar } from "@mui/material";
-import { Team } from "../../../shared/types/team";
+import { Team } from "@/shared/types/team";
 import SaveDialog from "@/shared/components/ui/dialog/save-dialog/save-dialog";
+import { generateTeamImageUrl } from "../utils/team-image";
 
 type SaveTeamsDialogProps = {
   isOpen: boolean;
   onCancel?: () => void;
-  title?: string;
+  title: string;
   selectedTeams: Team[];
   onSubmit: () => Promise<void>;
   disabled?: boolean;
@@ -14,7 +15,7 @@ type SaveTeamsDialogProps = {
 export default function SaveTeamsDialog({
   isOpen,
   onCancel,
-  title = "選択したチームを保存しますか？",
+  title,
   selectedTeams,
   onSubmit,
   disabled = false,
@@ -34,7 +35,7 @@ export default function SaveTeamsDialog({
               <ListItem key={team.id}>
                 <ListItemAvatar>
                   <Avatar
-                    src={team.image}
+                    src={generateTeamImageUrl(team.id)}
                     alt={team.name}
                     sx={{ width: 32, height: 32, mb: 0.5, bgcolor: 'white', borderRadius: 0, objectFit: 'contain' }}
                     variant="square"

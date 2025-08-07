@@ -4,13 +4,12 @@ import { Team } from "@/shared/types/team";
 import { League } from "@/shared/types/league";
 import SaveTeamsDialog from "@/features/teams/components/save-teams-dialog";
 import TeamsList from "@/features/teams/components/teams-list";
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import { useTeamsRegistration } from "../_hooks/use-teams-registration";
 import { Button } from "@/shared/components/ui/button/button";
-import { AddBadge } from "@/shared/components/ui/badge/add-badge/add-badge";
-import { RemoveBadge } from "@/shared/components/ui/badge/remove-badge/remove-badge";
-import { CheckBadge } from "@/shared/components/ui/badge/check-badge/check-badge";
-import { InitializationGuard } from "@/shared/contexts/initialization-context";
+import { Badge } from "@/shared/components/ui/badge/badge";
+import { LoadingUntilInitialized } from "@/shared/contexts/initialization-context";
+import Title from "@/shared/components/ui/title/title";
 
 type TeamsRegistrationProps = {
   teams: Team[];
@@ -22,14 +21,18 @@ export default function TeamsRegistration({
   leagues,
 }: TeamsRegistrationProps) {
   const {
-    selectedTeams,
-    newSelectedTeamIds,
-    isSaveButtonDisabled,
-    isSubmitting,
+    // 状態
     isOpenSaveTeamsDialog,
-    toggleTeamIdSelection,
+    isSubmitting,
+    // メモ化
+    selectedTeams,
+    isSaveButtonDisabled,
+    // 関数
+    handleTeamCardClick,
+    handleSaveButtonClick,
+    handleSaveTeamsDialogCancel,
+    isTeamCardActive,
     getTeamBadgeType,
-    setIsOpenSaveTeamsDialog,
     submit,
   } = useTeamsRegistration(teams);
 
@@ -38,34 +41,25 @@ export default function TeamsRegistration({
    */
   const getTeamBadge = (teamId: Team["id"]) => {
     const badgeType = getTeamBadgeType(teamId);
-    switch (badgeType) {
-      case 'add':
-        return <AddBadge/>;
-      case 'remove':
-        return <RemoveBadge/>;
-      case 'check':
-        return <CheckBadge/>;
-      default:
-        return null;
-    }
+    return badgeType
+      ? <Badge type={badgeType} />
+      : undefined;
   };
 
   return (
-    <InitializationGuard>
+    <LoadingUntilInitialized>
       {/* [start]タイトル */}
-      <Box sx={{ textAlign: 'center', mb: 1 }}>
-        <Typography variant="h5" component="h1" sx={{ fontWeight: 'bold' }}>
-          チーム登録
-        </Typography>
-      </Box>
+      <Title>
+        チーム登録
+      </Title>
       {/* [end]タイトル */}
 
       {/* [start]チーム選択 */}
       <TeamsList
         leagues={leagues}
-        activeTeamIds={newSelectedTeamIds}
+        isTeamActive={isTeamCardActive}
         getTeamBadge={getTeamBadge}
-        onTeamClick={toggleTeamIdSelection}
+        onTeamClick={handleTeamCardClick}
       />
       {/* [end]チーム選択 */}
 
@@ -74,18 +68,18 @@ export default function TeamsRegistration({
         <Button
           text="保存"
           disabled={isSaveButtonDisabled}
-          onClick={() => setIsOpenSaveTeamsDialog(true)}
-        />
-        <SaveTeamsDialog
-          isOpen={isOpenSaveTeamsDialog}
-          onCancel={() => setIsOpenSaveTeamsDialog(false)}
-          title="選択したチームを保存しますか？"
-          selectedTeams={selectedTeams}
-          onSubmit={submit}
-          disabled={isSubmitting}
+          onClick={handleSaveButtonClick}
         />
       </Box>
+      <SaveTeamsDialog
+        isOpen={isOpenSaveTeamsDialog}
+        onCancel={handleSaveTeamsDialogCancel}
+        title="選択したチームを保存しますか？"
+        selectedTeams={selectedTeams}
+        onSubmit={submit}
+        disabled={isSubmitting}
+      />
       {/* [end]チーム保存ボタン・ダイアログ */}
-    </InitializationGuard>
+    </LoadingUntilInitialized>
   );
 }

@@ -6,14 +6,14 @@ import React from "react";
 
 type TeamsListProps = {
   leagues: League[];
-  activeTeamIds?: Team['id'][];
-  getTeamBadge: (teamId: Team["id"]) => React.ReactNode;
-  onTeamClick: (teamId: Team["id"]) => void;
+  isTeamActive?: (teamId: Team['id']) => boolean;
+  getTeamBadge?: (teamId: Team["id"]) => React.ReactNode;
+  onTeamClick: (team: Team) => void;
 };
 
 export default function TeamsList({
   leagues,
-  activeTeamIds,
+  isTeamActive,
   getTeamBadge,
   onTeamClick,
 }: TeamsListProps) {
@@ -28,7 +28,6 @@ export default function TeamsList({
             variant="h6"
             fontWeight="bold"
             fontSize="1rem"
-            sx={{ mb: 0.5 }}
           >
             {league.name}
           </Typography>
@@ -41,8 +40,7 @@ export default function TeamsList({
                 variant="subtitle2"
                 fontSize="0.7rem"
                 fontWeight="medium"
-                mb={0.5}
-                sx={{ pl: 0.5 }}
+                mb={0.2}
               >
                 {division.name}
               </Typography>
@@ -51,9 +49,9 @@ export default function TeamsList({
                   <TeamCard
                     key={team.id}
                     team={team}
-                    badge={getTeamBadge(team.id)}
-                    isActive={activeTeamIds?.includes(team.id)}
-                    onClick={() => onTeamClick(team.id)}
+                    badge={getTeamBadge?.(team.id)}
+                    isActive={isTeamActive?.(team.id)}
+                    onClick={() => onTeamClick(team)}
                   />
                 ))}
               </Box>

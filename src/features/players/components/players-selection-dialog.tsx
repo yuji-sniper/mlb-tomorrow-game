@@ -9,25 +9,25 @@ type TeamPlayersSelectionDialogProps = {
   isOpen: boolean;
   onClose: () => void;
   team: Team;
-  isPlayersLoading: boolean;
+  isLoading: boolean;
   players: Player[];
-  selectedPlayers: Player[];
-  handlePlayerSelectionToggle: (player: Player) => void;
+  selectedPlayerIds: Player['id'][];
+  onPlayerClick: (player: Player) => void;
 }
 
 export default function TeamPlayersSelectionDialog({
   isOpen,
   onClose,
   team,
-  isPlayersLoading,
+  isLoading,
   players,
-  selectedPlayers,
-  handlePlayerSelectionToggle,
+  selectedPlayerIds,
+  onPlayerClick,
 }: TeamPlayersSelectionDialogProps) {
   return (
     <TeamDialog
       isOpen={isOpen}
-      isLoading={isPlayersLoading}
+      isLoading={isLoading}
       onClose={onClose}
       team={team}
     >
@@ -38,7 +38,7 @@ export default function TeamPlayersSelectionDialog({
       ) : (
         <List dense sx={{ p: 0, maxWidth: 280, mx: 'auto' }}>
           {players.map((player) => {
-            const isSelected = selectedPlayers.some((p) => p.id === player.id);
+            const isSelected = selectedPlayerIds.includes(player.id);
             return (
               <ListItem
                 key={player.id}
@@ -55,7 +55,7 @@ export default function TeamPlayersSelectionDialog({
                   borderRadius: 1,
                   cursor: 'pointer',
                 }}
-                onClick={() => handlePlayerSelectionToggle(player)}
+                onClick={() => onPlayerClick(player)}
               >
                 <ListItemAvatar>
                   <Avatar

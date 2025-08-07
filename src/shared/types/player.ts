@@ -1,5 +1,4 @@
 import { PLAYER_STATUS } from "@/shared/constants/player-status";
-import { Team } from "@/shared/types/team";
 
 export type Player = {
   id: number;
@@ -7,5 +6,4 @@ export type Player = {
   name: string;
   positionCode: string;
   statusCode: keyof typeof PLAYER_STATUS;
-  team?: Team;
 }
