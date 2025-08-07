@@ -23,7 +23,7 @@ type UseTeamsRegistration = (
   handleSaveButtonClick: () => void;
   handleSaveTeamsDialogCancel: () => void;
   isTeamCardActive: (teamId: Team['id']) => boolean;
-  getTeamBadgeType: (teamId: Team["id"]) => BadgeType | undefined;
+  getTeamBadgeType: (teamId: Team['id']) => BadgeType | undefined;
   submit: () => Promise<void>;
 }
 
@@ -162,7 +162,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (
   /**
    * チームカードに表示するバッジタイプを取得する
    */
-  const getTeamBadgeType = (teamId: Team["id"]) => {
+  const getTeamBadgeType = (teamId: Team['id']) => {
     if (removedTeamIds.includes(teamId)) {
       return BADGE_TYPE.REMOVE;
     }
