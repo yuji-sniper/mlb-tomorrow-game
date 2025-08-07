@@ -24,7 +24,11 @@ export default function TeamsList({
           mb={2}
           key={league.id}
         >
-          <Box display="flex" alignItems="center">
+          <Box
+            display="flex"
+            alignItems="center"
+            mb={0.5}
+          >
             <Box
               width="4px"
               height="1.25rem"
