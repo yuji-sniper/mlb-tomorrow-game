@@ -19,6 +19,9 @@ type FetchPitchersByTeamIdActionResponse = {
   players: Player[];
 }
 
+/**
+ * チームのピッチャー一覧取得アクション
+ */
 export async function fetchPitchersByTeamIdAction(
   request: FetchPitchersByTeamIdActionRequest,
 ): Promise<ActionResponse<FetchPitchersByTeamIdActionResponse>> {

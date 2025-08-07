@@ -23,6 +23,9 @@ type RegisterTeamsActionResponse = {
   registeredTeamIds: number[];
 }
 
+/**
+ * チーム登録アクション
+ */
 export async function registerTeamsAction(
   request: RegisterTeamsActionRequest,
 ): Promise<ActionResponse<RegisterTeamsActionResponse>> {

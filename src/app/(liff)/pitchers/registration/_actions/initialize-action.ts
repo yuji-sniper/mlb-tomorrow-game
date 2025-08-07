@@ -21,6 +21,9 @@ type InitializeActionResponse = {
   registeredPlayersByTeamId: Record<Team['id'], Player[]>;
 }
 
+/**
+ * ピッチャー登録画面の初期化アクション
+ */
 export async function initializeAction(
   request: InitializeActionRequest,
 ): Promise<ActionResponse<InitializeActionResponse>> {

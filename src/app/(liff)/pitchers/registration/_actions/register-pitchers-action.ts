@@ -26,6 +26,9 @@ type RegisterPitchersActionResponse = {
   registeredPlayersByTeamId: Record<Team['id'], Player[]>;
 }
 
+/**
+ * ピッチャー登録アクション
+ */
 export async function registerPitchersAction(
   request: RegisterPitchersActionRequest,
 ): Promise<ActionResponse<RegisterPitchersActionResponse>> {

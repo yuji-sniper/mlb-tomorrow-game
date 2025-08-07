@@ -16,6 +16,9 @@ type FetchPlayersByIdsActionResponse = {
   players: Player[];
 }
 
+/**
+ * 選手一覧取得アクション
+ */
 export async function fetchPlayersByIdsAction(
   request: FetchPlayersByIdsActionRequest,
 ): Promise<ActionResponse<FetchPlayersByIdsActionResponse>> {
