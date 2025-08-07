@@ -21,7 +21,7 @@ export default function TeamsList({
     <>
       {leagues.map((league) => (
         <Box
-          mb={2}
+          mb={3}
           key={league.id}
         >
           <Box
