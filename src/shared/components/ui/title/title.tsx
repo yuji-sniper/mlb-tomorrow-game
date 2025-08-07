@@ -8,7 +8,7 @@ export default function Title({
   return (
     <Box sx={{
       textAlign: 'center',
-      mb: 1,
+      mb: 2,
     }}>
       <Typography
         variant="h5"

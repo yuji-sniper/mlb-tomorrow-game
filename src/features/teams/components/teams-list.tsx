@@ -24,13 +24,21 @@ export default function TeamsList({
           mb={2}
           key={league.id}
         >
-          <Typography
-            variant="h6"
-            fontWeight="bold"
-            fontSize="1rem"
-          >
-            {league.name}
-          </Typography>
+          <Box display="flex" alignItems="center">
+            <Box
+              width="4px"
+              height="1.25rem"
+              bgcolor="grey.700"
+              mr={0.5}
+            />
+            <Typography
+              variant="h6"
+              fontWeight="bold"
+              fontSize="1rem"
+            >
+              {league.name}
+            </Typography>
+          </Box>
           {league.divisions.map((division) => (
             <Box
               mb={1}
