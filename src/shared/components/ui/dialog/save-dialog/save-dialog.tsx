@@ -25,14 +25,24 @@ export default function SaveDialog({
   disabled = false,
 }: SaveDialogProps) {  
   return (
-    <Dialog open={isOpen} maxWidth="xs" fullWidth>
+    <Dialog
+      open={isOpen}
+      onClose={onCancel}
+      maxWidth="xs"
+      fullWidth
+    >
 
-      <DialogTitle fontSize="0.8rem" sx={{ p: 1.5 }}>
+      <DialogTitle
+        fontSize="0.8rem"
+        sx={{ p: 1.5 }}
+      >
         {title}
       </DialogTitle>
 
       <DialogContent dividers>
-        {isLoading && <CenterSpinner />}
+        {isLoading && (
+          <CenterSpinner />
+        )}
         {children}
       </DialogContent>
 
@@ -42,9 +52,6 @@ export default function SaveDialog({
           onClick={onCancel}
           color="inherit"
           disabled={disabled}
-          sx={{
-            cursor: disabled ? 'not-allowed' : 'pointer',
-          }}
         >
           {cancelLabel}
         </Button>

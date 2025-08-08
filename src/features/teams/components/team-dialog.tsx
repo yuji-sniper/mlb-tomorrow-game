@@ -1,6 +1,7 @@
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Avatar, CircularProgress } from "@mui/material";
 import { Team } from "@/shared/types/team";
 import { generateTeamImageUrl } from "../utils/team-image";
+import { CenterSpinner } from "@/shared/components/ui/spinner/center-spinner/center-spinner";
 
 type TeamDialogProps = {
   isOpen: boolean;
@@ -20,7 +21,7 @@ export default function TeamDialog({
   closeLabel = '閉じる',
 }: TeamDialogProps) {
   return (
-    <Dialog open={isOpen} maxWidth="xs" fullWidth>
+    <Dialog open={isOpen} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ py: 1 }}>
         <Box display="flex" flexDirection="column" alignItems="center">
           {team && (
@@ -36,9 +37,7 @@ export default function TeamDialog({
       </DialogTitle>
       <DialogContent dividers>
         {isLoading ? (
-          <Box display="flex" justifyContent="center" alignItems="center" minHeight={120}>
-            <CircularProgress />
-          </Box>
+          <CenterSpinner />
         ) : (
           children
         )}
