@@ -12,7 +12,7 @@ import {
 } from "@/shared/utils/action"
 
 type FetchPlayersByIdsActionRequest = {
-  playerIds: Player["id"][]
+  playerIds: Player["id"][];
 }
 
 type FetchPlayersByIdsActionResponse = {

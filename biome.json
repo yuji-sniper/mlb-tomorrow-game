@@ -6,9 +6,9 @@
     "useIgnoreFile": false
   },
   "files": {
-    "ignoreUnknown": true,
+    "ignoreUnknown": false,
     "includes": ["src/**/*.ts", "src/**/*.tsx"],
-    "ignore": ["src/shared/generated/**"]
+    "experimentalScannerIgnores": ["src/shared/generated/**"]
   },
   "formatter": {
     "enabled": true,
