@@ -1,7 +1,7 @@
-import { Team } from "@/shared/types/team";
+import type { Team } from "@/shared/types/team"
 
 export type Division = {
-  id: number;
-  name: string;
-  teams: Team[];
+  id: number
+  name: string
+  teams: Team[]
 }

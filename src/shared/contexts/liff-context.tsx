@@ -1,36 +1,42 @@
-"use client";
+"use client"
 
-import { createContext, useContext, useEffect, useState } from "react";
-import liff, { Liff } from "@line/liff";
-import { useErrorHandlerContext } from "./error-handler-context";
-import { ERROR_CODE } from "@/shared/constants/error";
+import liff, { type Liff } from "@line/liff"
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react"
+import { ERROR_CODE } from "@/shared/constants/error"
+import { useErrorHandlerContext } from "./error-handler-context"
 
 type LiffContextType = {
-  liff: Liff | null;
-  relogin: (redirectUri?: string) => void;
-};
+  liff: Liff | null
+  relogin: (redirectUri?: string) => void
+}
 
-const LiffContext = createContext<LiffContextType | undefined>(undefined);
+const LiffContext = createContext<LiffContextType | undefined>(undefined)
 
 export function LiffProvider({ children }: { children: React.ReactNode }) {
-  const [liffObject, setLiffObject] = useState<Liff | null>(null);
-  const { handleError } = useErrorHandlerContext();
+  const [liffObject, setLiffObject] = useState<Liff | null>(null)
+  const { handleError } = useErrorHandlerContext()
 
   /**
    * LIFF初期化
    */
-  const initializeLiff = async () => {
+  const initializeLiff = useCallback(async () => {
     if (liffObject) {
-      return;
+      return
     }
 
     try {
-      const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
+      const liffId = process.env.NEXT_PUBLIC_LIFF_ID
       if (!liffId) {
-        throw new Error('LIFF ID is not found');
+        throw new Error("LIFF ID is not found")
       }
 
-      await liff.init({liffId});
+      await liff.init({ liffId })
 
       // ログインテスト用
       // liff.logout();
@@ -38,40 +44,36 @@ export function LiffProvider({ children }: { children: React.ReactNode }) {
       if (!liff.isLoggedIn()) {
         liff.login({
           redirectUri: window.location.href,
-        });
-        return;
+        })
+        return
       }
 
-      setLiffObject(liff);
+      setLiffObject(liff)
     } catch (error) {
-      handleError(
-        ERROR_CODE.ERROR,
-        'Failed to initialize LIFF',
-        error,
-      );
+      handleError(ERROR_CODE.ERROR, "Failed to initialize LIFF", error)
     }
-  };
+  }, [liffObject, handleError])
 
   /**
    * LIFF初期化実行
    */
   useEffect(() => {
-    initializeLiff();
-  }, []);
+    initializeLiff()
+  }, [initializeLiff])
 
   /**
    * 再ログイン
    */
   const relogin = (redirectUri?: string) => {
     if (!liffObject) {
-      return;
+      return
     }
 
-    liffObject.logout();
+    liffObject.logout()
 
     liffObject.login({
       redirectUri: redirectUri || window.location.href,
-    });
+    })
   }
 
   return (
@@ -83,13 +85,13 @@ export function LiffProvider({ children }: { children: React.ReactNode }) {
     >
       {children}
     </LiffContext.Provider>
-  );
+  )
 }
 
 export function useLiffContext() {
-  const context = useContext(LiffContext);
+  const context = useContext(LiffContext)
   if (context === undefined) {
-    throw new Error("useLiffContext must be used within a LiffProvider");
+    throw new Error("useLiffContext must be used within a LiffProvider")
   }
-  return context;
-} 
+  return context
+}

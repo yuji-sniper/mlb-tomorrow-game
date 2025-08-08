@@ -1,15 +1,23 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Avatar, CircularProgress } from "@mui/material";
-import { Team } from "@/shared/types/team";
-import { generateTeamImageUrl } from "../utils/team-image";
-import { CenterSpinner } from "@/shared/components/ui/spinner/center-spinner/center-spinner";
+import {
+  Avatar,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material"
+import { CenterSpinner } from "@/shared/components/ui/spinner/center-spinner/center-spinner"
+import type { Team } from "@/shared/types/team"
+import { generateTeamImageUrl } from "../utils/team-image"
 
 type TeamDialogProps = {
-  isOpen: boolean;
-  isLoading: boolean;
-  onClose: () => void;
-  team: Team;
-  children: React.ReactNode;
-  closeLabel?: string;
+  isOpen: boolean
+  isLoading: boolean
+  onClose: () => void
+  team: Team
+  children: React.ReactNode
+  closeLabel?: string
 }
 
 export default function TeamDialog({
@@ -18,7 +26,7 @@ export default function TeamDialog({
   onClose,
   team,
   children,
-  closeLabel = '閉じる',
+  closeLabel = "閉じる",
 }: TeamDialogProps) {
   return (
     <Dialog open={isOpen} onClose={onClose} maxWidth="xs" fullWidth>
@@ -30,19 +38,15 @@ export default function TeamDialog({
               alt={team.name}
               variant="square"
               sx={{ width: 32, height: 32 }}
-              slotProps={{ img: { style: { objectFit: 'contain' } } }}
+              slotProps={{ img: { style: { objectFit: "contain" } } }}
             />
           )}
         </Box>
       </DialogTitle>
       <DialogContent dividers>
-        {isLoading ? (
-          <CenterSpinner />
-        ) : (
-          children
-        )}
+        {isLoading ? <CenterSpinner /> : children}
       </DialogContent>
-      <DialogActions sx={{ justifyContent: 'center' }}>
+      <DialogActions sx={{ justifyContent: "center" }}>
         <Button onClick={onClose} color="primary" fullWidth>
           {closeLabel}
         </Button>

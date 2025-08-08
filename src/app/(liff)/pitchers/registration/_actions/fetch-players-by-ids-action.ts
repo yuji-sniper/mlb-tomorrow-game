@@ -1,19 +1,22 @@
-"use server";
+"use server"
 
-import { Player } from "@/shared/types/player";
-import { ActionResponse } from "@/shared/types/action";
-import { CustomError } from "@/shared/errors/error";
-import { ERROR_CODE } from "@/shared/constants/error";
-import { generateActionErrorResponse, generateActionSuccessResponse } from "@/shared/utils/action";
-import { z } from "zod";
-import { fetchPlayersByIdsApi } from "@/shared/api/mlb-api";
+import { z } from "zod"
+import { fetchPlayersByIdsApi } from "@/shared/api/mlb-api"
+import { ERROR_CODE } from "@/shared/constants/error"
+import { CustomError } from "@/shared/errors/error"
+import type { ActionResponse } from "@/shared/types/action"
+import type { Player } from "@/shared/types/player"
+import {
+  generateActionErrorResponse,
+  generateActionSuccessResponse,
+} from "@/shared/utils/action"
 
 type FetchPlayersByIdsActionRequest = {
-  playerIds: Player['id'][];
+  playerIds: Player["id"][]
 }
 
 type FetchPlayersByIdsActionResponse = {
-  players: Player[];
+  players: Player[]
 }
 
 /**
@@ -26,28 +29,28 @@ export async function fetchPlayersByIdsAction(
     // リクエストパラメータ取得
     const schema = z.object({
       playerIds: z.array(z.number()),
-    });
-    const parsedRequest = schema.safeParse(request);
+    })
+    const parsedRequest = schema.safeParse(request)
     if (!parsedRequest.success) {
       throw new CustomError(
         ERROR_CODE.BAD_REQUEST,
-        'Invalid request',
+        "Invalid request",
         z.treeifyError(parsedRequest.error),
-      );
+      )
     }
-    const { playerIds } = parsedRequest.data;
+    const { playerIds } = parsedRequest.data
 
     // 選手の取得APIを呼び出し
-    const players = await fetchPlayersByIdsApi(playerIds);
+    const players = await fetchPlayersByIdsApi(playerIds)
 
     return generateActionSuccessResponse({
       players,
-    });
+    })
   } catch (error) {
     return generateActionErrorResponse(
-      'pitchers-registration-form-action:fetchPlayersByIdsAction',
-      'Failed to fetch players by ids',
+      "pitchers-registration-form-action:fetchPlayersByIdsAction",
+      "Failed to fetch players by ids",
       error,
-    );
+    )
   }
 }

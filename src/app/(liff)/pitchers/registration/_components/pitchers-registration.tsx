@@ -1,20 +1,20 @@
-"use client";
+"use client"
 
-import { League } from "@/shared/types/league";
-import PlayersSelectionDialog from "@/features/players/components/players-selection-dialog";
-import TeamsList from "@/features/teams/components/teams-list";
-import RegisterPlayersDialog from "@/features/players/components/register-players-dialog";
-import { Box } from "@mui/material";
-import { LoadingUntilInitialized } from "@/shared/contexts/initialization-context";
-import Title from "@/shared/components/ui/title/title";
-import { Button } from "@/shared/components/ui/button/button";
-import { CountBadge } from "@/shared/components/ui/badge/count-badge/count-badge";
-import { Team } from "@/shared/types/team";
-import { usePitchersRegistration } from "../_hooks/use-pitchers-registration";
+import { Box } from "@mui/material"
+import PlayersSelectionDialog from "@/features/players/components/players-selection-dialog"
+import RegisterPlayersDialog from "@/features/players/components/register-players-dialog"
+import TeamsList from "@/features/teams/components/teams-list"
+import { CountBadge } from "@/shared/components/ui/badge/count-badge/count-badge"
+import { Button } from "@/shared/components/ui/button/button"
+import Title from "@/shared/components/ui/title/title"
+import { LoadingUntilInitialized } from "@/shared/contexts/initialization-context"
+import type { League } from "@/shared/types/league"
+import type { Team } from "@/shared/types/team"
+import { usePitchersRegistration } from "../_hooks/use-pitchers-registration"
 
 type PitchersRegistrationProps = {
-  leagues: League[];
-};
+  leagues: League[]
+}
 
 export default function PitchersRegistration({
   leagues,
@@ -39,24 +39,20 @@ export default function PitchersRegistration({
     isTeamCardActive,
     getSelectedCountOfTeam,
     submit,
-  } = usePitchersRegistration();
+  } = usePitchersRegistration()
 
   /**
    * チームカードに表示するバッジを取得する
    */
-  const getTeamBadge = (teamId: Team['id']) => {
-    const count = getSelectedCountOfTeam(teamId);
-    return count > 0
-      ? <CountBadge count={count} />
-      : undefined;
+  const getTeamBadge = (teamId: Team["id"]) => {
+    const count = getSelectedCountOfTeam(teamId)
+    return count > 0 ? <CountBadge count={count} /> : undefined
   }
 
   return (
     <LoadingUntilInitialized>
       {/* [start]タイトル */}
-      <Title>
-        好きなピッチャーを登録
-      </Title>
+      <Title>好きなピッチャーを登録</Title>
       {/* [end]タイトル */}
 
       {/* [start]チーム一覧 */}
@@ -79,11 +75,11 @@ export default function PitchersRegistration({
           selectedPlayerIds={selectedPlayerIds}
           onPlayerClick={handlePlayerClick}
         />
-      )}  
+      )}
       {/* [end]ピッチャー選択ダイアログ */}
 
       {/* [start]選手登録ボタン・ダイアログ */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}>
         <Button
           text={`選択した${selectedPlayerIds.length}人を保存`}
           disabled={isSaveButtonDisabled}
@@ -100,5 +96,5 @@ export default function PitchersRegistration({
       />
       {/* [end]選手登録ボタン・ダイアログ */}
     </LoadingUntilInitialized>
-  );
+  )
 }

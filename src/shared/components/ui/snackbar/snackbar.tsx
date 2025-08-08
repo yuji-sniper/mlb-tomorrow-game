@@ -1,10 +1,10 @@
-import { Snackbar as MuiSnackbar } from "@mui/material";
+import { Snackbar as MuiSnackbar } from "@mui/material"
 
 type SnackbarProps = {
-  open: boolean;
-  onClose: () => void;
-  message: string;
-  status: 'success' | 'error';
+  open: boolean
+  onClose: () => void
+  message: string
+  status: "success" | "error"
 }
 
 export default function Snackbar({
@@ -13,11 +13,11 @@ export default function Snackbar({
   message,
   status,
 }: SnackbarProps) {
-  return (  
+  return (
     <MuiSnackbar
       anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'center',
+        vertical: "top",
+        horizontal: "center",
       }}
       open={open}
       onClose={onClose}
@@ -26,9 +26,9 @@ export default function Snackbar({
       slotProps={{
         content: {
           sx: {
-            backgroundColor: status === 'success' ? '#4caf50' : '#f44336'
-          }
-        }
+            backgroundColor: status === "success" ? "#4caf50" : "#f44336",
+          },
+        },
       }}
     />
   )

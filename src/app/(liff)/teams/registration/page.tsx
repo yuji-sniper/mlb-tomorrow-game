@@ -1,15 +1,10 @@
-import { fetchTeamsApi } from "@/shared/api/mlb-api";
-import { createLeaguesFromTeams } from "@/features/leagues/utils/league";
-import TeamsRegistration from "./_components/teams-registration";
+import { createLeaguesFromTeams } from "@/features/leagues/utils/league"
+import { fetchTeamsApi } from "@/shared/api/mlb-api"
+import TeamsRegistration from "./_components/teams-registration"
 
 export default async function Page() {
-  const teams = await fetchTeamsApi();
-  const leagues = createLeaguesFromTeams(teams);
+  const teams = await fetchTeamsApi()
+  const leagues = createLeaguesFromTeams(teams)
 
-  return (
-    <TeamsRegistration
-      teams={teams}
-      leagues={leagues}
-    />
-  );
+  return <TeamsRegistration teams={teams} leagues={leagues} />
 }

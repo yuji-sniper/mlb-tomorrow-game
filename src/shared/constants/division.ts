@@ -5,7 +5,7 @@ export const DIVISION_ID = {
   NATIONAL_EAST: 204,
   NATIONAL_CENTRAL: 205,
   NATIONAL_WEST: 203,
-} as const;
+} as const
 
 export const DIVISION_NAME_JP = {
   [DIVISION_ID.AMERICAN_EAST]: "東地区",
@@ -14,4 +14,4 @@ export const DIVISION_NAME_JP = {
   [DIVISION_ID.NATIONAL_EAST]: "東地区",
   [DIVISION_ID.NATIONAL_CENTRAL]: "中地区",
   [DIVISION_ID.NATIONAL_WEST]: "西地区",
-} as const;
+} as const

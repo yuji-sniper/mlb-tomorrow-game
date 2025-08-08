@@ -1,13 +1,12 @@
-import { Button } from "@/shared/components/ui/button/button";
+import { useRouter } from "next/router"
+import { Button } from "@/shared/components/ui/button/button"
 
 export function NotFoundFallback() {
+  const router = useRouter()
   return (
     <div>
       <h2>お探しのページは見つかりませんでした。</h2>
-      <Button
-        text="トップへ"
-        onClick={() => window.location.href = '/'}
-      />
+      <Button text="トップへ" onClick={() => router.push("/")} />
     </div>
   )
 }

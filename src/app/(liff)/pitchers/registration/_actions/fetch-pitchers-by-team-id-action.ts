@@ -1,22 +1,29 @@
-"use server";
+"use server"
 
-import { Team } from "@/shared/types/team";
-import { Player } from "@/shared/types/player";
-import { ActionResponse } from "@/shared/types/action";
-import { CustomError } from "@/shared/errors/error";
-import { ERROR_CODE } from "@/shared/constants/error";
-import { generateActionErrorResponse, generateActionSuccessResponse } from "@/shared/utils/action";
-import { z } from "zod";
-import { fetchTeamRoster40ManApi } from "@/shared/api/mlb-api";
-import { filterPlayersByPosition, removeDuplicatePlayers, sortPlayersByStatusPriority } from "@/features/players/utils/players";
-import { PITCHER_POSITIONS } from "@/features/players/constants/position";
+import { z } from "zod"
+import { PITCHER_POSITIONS } from "@/features/players/constants/position"
+import {
+  filterPlayersByPosition,
+  removeDuplicatePlayers,
+  sortPlayersByStatusPriority,
+} from "@/features/players/utils/players"
+import { fetchTeamRoster40ManApi } from "@/shared/api/mlb-api"
+import { ERROR_CODE } from "@/shared/constants/error"
+import { CustomError } from "@/shared/errors/error"
+import type { ActionResponse } from "@/shared/types/action"
+import type { Player } from "@/shared/types/player"
+import type { Team } from "@/shared/types/team"
+import {
+  generateActionErrorResponse,
+  generateActionSuccessResponse,
+} from "@/shared/utils/action"
 
 type FetchPitchersByTeamIdActionRequest = {
-  teamId: Team['id'];
+  teamId: Team["id"]
 }
 
 type FetchPitchersByTeamIdActionResponse = {
-  players: Player[];
+  players: Player[]
 }
 
 /**
@@ -29,31 +36,31 @@ export async function fetchPitchersByTeamIdAction(
     // リクエストパラメータ取得
     const schema = z.object({
       teamId: z.number(),
-    });
-    const parsedRequest = schema.safeParse(request);
+    })
+    const parsedRequest = schema.safeParse(request)
     if (!parsedRequest.success) {
       throw new CustomError(
         ERROR_CODE.BAD_REQUEST,
-        'Invalid request',
+        "Invalid request",
         z.treeifyError(parsedRequest.error),
-      );
+      )
     }
-    const { teamId } = parsedRequest.data;
+    const { teamId } = parsedRequest.data
 
     // チームのピッチャー一覧取得
-    const players = await fetchTeamRoster40ManApi(teamId);
-    const pitchers = filterPlayersByPosition(players, PITCHER_POSITIONS);
-    const uniquePitchers = removeDuplicatePlayers(pitchers);
-    const sortedPitchers = sortPlayersByStatusPriority(uniquePitchers);
+    const players = await fetchTeamRoster40ManApi(teamId)
+    const pitchers = filterPlayersByPosition(players, PITCHER_POSITIONS)
+    const uniquePitchers = removeDuplicatePlayers(pitchers)
+    const sortedPitchers = sortPlayersByStatusPriority(uniquePitchers)
 
     return generateActionSuccessResponse({
       players: sortedPitchers,
-    });
+    })
   } catch (error) {
     return generateActionErrorResponse(
-      'pitchers-registration-form-action:fetchPitchersByTeamIdAction',
-      'Failed to fetch pitchers by team id',
+      "pitchers-registration-form-action:fetchPitchersByTeamIdAction",
+      "Failed to fetch pitchers by team id",
       error,
-    );
+    )
   }
 }

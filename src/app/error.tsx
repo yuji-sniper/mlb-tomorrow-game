@@ -1,18 +1,12 @@
-"use client";
+"use client"
 
-import { ErrorFallback } from "@/shared/components/errors/error-fallback";
-import { useEffect } from "react";
+import { useEffect } from "react"
+import { ErrorFallback } from "@/shared/components/errors/error-fallback"
 
-export default function Error({
-  error,
-}: {
-  error: Error
-}) {
+export default function ErrorPage({ error }: { error: Error }) {
   useEffect(() => {
-    console.error(error);
-  }, [error]);
+    console.error(error)
+  }, [error])
 
-  return (
-    <ErrorFallback/>
-  )
+  return <ErrorFallback />
 }

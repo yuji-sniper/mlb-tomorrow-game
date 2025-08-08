@@ -1,24 +1,27 @@
-"use server";
+"use server"
 
-import { findUser } from "@/features/users/repositories/find-user-repository";
-import { fetchUserPlayersByUserId } from "@/features/user-players/repositories/fetch-user-playres-repository";
-import { verifyLineTokenApi } from "@/shared/api/line-api";
-import { ERROR_CODE } from "@/shared/constants/error";
-import { ActionResponse } from "@/shared/types/action";
-import { CustomError } from "@/shared/errors/error";
-import { generateActionErrorResponse, generateActionSuccessResponse } from "@/shared/utils/action";
-import { z } from "zod";
-import { Player } from "@/shared/types/player";
-import { Team } from "@/shared/types/team";
-import { fetchPlayersByIdsApi } from "@/shared/api/mlb-api";
-import { groupPlayersByTeamId } from "@/features/players/utils/players";
+import { z } from "zod"
+import { groupPlayersByTeamId } from "@/features/players/utils/players"
+import { fetchUserPlayersByUserId } from "@/features/user-players/repositories/fetch-user-playres-repository"
+import { findUser } from "@/features/users/repositories/find-user-repository"
+import { verifyLineTokenApi } from "@/shared/api/line-api"
+import { fetchPlayersByIdsApi } from "@/shared/api/mlb-api"
+import { ERROR_CODE } from "@/shared/constants/error"
+import { CustomError } from "@/shared/errors/error"
+import type { ActionResponse } from "@/shared/types/action"
+import type { Player } from "@/shared/types/player"
+import type { Team } from "@/shared/types/team"
+import {
+  generateActionErrorResponse,
+  generateActionSuccessResponse,
+} from "@/shared/utils/action"
 
 type InitializeActionRequest = {
-  lineIdToken: string;
+  lineIdToken: string
 }
 
 type InitializeActionResponse = {
-  registeredPlayersByTeamId: Record<Team['id'], Player[]>;
+  registeredPlayersByTeamId: Record<Team["id"], Player[]>
 }
 
 /**
@@ -31,44 +34,42 @@ export async function initializeAction(
     // リクエストパラメータ取得
     const schema = z.object({
       lineIdToken: z.string(),
-    });
-    const parsedRequest = schema.safeParse(request);
+    })
+    const parsedRequest = schema.safeParse(request)
     if (!parsedRequest.success) {
       throw new CustomError(
         ERROR_CODE.BAD_REQUEST,
-        'Invalid request',
+        "Invalid request",
         z.treeifyError(parsedRequest.error),
-      );
+      )
     }
-    const { lineIdToken } = parsedRequest.data;
+    const { lineIdToken } = parsedRequest.data
 
     // LINE IDトークンの検証
-    const lineVerifyData = await verifyLineTokenApi(lineIdToken);
-    const lineId = lineVerifyData.sub;
+    const lineVerifyData = await verifyLineTokenApi(lineIdToken)
+    const lineId = lineVerifyData.sub
 
     // ユーザー取得
-    const user = await findUser(lineId);
+    const user = await findUser(lineId)
 
     // ユーザーと選手の紐づけを取得
-    const userPlayers = (!user)
-      ? []
-      : await fetchUserPlayersByUserId(user.id);
-    
+    const userPlayers = !user ? [] : await fetchUserPlayersByUserId(user.id)
+
     // 選手データをMLB APIから取得
-    const playerIds = userPlayers.map((userPlayer) => userPlayer.playerId);
-    const players = await fetchPlayersByIdsApi(playerIds);
+    const playerIds = userPlayers.map((userPlayer) => userPlayer.playerId)
+    const players = await fetchPlayersByIdsApi(playerIds)
 
     // 選手をチームIDでグループ化
-    const registeredPlayersByTeamId = groupPlayersByTeamId(players);
+    const registeredPlayersByTeamId = groupPlayersByTeamId(players)
 
     return generateActionSuccessResponse({
       registeredPlayersByTeamId,
-    });
+    })
   } catch (error) {
     return generateActionErrorResponse(
-      'pitchers-registration-form-action:initializeAction',
-      'Failed to initialize pitchers registration form',
+      "pitchers-registration-form-action:initializeAction",
+      "Failed to initialize pitchers registration form",
       error,
-    );
+    )
   }
 }

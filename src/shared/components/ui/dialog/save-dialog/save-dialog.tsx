@@ -1,16 +1,22 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
-import { CenterSpinner } from "@/shared/components/ui/spinner/center-spinner/center-spinner";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material"
+import { CenterSpinner } from "@/shared/components/ui/spinner/center-spinner/center-spinner"
 
 type SaveDialogProps = {
-  isOpen: boolean;
-  isLoading?: boolean;
-  onCancel: () => void;
-  onSubmit: () => Promise<void>;
-  title: string;
-  children: React.ReactNode;
-  saveLabel?: string;
-  cancelLabel?: string;
-  disabled?: boolean;
+  isOpen: boolean
+  isLoading?: boolean
+  onCancel: () => void
+  onSubmit: () => Promise<void>
+  title: string
+  children: React.ReactNode
+  saveLabel?: string
+  cancelLabel?: string
+  disabled?: boolean
 }
 
 export default function SaveDialog({
@@ -20,39 +26,23 @@ export default function SaveDialog({
   onSubmit,
   title,
   children,
-  saveLabel = '保存',
-  cancelLabel = 'キャンセル',
+  saveLabel = "保存",
+  cancelLabel = "キャンセル",
   disabled = false,
-}: SaveDialogProps) {  
+}: SaveDialogProps) {
   return (
-    <Dialog
-      open={isOpen}
-      onClose={onCancel}
-      maxWidth="xs"
-      fullWidth
-    >
-
-      <DialogTitle
-        fontSize="0.8rem"
-        sx={{ p: 1.5 }}
-      >
+    <Dialog open={isOpen} onClose={onCancel} maxWidth="xs" fullWidth>
+      <DialogTitle fontSize="0.8rem" sx={{ p: 1.5 }}>
         {title}
       </DialogTitle>
 
       <DialogContent dividers>
-        {isLoading && (
-          <CenterSpinner />
-        )}
+        {isLoading && <CenterSpinner />}
         {children}
       </DialogContent>
 
       <DialogActions>
-
-        <Button
-          onClick={onCancel}
-          color="inherit"
-          disabled={disabled}
-        >
+        <Button onClick={onCancel} color="inherit" disabled={disabled}>
           {cancelLabel}
         </Button>
 
@@ -64,9 +54,7 @@ export default function SaveDialog({
         >
           {saveLabel}
         </Button>
-
       </DialogActions>
-
     </Dialog>
   )
 }

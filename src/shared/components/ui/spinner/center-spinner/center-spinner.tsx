@@ -1,13 +1,13 @@
-import { CircularProgress, Box } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material"
 
 interface CenterSpinnerProps {
-  size?: number;
-  color?: "primary" | "secondary" | "error" | "info" | "success" | "warning";
+  size?: number
+  color?: "primary" | "secondary" | "error" | "info" | "success" | "warning"
 }
 
-export function CenterSpinner({ 
-  size = 40, 
-  color = "primary" 
+export function CenterSpinner({
+  size = 40,
+  color = "primary",
 }: CenterSpinnerProps) {
   return (
     <Box
@@ -17,10 +17,7 @@ export function CenterSpinner({
       height="100%"
       width="100%"
     >
-      <CircularProgress
-        size={size}
-        color={color}
-      />
+      <CircularProgress size={size} color={color} />
     </Box>
-  );
+  )
 }

@@ -1,17 +1,23 @@
-"use client";
+"use client"
 
-import { createContext, useContext, useState } from "react";
-import { FullScreenSpinner } from "../components/ui/spinner/full-screen-spinner/full-screen-spinner";
+import { createContext, useContext, useState } from "react"
+import { FullScreenSpinner } from "../components/ui/spinner/full-screen-spinner/full-screen-spinner"
 
 type InitializationContextType = {
-  isInitialized: boolean;
-  setIsInitialized: (isInitialized: boolean) => void;
+  isInitialized: boolean
+  setIsInitialized: (isInitialized: boolean) => void
 }
 
-const InitializationContext = createContext<InitializationContextType | undefined>(undefined);
+const InitializationContext = createContext<
+  InitializationContextType | undefined
+>(undefined)
 
-export const InitializationProvider = ({ children }: { children: React.ReactNode }) => {
-  const [isInitialized, setIsInitialized] = useState(false);
+export const InitializationProvider = ({
+  children,
+}: {
+  children: React.ReactNode
+}) => {
+  const [isInitialized, setIsInitialized] = useState(false)
 
   return (
     <InitializationContext.Provider
@@ -22,29 +28,31 @@ export const InitializationProvider = ({ children }: { children: React.ReactNode
     >
       {children}
     </InitializationContext.Provider>
-  );
-};
+  )
+}
 
 export const useInitialization = () => {
-  const context = useContext(InitializationContext);
+  const context = useContext(InitializationContext)
 
   if (!context) {
-    throw new Error('useInitialization must be used within a InitializationProvider');
+    throw new Error(
+      "useInitialization must be used within a InitializationProvider",
+    )
   }
 
-  return context;
-};
+  return context
+}
 
 export function LoadingUntilInitialized({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  const { isInitialized } = useInitialization();
+  const { isInitialized } = useInitialization()
 
   if (!isInitialized) {
-    return <FullScreenSpinner/>;
+    return <FullScreenSpinner />
   }
 
-  return children;
+  return children
 }

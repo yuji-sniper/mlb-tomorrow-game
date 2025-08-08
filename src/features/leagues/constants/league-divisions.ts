@@ -1,5 +1,5 @@
-import { LEAGUE_ID } from "@/shared/constants/league";
-import { DIVISION_ID } from "@/shared/constants/division";
+import { DIVISION_ID } from "@/shared/constants/division"
+import { LEAGUE_ID } from "@/shared/constants/league"
 
 export const LEAGUE_DIVISIONS = {
   [LEAGUE_ID.AMERICAN]: [
@@ -12,4 +12,4 @@ export const LEAGUE_DIVISIONS = {
     DIVISION_ID.NATIONAL_CENTRAL,
     DIVISION_ID.NATIONAL_WEST,
   ],
-} as const;
+} as const

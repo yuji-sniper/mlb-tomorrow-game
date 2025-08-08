@@ -1,11 +1,11 @@
 export const POSITION = {
   pitcher: {
-    code: '1',
-    name: '投手',
+    code: "1",
+    name: "投手",
   },
   twoWayPlayer: {
-    code: 'Y',
-    name: '二刀流',
+    code: "Y",
+    name: "二刀流",
   },
 }
 

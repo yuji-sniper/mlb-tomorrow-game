@@ -1,6 +1,9 @@
-import { CustomError } from '@/shared/errors/error';
-import { ActionErrorResponse, ActionSuccessResponse } from '@/shared/types/action';
-import { ERROR_CODE } from '@/shared/constants/error';
+import { ERROR_CODE } from "@/shared/constants/error"
+import { CustomError } from "@/shared/errors/error"
+import type {
+  ActionErrorResponse,
+  ActionSuccessResponse,
+} from "@/shared/types/action"
 
 /**
  * 成功レスポンスを生成
@@ -8,12 +11,12 @@ import { ERROR_CODE } from '@/shared/constants/error';
  * @returns
  */
 export function generateActionSuccessResponse<T>(
-  data: T
+  data: T,
 ): ActionSuccessResponse<T> {
   return {
     ok: true,
     data,
-  };
+  }
 }
 
 /**
@@ -29,9 +32,9 @@ export function generateActionErrorResponse(
   error: unknown,
 ): ActionErrorResponse {
   const logError = (shouldLogAsError: boolean = true) => {
-    const logMethod = shouldLogAsError ? console.error : console.log;
-    logMethod(`[${logPrefix}]`, error);
-  };
+    const logMethod = shouldLogAsError ? console.error : console.log
+    logMethod(`[${logPrefix}]`, error)
+  }
 
   const createErrorResponse = (
     code: keyof typeof ERROR_CODE,
@@ -40,27 +43,26 @@ export function generateActionErrorResponse(
   ): ActionErrorResponse => ({
     ok: false,
     error: { code, message, ...(data && { data }) },
-  });
+  })
 
   // CustomErrorの場合
   if (error instanceof CustomError) {
-    const shouldLogAsError = error.code === ERROR_CODE.INTERNAL_SERVER_ERROR;
-    logError(shouldLogAsError);
-    
-    return createErrorResponse(error.code, error.message, error.data);
+    const shouldLogAsError = error.code === ERROR_CODE.INTERNAL_SERVER_ERROR
+    logError(shouldLogAsError)
+
+    return createErrorResponse(error.code, error.message, error.data)
   }
 
   // Errorの場合
   if (error instanceof Error) {
-    logError();
+    logError()
     return createErrorResponse(
       ERROR_CODE.INTERNAL_SERVER_ERROR,
-      error.message || defaultMessage
-    );
+      error.message || defaultMessage,
+    )
   }
 
   // その他のエラーの場合
-  logError();
-  return createErrorResponse(ERROR_CODE.INTERNAL_SERVER_ERROR, defaultMessage);
+  logError()
+  return createErrorResponse(ERROR_CODE.INTERNAL_SERVER_ERROR, defaultMessage)
 }
-

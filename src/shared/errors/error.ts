@@ -1,4 +1,4 @@
-import { ERROR_CODE } from '@/shared/constants/error';
+import type { ERROR_CODE } from "@/shared/constants/error"
 
 export class CustomError extends Error {
   constructor(
@@ -6,6 +6,6 @@ export class CustomError extends Error {
     message?: string,
     public data?: Record<string, unknown>,
   ) {
-    super(message);
+    super(message)
   }
 }

@@ -1,13 +1,13 @@
-import { CircularProgress, Box } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material"
 
 interface FullScreenSpinnerProps {
-  size?: number;
-  color?: "primary" | "secondary" | "error" | "info" | "success" | "warning";
+  size?: number
+  color?: "primary" | "secondary" | "error" | "info" | "success" | "warning"
 }
 
-export function FullScreenSpinner({ 
-  size = 40, 
-  color = "primary" 
+export function FullScreenSpinner({
+  size = 40,
+  color = "primary",
 }: FullScreenSpinnerProps) {
   return (
     <Box
@@ -17,10 +17,7 @@ export function FullScreenSpinner({
       height="100vh"
       width="100%"
     >
-      <CircularProgress
-        size={size}
-        color={color}
-      />
+      <CircularProgress size={size} color={color} />
     </Box>
-  );
+  )
 }

@@ -1,18 +1,26 @@
-import { List, ListItem, ListItemAvatar, ListItemText, Typography, Checkbox, Avatar } from "@mui/material";
-import TeamDialog from "@/features/teams/components/team-dialog";
-import { Team } from "@/shared/types/team";
-import { PLAYER_STATUS } from "@/shared/constants/player-status";
-import { Player } from "@/shared/types/player";
-import { generatePlayerImageUrl } from "../utils/player-image";
+import {
+  Avatar,
+  Checkbox,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Typography,
+} from "@mui/material"
+import TeamDialog from "@/features/teams/components/team-dialog"
+import { PLAYER_STATUS } from "@/shared/constants/player-status"
+import type { Player } from "@/shared/types/player"
+import type { Team } from "@/shared/types/team"
+import { generatePlayerImageUrl } from "../utils/player-image"
 
 type TeamPlayersSelectionDialogProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  team: Team;
-  isLoading: boolean;
-  players: Player[];
-  selectedPlayerIds: Player['id'][];
-  onPlayerClick: (player: Player) => void;
+  isOpen: boolean
+  onClose: () => void
+  team: Team
+  isLoading: boolean
+  players: Player[]
+  selectedPlayerIds: Player["id"][]
+  onPlayerClick: (player: Player) => void
 }
 
 export default function TeamPlayersSelectionDialog({
@@ -36,24 +44,20 @@ export default function TeamPlayersSelectionDialog({
           選択可能な選手がいません
         </Typography>
       ) : (
-        <List dense sx={{ p: 0, maxWidth: 280, mx: 'auto' }}>
+        <List dense sx={{ p: 0, maxWidth: 280, mx: "auto" }}>
           {players.map((player) => {
-            const isSelected = selectedPlayerIds.includes(player.id);
+            const isSelected = selectedPlayerIds.includes(player.id)
             return (
               <ListItem
                 key={player.id}
                 component="div"
                 secondaryAction={
-                  <Checkbox
-                    edge="end"
-                    checked={isSelected}
-                    color="primary"
-                  />
+                  <Checkbox edge="end" checked={isSelected} color="primary" />
                 }
                 sx={{
-                  bgcolor: isSelected ? 'action.selected' : undefined,
+                  bgcolor: isSelected ? "action.selected" : undefined,
                   borderRadius: 1,
-                  cursor: 'pointer',
+                  cursor: "pointer",
                 }}
                 onClick={() => onPlayerClick(player)}
               >
@@ -69,12 +73,12 @@ export default function TeamPlayersSelectionDialog({
                   secondary={PLAYER_STATUS[player.statusCode].display}
                   slotProps={{
                     secondary: {
-                      sx: { fontSize: '0.6rem' },
+                      sx: { fontSize: "0.6rem" },
                     },
                   }}
                 />
               </ListItem>
-            );
+            )
           })}
         </List>
       )}

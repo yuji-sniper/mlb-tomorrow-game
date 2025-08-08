@@ -1,20 +1,20 @@
-"use client";
+"use client"
 
-import { Team } from "@/shared/types/team";
-import { League } from "@/shared/types/league";
-import SaveTeamsDialog from "@/features/teams/components/save-teams-dialog";
-import TeamsList from "@/features/teams/components/teams-list";
-import { Box } from "@mui/material";
-import { useTeamsRegistration } from "../_hooks/use-teams-registration";
-import { Button } from "@/shared/components/ui/button/button";
-import { Badge } from "@/shared/components/ui/badge/badge";
-import { LoadingUntilInitialized } from "@/shared/contexts/initialization-context";
-import Title from "@/shared/components/ui/title/title";
+import { Box } from "@mui/material"
+import SaveTeamsDialog from "@/features/teams/components/save-teams-dialog"
+import TeamsList from "@/features/teams/components/teams-list"
+import { Badge } from "@/shared/components/ui/badge/badge"
+import { Button } from "@/shared/components/ui/button/button"
+import Title from "@/shared/components/ui/title/title"
+import { LoadingUntilInitialized } from "@/shared/contexts/initialization-context"
+import type { League } from "@/shared/types/league"
+import type { Team } from "@/shared/types/team"
+import { useTeamsRegistration } from "../_hooks/use-teams-registration"
 
 type TeamsRegistrationProps = {
-  teams: Team[];
-  leagues: League[];
-};
+  teams: Team[]
+  leagues: League[]
+}
 
 export default function TeamsRegistration({
   teams,
@@ -34,24 +34,20 @@ export default function TeamsRegistration({
     isTeamCardActive,
     getTeamBadgeType,
     submit,
-  } = useTeamsRegistration(teams);
+  } = useTeamsRegistration(teams)
 
   /**
    * チームカードに表示するバッジを取得する
    */
-  const getTeamBadge = (teamId: Team['id']) => {
-    const badgeType = getTeamBadgeType(teamId);
-    return badgeType
-      ? <Badge type={badgeType} />
-      : undefined;
-  };
+  const getTeamBadge = (teamId: Team["id"]) => {
+    const badgeType = getTeamBadgeType(teamId)
+    return badgeType ? <Badge type={badgeType} /> : undefined
+  }
 
   return (
     <LoadingUntilInitialized>
       {/* [start]タイトル */}
-      <Title>
-        好きなチームを登録
-      </Title>
+      <Title>好きなチームを登録</Title>
       {/* [end]タイトル */}
 
       {/* [start]チーム選択 */}
@@ -64,7 +60,7 @@ export default function TeamsRegistration({
       {/* [end]チーム選択 */}
 
       {/* [start]チーム保存ボタン・ダイアログ */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}>
         <Button
           text="保存"
           disabled={isSaveButtonDisabled}
@@ -81,5 +77,5 @@ export default function TeamsRegistration({
       />
       {/* [end]チーム保存ボタン・ダイアログ */}
     </LoadingUntilInitialized>
-  );
+  )
 }

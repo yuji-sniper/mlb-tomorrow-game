@@ -1,40 +1,42 @@
-"use client";
+"use client"
 
-import { createContext, useContext, useState } from "react";
-import Snackbar from "@/shared/components/ui/snackbar/snackbar";
+import { createContext, useContext, useState } from "react"
+import Snackbar from "@/shared/components/ui/snackbar/snackbar"
 
-type SnackbarStatus = 'success' | 'error';
+type SnackbarStatus = "success" | "error"
 
-type ShowSnackbar = (message: string) => void;
+type ShowSnackbar = (message: string) => void
 
 type SnackbarContextType = {
-  showSuccessSnackbar: ShowSnackbar;
-  showErrorSnackbar: ShowSnackbar;
+  showSuccessSnackbar: ShowSnackbar
+  showErrorSnackbar: ShowSnackbar
 }
 
-export const SnackbarContext = createContext<SnackbarContextType | undefined>(undefined);
+export const SnackbarContext = createContext<SnackbarContextType | undefined>(
+  undefined,
+)
 
 export function SnackbarProvider({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useState(false);
-  const [message, setMessage] = useState('');
-  const [status, setStatus] = useState<SnackbarStatus>('success');
+  const [open, setOpen] = useState(false)
+  const [message, setMessage] = useState("")
+  const [status, setStatus] = useState<SnackbarStatus>("success")
 
   const showSnackbar = (message: string, status: SnackbarStatus) => {
-    setOpen(true);
-    setMessage(message);
-    setStatus(status);
+    setOpen(true)
+    setMessage(message)
+    setStatus(status)
   }
 
   const showSuccessSnackbar = (message: string) => {
-    showSnackbar(message, 'success');
+    showSnackbar(message, "success")
   }
 
   const showErrorSnackbar = (message: string) => {
-    showSnackbar(message, 'error');
+    showSnackbar(message, "error")
   }
 
   const handleClose = () => {
-    setOpen(false);
+    setOpen(false)
   }
 
   return (
@@ -56,9 +58,9 @@ export function SnackbarProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useSnackbarContext() {
-  const context = useContext(SnackbarContext);
+  const context = useContext(SnackbarContext)
   if (!context) {
-    throw new Error('useSnackbarContext must be used within a SnackbarProvider');
+    throw new Error("useSnackbarContext must be used within a SnackbarProvider")
   }
-  return context;
+  return context
 }

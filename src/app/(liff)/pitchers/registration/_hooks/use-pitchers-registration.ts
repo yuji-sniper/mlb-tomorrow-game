@@ -1,161 +1,162 @@
-import { useEffect, useMemo, useState } from "react";
-import { Team } from "@/shared/types/team";
-import { Player } from "@/shared/types/player";
-import { useInitialization } from "@/shared/contexts/initialization-context";
-import { useLiffContext } from "@/shared/contexts/liff-context";
-import { useErrorHandlerContext } from "@/shared/contexts/error-handler-context";
-import { useSnackbarContext } from "@/shared/contexts/snackbar-context";
-import { ERROR_CODE } from "@/shared/constants/error";
-import { initializeAction } from "../_actions/initialize-action";
-import { fetchPitchersByTeamIdAction } from "../_actions/fetch-pitchers-by-team-id-action";
-import { registerPitchersAction } from "../_actions/register-pitchers-action";
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { ERROR_CODE } from "@/shared/constants/error"
+import { useErrorHandlerContext } from "@/shared/contexts/error-handler-context"
+import { useInitialization } from "@/shared/contexts/initialization-context"
+import { useLiffContext } from "@/shared/contexts/liff-context"
+import { useSnackbarContext } from "@/shared/contexts/snackbar-context"
+import type { Player } from "@/shared/types/player"
+import type { Team } from "@/shared/types/team"
+import { fetchPitchersByTeamIdAction } from "../_actions/fetch-pitchers-by-team-id-action"
+import { initializeAction } from "../_actions/initialize-action"
+import { registerPitchersAction } from "../_actions/register-pitchers-action"
 
 type UsePitchersRegistration = () => {
   // 状態
-  selectedTeam: Team | undefined;
-  playersGroupByTeamId: Record<Team['id'], Player[]>;
-  isPlayersSelectionDialogLoading: boolean;
-  isSavePlayersDialogOpen: boolean;
-  isSubmitting: boolean;
+  selectedTeam: Team | undefined
+  playersGroupByTeamId: Record<Team["id"], Player[]>
+  isPlayersSelectionDialogLoading: boolean
+  isSavePlayersDialogOpen: boolean
+  isSubmitting: boolean
   // メモ化
-  selectedPlayers: Player[];
-  selectedPlayerIds: Player['id'][];
-  isSaveButtonDisabled: boolean;
+  selectedPlayers: Player[]
+  selectedPlayerIds: Player["id"][]
+  isSaveButtonDisabled: boolean
   // 関数
-  handleTeamCardClick: (team: Team) => void;
-  handlePlayersSelectionDialogClose: () => void;
-  handlePlayerClick: (player: Player) => void;
-  handleSaveButtonClick: () => void;
-  handleRegisterPlayersDialogCancel: () => void;
-  isTeamCardActive: (teamId: Team['id']) => boolean;
-  getSelectedCountOfTeam: (teamId: Team['id']) => number;
-  submit: () => Promise<void>;
+  handleTeamCardClick: (team: Team) => void
+  handlePlayersSelectionDialogClose: () => void
+  handlePlayerClick: (player: Player) => void
+  handleSaveButtonClick: () => void
+  handleRegisterPlayersDialogCancel: () => void
+  isTeamCardActive: (teamId: Team["id"]) => boolean
+  getSelectedCountOfTeam: (teamId: Team["id"]) => number
+  submit: () => Promise<void>
 }
 
 export const usePitchersRegistration: UsePitchersRegistration = () => {
-  const { isInitialized, setIsInitialized } = useInitialization();
-  const {liff, relogin} = useLiffContext();
-  const { handleError } = useErrorHandlerContext();
-  const { showSuccessSnackbar, showErrorSnackbar } = useSnackbarContext();
-  const [selectedTeam, setSelectedTeam] = useState<Team>();
-  const [playersGroupByTeamId, setPlayersGroupByTeamId] = useState<Record<Team['id'], Player[]>>({});
-  const [selectedPlayersByTeamId, setSelectedPlayersByTeamId] = useState<Record<Team['id'], Player[]>>({});
-  const [isPlayersSelectionDialogLoading, setIsPlayersSelectionDialogLoading] = useState(false);
-  const [isSavePlayersDialogOpen, setIsSavePlayersDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isInitialized, setIsInitialized } = useInitialization()
+  const { liff, relogin } = useLiffContext()
+  const { handleError } = useErrorHandlerContext()
+  const { showSuccessSnackbar, showErrorSnackbar } = useSnackbarContext()
+  const [selectedTeam, setSelectedTeam] = useState<Team>()
+  const [playersGroupByTeamId, setPlayersGroupByTeamId] = useState<
+    Record<Team["id"], Player[]>
+  >({})
+  const [selectedPlayersByTeamId, setSelectedPlayersByTeamId] = useState<
+    Record<Team["id"], Player[]>
+  >({})
+  const [isPlayersSelectionDialogLoading, setIsPlayersSelectionDialogLoading] =
+    useState(false)
+  const [isSavePlayersDialogOpen, setIsSavePlayersDialogOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   /**
    * 選択された選手を平坦化した配列を返す
    */
   const selectedPlayers = useMemo(() => {
-    return Object.values(selectedPlayersByTeamId).flat();
-  }, [selectedPlayersByTeamId]);
+    return Object.values(selectedPlayersByTeamId).flat()
+  }, [selectedPlayersByTeamId])
 
   /**
    * 選択された選手のIDを返す
    */
   const selectedPlayerIds = useMemo(() => {
-    return selectedPlayers.map((player) => player.id);
-  }, [selectedPlayers]);
+    return selectedPlayers.map((player) => player.id)
+  }, [selectedPlayers])
 
   /**
    * 保存ボタンの無効化判定
    */
-  const isSaveButtonDisabled = useMemo(() => (
-    isSavePlayersDialogOpen ||
-    isSubmitting ||
-    selectedPlayerIds.length === 0
-  ), [
-    isSavePlayersDialogOpen,
-    isSubmitting,
-    selectedPlayerIds,
-  ]);
+  const isSaveButtonDisabled = useMemo(
+    () =>
+      isSavePlayersDialogOpen || isSubmitting || selectedPlayerIds.length === 0,
+    [isSavePlayersDialogOpen, isSubmitting, selectedPlayerIds],
+  )
 
   /**
    * 初期化
    */
-  const initialize = async () => {
+  const initialize = useCallback(async () => {
     if (isInitialized || !liff) {
-      return;
+      return
     }
-    
+
     try {
       // LINE IDトークン取得
-      const lineIdToken = liff.getIDToken();
+      const lineIdToken = liff.getIDToken()
       if (!lineIdToken) {
-        relogin();
-        return;
+        relogin()
+        return
       }
 
       // 初期化APIを呼び出し
       const request = {
         lineIdToken,
-      };
-      const response = await initializeAction(request);
+      }
+      const response = await initializeAction(request)
       if (!response.ok) {
         if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
-          relogin();
-          return;
+          relogin()
+          return
         }
-        throw new Error(response.error.message);
+        throw new Error(response.error.message)
       }
-      const { registeredPlayersByTeamId } = response.data;
+      const { registeredPlayersByTeamId } = response.data
 
       // データをセット
-      setSelectedPlayersByTeamId(registeredPlayersByTeamId);
+      setSelectedPlayersByTeamId(registeredPlayersByTeamId)
 
-      setIsInitialized(true);
+      setIsInitialized(true)
     } catch (error) {
       handleError(
         ERROR_CODE.ERROR,
-        'Failed to initialize pitchers registration',
+        "Failed to initialize pitchers registration",
         error,
-      );
+      )
     }
-  }
+  }, [isInitialized, liff, relogin, handleError, setIsInitialized])
 
   /**
    * 初期化実行
    */
   useEffect(() => {
-    initialize();
-  }, [liff]);
+    initialize()
+  }, [initialize])
 
   /**
    * チームカードクリック時の処理
    */
   const handleTeamCardClick = async (team: Team) => {
-    setSelectedTeam(team);
-    setIsPlayersSelectionDialogLoading(true);
+    setSelectedTeam(team)
+    setIsPlayersSelectionDialogLoading(true)
 
     try {
       // チームのピッチャーがすでに取得済みの場合は、そのままダイアログを開く
-      const players = playersGroupByTeamId[team.id];
+      const players = playersGroupByTeamId[team.id]
       if (players) {
-        setIsPlayersSelectionDialogLoading(false);
-        return;
+        setIsPlayersSelectionDialogLoading(false)
+        return
       }
 
       // チームのピッチャーを取得
       const request = {
         teamId: team.id,
-      };
-      const response = await fetchPitchersByTeamIdAction(request);
-      if (!response.ok) {
-        throw new Error(response.error.message);
       }
-      const { players: fetchedPlayers } = response.data;
+      const response = await fetchPitchersByTeamIdAction(request)
+      if (!response.ok) {
+        throw new Error(response.error.message)
+      }
+      const { players: fetchedPlayers } = response.data
 
       // データをセット
       setPlayersGroupByTeamId((prev) => ({
         ...prev,
         [team.id]: fetchedPlayers,
-      }));
+      }))
     } catch (error) {
-      console.error(error);
-      showErrorSnackbar("ピッチャーの取得に失敗しました");
+      console.error(error)
+      showErrorSnackbar("ピッチャーの取得に失敗しました")
     } finally {
-      setIsPlayersSelectionDialogLoading(false);
+      setIsPlayersSelectionDialogLoading(false)
     }
   }
 
@@ -163,21 +164,21 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
    * 選手選択ダイアログを閉じる
    */
   const handlePlayersSelectionDialogClose = () => {
-    setSelectedTeam(undefined);
+    setSelectedTeam(undefined)
   }
 
   /**
    * 保存ボタンをクリックする
    */
   const handleSaveButtonClick = () => {
-    setIsSavePlayersDialogOpen(true);
+    setIsSavePlayersDialogOpen(true)
   }
 
   /**
    * 選手登録ダイアログをキャンセルする
    */
   const handleRegisterPlayersDialogCancel = () => {
-    setIsSavePlayersDialogOpen(false);
+    setIsSavePlayersDialogOpen(false)
   }
 
   /**
@@ -186,86 +187,85 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
   const handlePlayerClick = (player: Player) => {
     // 選手の選択状態を切り替える
     setSelectedPlayersByTeamId((prev) => {
-      const teamId = player.teamId;
-      const teamPlayers = prev[teamId] || [];
-      const isSelected = teamPlayers.some((p) => p.id === player.id);
+      const teamId = player.teamId
+      const teamPlayers = prev[teamId] || []
+      const isSelected = teamPlayers.some((p) => p.id === player.id)
 
       if (isSelected) {
         return {
           ...prev,
           [teamId]: teamPlayers.filter((p) => p.id !== player.id),
-        };
+        }
       } else {
         return {
           ...prev,
           [teamId]: [...teamPlayers, player],
-        };
+        }
       }
-    });
-  };
+    })
+  }
 
   /**
    * チームカードのアクティブ状態を返す
    */
-  const isTeamCardActive = (teamId: Team['id']) => {
+  const isTeamCardActive = (teamId: Team["id"]) => {
     return (
-      selectedTeam?.id === teamId ||
-      selectedPlayersByTeamId[teamId]?.length > 0
-    );
+      selectedTeam?.id === teamId || selectedPlayersByTeamId[teamId]?.length > 0
+    )
   }
 
   /**
    * 選択されたチームのピッチャー数を返す
    */
-  const getSelectedCountOfTeam = (teamId: Team['id']) => {
-    return selectedPlayersByTeamId[teamId]?.length || 0;
+  const getSelectedCountOfTeam = (teamId: Team["id"]) => {
+    return selectedPlayersByTeamId[teamId]?.length || 0
   }
 
   /**
    * ピッチャーの登録を行う
    */
   const submit = async () => {
-    setIsSubmitting(true);
+    setIsSubmitting(true)
 
     try {
       if (!liff) {
-        throw new Error('LIFF is not initialized');
+        throw new Error("LIFF is not initialized")
       }
 
       // LINE IDトークン取得
-      const lineIdToken = liff.getIDToken();
+      const lineIdToken = liff.getIDToken()
       if (!lineIdToken) {
-        relogin();
-        return;
+        relogin()
+        return
       }
 
       // 登録APIを呼び出し
       const request = {
         lineIdToken,
         selectedPlayerIds,
-      };
-      const response = await registerPitchersAction(request);
+      }
+      const response = await registerPitchersAction(request)
       if (!response.ok) {
         if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
-          relogin();
-          return;
+          relogin()
+          return
         }
-        throw new Error(response.error.message);
+        throw new Error(response.error.message)
       }
-      const { registeredPlayersByTeamId } = response.data;
+      const { registeredPlayersByTeamId } = response.data
 
       // データをセット
-      setSelectedPlayersByTeamId(registeredPlayersByTeamId);
+      setSelectedPlayersByTeamId(registeredPlayersByTeamId)
 
-      showSuccessSnackbar('ピッチャーを登録しました');
+      showSuccessSnackbar("ピッチャーを登録しました")
     } catch (error) {
-      console.error(error);
-      showErrorSnackbar('ピッチャーの登録に失敗しました');
+      console.error(error)
+      showErrorSnackbar("ピッチャーの登録に失敗しました")
     } finally {
-      setIsSubmitting(false);
-      setIsSavePlayersDialogOpen(false);
+      setIsSubmitting(false)
+      setIsSavePlayersDialogOpen(false)
     }
-  };
+  }
 
   return {
     // 状態
@@ -287,5 +287,5 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
     isTeamCardActive,
     getSelectedCountOfTeam,
     submit,
-  };
+  }
 }
