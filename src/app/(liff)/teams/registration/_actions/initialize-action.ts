@@ -50,6 +50,8 @@ export async function initializeAction(
 
     // ユーザーとチームの紐づけを取得
     const userTeams = !user ? [] : await fetchUserTeamsByUserId(user.id)
+
+    // ユーザーとチームの紐づけのチームIDを取得
     const registeredTeamIds = userTeams.map((userTeam) => userTeam.teamId)
 
     return generateActionSuccessResponse({
