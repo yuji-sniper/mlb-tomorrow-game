@@ -252,10 +252,10 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
         }
         throw new Error(response.error.message)
       }
-      const { registeredPlayersByTeamId } = response.data
+      const { registeredPlayersGroupedByTeamId } = response.data
 
       // データをセット
-      setSelectedPlayersByTeamId(registeredPlayersByTeamId)
+      setSelectedPlayersByTeamId(registeredPlayersGroupedByTeamId)
 
       showSuccessSnackbar("ピッチャーを登録しました")
     } catch (error) {

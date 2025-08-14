@@ -26,7 +26,7 @@ type RegisterPitchersActionRequest = {
 }
 
 type RegisterPitchersActionResponse = {
-  registeredPlayersByTeamId: Record<Team["id"], Player[]>
+  registeredPlayersGroupedByTeamId: Record<Team["id"], Player[]>
 }
 
 /**
@@ -56,34 +56,36 @@ export async function registerPitchersAction(
     const lineId = lineVerifyData.sub
 
     // DBトランザクション
-    const registeredPlayersByTeamId = await prisma.$transaction(async (tx) => {
-      // ユーザー取得 or 作成
-      const user =
-        (await findUser(lineId, tx)) ?? (await createUser(lineId, tx))
+    const registeredPlayersGroupedByTeamId = await prisma.$transaction(
+      async (tx) => {
+        // ユーザー取得 or 作成
+        const user =
+          (await findUser(lineId, tx)) ?? (await createUser(lineId, tx))
 
-      // ユーザーと選手の紐づけを更新
-      await deleteUserPlayersByUserId(user.id, tx)
-      if (selectedPlayerIds.length > 0) {
-        await createUserPlayers(user.id, selectedPlayerIds, tx)
-      }
+        // ユーザーと選手の紐づけを更新
+        await deleteUserPlayersByUserId(user.id, tx)
+        if (selectedPlayerIds.length > 0) {
+          await createUserPlayers(user.id, selectedPlayerIds, tx)
+        }
 
-      // ユーザーと選手の紐づけを取得
-      const userPlayers = await fetchUserPlayersByUserId(user.id, tx)
+        // ユーザーと選手の紐づけを取得
+        const userPlayers = await fetchUserPlayersByUserId(user.id, tx)
 
-      // ユーザーと選手の紐づけの選手IDを取得
-      const playerIds = userPlayers.map((userPlayer) => userPlayer.playerId)
+        // ユーザーと選手の紐づけの選手IDを取得
+        const playerIds = userPlayers.map((userPlayer) => userPlayer.playerId)
 
-      // 選手データをMLB APIから取得
-      const players = await fetchPlayersByIdsApi(playerIds)
+        // 選手データをMLB APIから取得
+        const players = await fetchPlayersByIdsApi(playerIds)
 
-      // 選手をチームIDでグループ化
-      const registeredPlayersByTeamId = groupPlayersByTeamId(players)
+        // 選手をチームIDでグループ化
+        const registeredPlayersGroupedByTeamId = groupPlayersByTeamId(players)
 
-      return registeredPlayersByTeamId
-    })
+        return registeredPlayersGroupedByTeamId
+      },
+    )
 
     return generateActionSuccessResponse({
-      registeredPlayersByTeamId,
+      registeredPlayersGroupedByTeamId,
     })
   } catch (error) {
     return generateActionErrorResponse(
