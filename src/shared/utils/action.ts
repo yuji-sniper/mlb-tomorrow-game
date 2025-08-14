@@ -49,7 +49,6 @@ export function generateActionErrorResponse(
   if (error instanceof CustomError) {
     const shouldLogAsError = error.code === ERROR_CODE.INTERNAL_SERVER_ERROR
     logError(shouldLogAsError)
-
     return createErrorResponse(error.code, error.message, error.data)
   }
 
