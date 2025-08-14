@@ -25,13 +25,19 @@ export async function verifyLineTokenApi(
     )
   }
 
-  const res = await fetch("https://api.line.me/oauth2/v2.1/verify", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
+  const params = new URLSearchParams()
+  params.append("id_token", lineIdToken)
+  params.append("client_id", clientId)
+
+  const res = await fetch(
+    `https://api.line.me/oauth2/v2.1/verify?${params.toString()}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
     },
-    body: `id_token=${encodeURIComponent(lineIdToken)}&client_id=${encodeURIComponent(clientId)}`,
-  })
+  )
 
   const data = await res.json()
 
