@@ -14,6 +14,9 @@ type VerifyLineTokenApiErrorResponse = {
   error_description: string
 }
 
+/**
+ * LINE IDトークンを検証する
+ */
 export async function verifyLineTokenApi(
   lineIdToken: string,
 ): Promise<VerifyLineTokenApiSuccessResponse> {
@@ -64,7 +67,7 @@ type LineStatelessChannelAccessTokenApiErrorResponse = {
 }
 
 /**
- * LINEのステートレスチャネルアクセストークンを発行する
+ * LINE Messaging APIのステートレスチャネルアクセストークンを発行する
  */
 export async function issueLineMessagingApiStatelessChannelAccessTokenApi() {
   const clientId = process.env.LINE_MESSAGING_API_CHANNEL_ID
