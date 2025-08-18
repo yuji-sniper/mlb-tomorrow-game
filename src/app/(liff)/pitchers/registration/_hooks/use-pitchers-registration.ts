@@ -257,10 +257,10 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
       // データをセット
       setSelectedPlayersByTeamId(registeredPlayersGroupedByTeamId)
 
-      showSuccessSnackbar("ピッチャーを登録しました")
+      showSuccessSnackbar("ピッチャーを保存しました")
     } catch (error) {
       console.error(error)
-      showErrorSnackbar("ピッチャーの登録に失敗しました")
+      showErrorSnackbar("ピッチャーの保存に失敗しました")
     } finally {
       setIsSubmitting(false)
       setIsSavePlayersDialogOpen(false)

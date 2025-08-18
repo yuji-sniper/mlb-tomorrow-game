@@ -19,8 +19,9 @@ export default function TeamCard({
     <Card
       onClick={onClick}
       sx={{
-        width: 54,
-        flex: "0 0 auto",
+        width: "100%",
+        maxWidth: 120,
+        minWidth: 54,
         textAlign: "center",
         cursor: "pointer",
         position: "relative",
@@ -44,8 +45,11 @@ export default function TeamCard({
           src={generateTeamImageUrl(team.id)}
           alt={team.teamName}
           sx={{
-            width: 32,
-            height: 32,
+            width: "60%",
+            height: "auto",
+            minWidth: 32,
+            maxWidth: 48,
+            aspectRatio: "1/1",
             bgcolor: "white",
             borderRadius: 0,
             objectFit: "contain",
@@ -55,7 +59,12 @@ export default function TeamCard({
         />
         <Typography
           variant="caption"
-          sx={{ mt: 0.2, fontSize: "0.5rem", wordBreak: "break-word" }}
+          sx={{
+            mt: 0.4,
+            fontSize: "0.6rem",
+            fontWeight: "bold",
+            whiteSpace: "nowrap",
+          }}
         >
           {team.teamName}
         </Typography>

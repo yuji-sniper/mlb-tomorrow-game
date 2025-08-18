@@ -38,11 +38,12 @@ export default function TeamsList({
                 {division.name}
               </Typography>
               <Box
-                display="flex"
-                flexDirection="row"
-                flexWrap="wrap"
-                gap={0.5}
-                justifyContent="center"
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(5, 1fr)",
+                  gap: 0.5,
+                  justifyItems: "center",
+                }}
               >
                 {division.teams.map((team) => (
                   <TeamCard

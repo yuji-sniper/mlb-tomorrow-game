@@ -6,7 +6,7 @@ export default function LiffLayout({
   children: React.ReactNode
 }) {
   return (
-    <Box p={2} maxWidth={320} mx="auto">
+    <Box p={2} maxWidth={450} mx="auto">
       {children}
     </Box>
   )

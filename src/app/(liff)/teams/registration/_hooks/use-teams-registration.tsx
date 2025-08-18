@@ -205,10 +205,10 @@ export const useTeamsRegistration: UseTeamsRegistration = (teams: Team[]) => {
       // データをセット
       setSelectedTeamIds(registeredTeamIds)
 
-      showSuccessSnackbar("チームを登録しました")
+      showSuccessSnackbar("チームを保存しました")
     } catch (error) {
       console.error(error)
-      showErrorSnackbar("チームの登録に失敗しました")
+      showErrorSnackbar("チームの保存に失敗しました")
     } finally {
       setIsSubmitting(false)
       setIsOpenSaveTeamsDialog(false)
