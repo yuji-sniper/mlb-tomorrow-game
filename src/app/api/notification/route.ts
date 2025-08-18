@@ -39,10 +39,15 @@ const GAME_START_TIME_FORMAT_OPTIONS = {
   minute: "2-digit",
 } as const
 
+const GAME_COUNT_PER_MESSAGE = 5
+
 const CHUNK_SIZE = 200
 
-// MEMO: LINE APIのレート制限に合わせて増減調整する
+// MEMO: LINE APIのレート制限と現状の処理時間に合わせて調整する
 const CONCURRENCY = 10
+
+// MEMO: LINE APIのチャネルアクセストークンの有効期限が15分なので、ゆとりを持って10分で再発行する
+const CHANNEL_ACCESS_TOKEN_REFRESH_INTERVAL_MS = 1000 * 60 * 10
 
 const MAX_RETRY_COUNT = 3
 
@@ -106,7 +111,21 @@ async function fetchMlbData(): Promise<{
     fetchGamesByDateApi(new Date()),
   ])
 
-  return { teams, standings, games }
+  const sortedGames = sortGamesByStartTime(games)
+
+  return { teams, standings, games: sortedGames }
+}
+
+/**
+ * 試合データを開始時間でソートする
+ */
+function sortGamesByStartTime(games: Game[]): Game[] {
+  return games.sort((a, b) => {
+    const aStartTime = new Date(a.gameDate).getTime()
+    const bStartTime = new Date(b.gameDate).getTime()
+
+    return aStartTime - bStartTime
+  })
 }
 
 /**
@@ -238,9 +257,9 @@ async function sendPushMessagesToUsers(
   errorCount: number
   skipCount: number
 }> {
-  // MEMO: 15分で有効期限が切れるので、ユーザー数が多く処理時間が長くなる場合は再発行するよう修正する
-  const channelAccessToken =
+  let channelAccessToken =
     await issueLineMessagingApiStatelessChannelAccessTokenApi()
+  let lastTokenIssuedAt = Date.now()
 
   let totalCount = 0
   let successCount = 0
@@ -253,25 +272,35 @@ async function sendPushMessagesToUsers(
   })) {
     const tasks: (() => Promise<void>)[] = users.map((user) => async () => {
       try {
+        // ユーザーへのメッセージを生成する
         const registeredTeamIds = user.teams?.map((team) => team.teamId) ?? []
         const registeredPlayerIds =
           user.players?.map((player) => player.playerId) ?? []
-
-        const message = buildMessageForUser(
+        const messageObjects = buildMessageObjectsForUser(
           gameMessageDataList,
           registeredTeamIds,
           registeredPlayerIds,
         )
-
-        if (!message) {
+        if (messageObjects.length === 0) {
           skipCount++
           return
         }
 
+        // 有効期限が切れる前にチャネルアクセストークンを再発行する
+        const now = Date.now()
+        const isTokenExpired =
+          now - lastTokenIssuedAt > CHANNEL_ACCESS_TOKEN_REFRESH_INTERVAL_MS
+        if (isTokenExpired) {
+          channelAccessToken =
+            await issueLineMessagingApiStatelessChannelAccessTokenApi()
+          lastTokenIssuedAt = now
+        }
+
+        // メッセージを送信する
         await sendWithRetry({
           channelAccessToken: channelAccessToken.access_token,
           to: user.lineId,
-          messages: [{ type: "text", text: message }],
+          messages: messageObjects,
         })
 
         successCount++
@@ -299,14 +328,16 @@ async function sendPushMessagesToUsers(
 }
 
 /**
- * ユーザーごとに通知対象の試合を判定して通知メッセージを生成する
+ * ユーザーごとに通知対象の試合を選定して、通知メッセージを生成する
  */
-function buildMessageForUser(
+function buildMessageObjectsForUser(
   gameMessageDataList: GameMessageData[],
   registeredTeamIds: number[],
   registeredPlayerIds: number[],
-): string {
-  const gameMessages: string[] = []
+): { type: string; text: string }[] {
+  const gameMessageGroups: string[][] = []
+
+  let currentGroup: string[] = []
 
   gameMessageDataList.forEach((data) => {
     const shouldNotify = shouldNotifyGameToUser(
@@ -316,11 +347,26 @@ function buildMessageForUser(
     )
 
     if (shouldNotify) {
-      gameMessages.push(data.gameMessage)
+      currentGroup.push(data.gameMessage)
+
+      // 1メッセージあたりの試合数を制限する（文字数制限対策）
+      if (currentGroup.length >= GAME_COUNT_PER_MESSAGE) {
+        gameMessageGroups.push(currentGroup)
+        currentGroup = []
+      }
     }
   })
 
-  return gameMessages.join("\n\n")
+  if (currentGroup.length > 0) {
+    gameMessageGroups.push(currentGroup)
+  }
+
+  const messages = gameMessageGroups.map((group) => ({
+    type: "text",
+    text: group.join("\n\n"),
+  }))
+
+  return messages
 }
 
 /**
