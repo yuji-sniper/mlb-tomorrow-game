@@ -45,11 +45,13 @@ const GAME_COUNT_PER_MESSAGE = 5
 
 const CHUNK_SIZE = 200
 
-// MEMO: LINE APIのレート制限と現状の処理時間に合わせて調整する
+// 送信処理の並列数
 const CONCURRENCY = 10
 
 // MEMO: LINE APIのチャネルアクセストークンの有効期限が15分なので、ゆとりを持って10分で再発行する
 const CHANNEL_ACCESS_TOKEN_REFRESH_INTERVAL_MS = 1000 * 60 * 10
+
+const LINE_MESSAGE_TYPE = "text"
 
 const MAX_RETRY_COUNT = 3
 
@@ -77,15 +79,14 @@ export async function POST() {
       games,
     )
 
-    const { totalCount, successCount, errorCount, skipCount } =
-      await sendPushMessagesToUsers(gameMessageDataList)
+    const result = await sendPushMessagesToUsers(gameMessageDataList)
 
     console.log(
       logPrefix,
-      `Total: ${totalCount}`,
-      `Success: ${successCount}`,
-      `Error: ${errorCount}`,
-      `Skip: ${skipCount}`,
+      `Total: ${result.total}`,
+      `Success: ${result.success}`,
+      `Error: ${result.error}`,
+      `Skip: ${result.skip}`,
     )
 
     return NextResponse.json({ message: "OK" })
@@ -257,19 +258,25 @@ function generateStandingText(standing?: Standing): string {
 async function sendPushMessagesToUsers(
   gameMessageDataList: GameMessageData[],
 ): Promise<{
-  totalCount: number
-  successCount: number
-  errorCount: number
-  skipCount: number
+  total: number
+  success: number
+  error: number
+  skip: number
 }> {
-  let channelAccessToken =
+  const initialChannelAccessToken =
     await issueLineMessagingApiStatelessChannelAccessTokenApi()
-  let lastTokenIssuedAt = Date.now()
 
-  let totalCount = 0
-  let successCount = 0
-  let errorCount = 0
-  let skipCount = 0
+  const channelAccessTokenState = {
+    token: initialChannelAccessToken.access_token,
+    issuedAt: Date.now(),
+  }
+
+  const result = {
+    total: 0,
+    success: 0,
+    error: 0,
+    skip: 0,
+  }
 
   for await (const users of iterateAllUsersByChunkWithRelations(CHUNK_SIZE, {
     players: true,
@@ -287,49 +294,47 @@ async function sendPushMessagesToUsers(
           registeredPlayerIds,
         )
         if (messageObjects.length === 0) {
-          skipCount++
+          result.skip++
           return
         }
 
         // 有効期限が切れる前にチャネルアクセストークンを再発行する
         const now = Date.now()
         const isTokenExpired =
-          now - lastTokenIssuedAt > CHANNEL_ACCESS_TOKEN_REFRESH_INTERVAL_MS
+          now - channelAccessTokenState.issuedAt >
+          CHANNEL_ACCESS_TOKEN_REFRESH_INTERVAL_MS
         if (isTokenExpired) {
-          channelAccessToken =
+          const refreshedChannelAccessToken =
             await issueLineMessagingApiStatelessChannelAccessTokenApi()
-          lastTokenIssuedAt = now
+          channelAccessTokenState.token =
+            refreshedChannelAccessToken.access_token
+          channelAccessTokenState.issuedAt = now
         }
 
         // メッセージを送信する
         await sendWithRetry({
-          channelAccessToken: channelAccessToken.access_token,
+          channelAccessToken: channelAccessTokenState.token,
           to: user.lineId,
           messages: messageObjects,
         })
 
-        successCount++
+        result.success++
       } catch (error) {
         console.error(
           `Failed to send LINE message: (userId: ${user.id})`,
           error,
         )
 
-        errorCount++
+        result.error++
       } finally {
-        totalCount++
+        result.total++
       }
     })
 
     await runWithConcurrency<void>(tasks, CONCURRENCY)
   }
 
-  return {
-    totalCount,
-    successCount,
-    errorCount,
-    skipCount,
-  }
+  return result
 }
 
 /**
@@ -340,38 +345,45 @@ function buildMessageObjectsForUser(
   registeredTeamIds: number[],
   registeredPlayerIds: number[],
 ): { type: string; text: string }[] {
-  const gameMessageGroups: string[][] = []
+  const dataLength = gameMessageDataList.length
 
-  let currentGroup: string[] = []
+  const { messageObjects } = gameMessageDataList.reduce(
+    (acc, gameMessageData, index) => {
+      const shouldNotify = shouldNotifyGameToUser(
+        gameMessageData,
+        registeredTeamIds,
+        registeredPlayerIds,
+      )
 
-  gameMessageDataList.forEach((data) => {
-    const shouldNotify = shouldNotifyGameToUser(
-      data,
-      registeredTeamIds,
-      registeredPlayerIds,
-    )
-
-    if (shouldNotify) {
-      currentGroup.push(data.gameMessage)
-
-      // 1メッセージあたりの試合数を制限する（文字数制限対策）
-      if (currentGroup.length >= GAME_COUNT_PER_MESSAGE) {
-        gameMessageGroups.push(currentGroup)
-        currentGroup = []
+      if (shouldNotify) {
+        acc.currentMessageArray.push(gameMessageData.gameMessage)
       }
-    }
-  })
 
-  if (currentGroup.length > 0) {
-    gameMessageGroups.push(currentGroup)
-  }
+      // 1メッセージあたりの試合数制限に達したか
+      const isGameCountLimitReached =
+        acc.currentMessageArray.length >= GAME_COUNT_PER_MESSAGE
+      // 最後のデータかつメッセージ配列が存在するか
+      const isLastAndExistsMessageArray =
+        index === dataLength - 1 && acc.currentMessageArray.length > 0
 
-  const messages = gameMessageGroups.map((group) => ({
-    type: "text",
-    text: group.join("\n\n"),
-  }))
+      if (isGameCountLimitReached || isLastAndExistsMessageArray) {
+        const joinedMessage = acc.currentMessageArray.join("\n\n")
+        acc.messageObjects.push({
+          type: LINE_MESSAGE_TYPE,
+          text: joinedMessage,
+        })
+        acc.currentMessageArray = []
+      }
 
-  return messages
+      return acc
+    },
+    {
+      messageObjects: [] as { type: string; text: string }[],
+      currentMessageArray: [] as string[],
+    },
+  )
+
+  return messageObjects
 }
 
 /**
@@ -434,30 +446,27 @@ async function sendWithRetry({
 }): Promise<void> {
   const retryKey = crypto.randomUUID()
 
-  let attemptCount = 0
-
-  while (true) {
+  const run = async (attemptCount: number): Promise<void> => {
     try {
       await sendLinePushMessageApi(channelAccessToken, retryKey, to, messages)
 
-      break
+      return
     } catch (error) {
-      attemptCount++
-
       const isRetryTargetError =
         error instanceof CustomError &&
         RETRYABLE_ERROR_CODES.includes(error.code)
 
-      const shouldRetry = isRetryTargetError && attemptCount <= MAX_RETRY_COUNT
-
-      if (!shouldRetry) {
+      if (!isRetryTargetError || attemptCount > MAX_RETRY_COUNT) {
         throw error
       }
 
       const jitter = Math.floor(Math.random() * BASE_JITTER_MS)
       const waitMs = BASE_RETRY_INTERVAL_MS * 2 ** (attemptCount - 1) + jitter
-
       await new Promise((resolve) => setTimeout(resolve, waitMs))
+
+      await run(attemptCount + 1)
     }
   }
+
+  await run(1)
 }
