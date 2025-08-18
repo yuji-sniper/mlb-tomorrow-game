@@ -38,9 +38,6 @@ export function LiffProvider({ children }: { children: React.ReactNode }) {
 
       await liff.init({ liffId })
 
-      // ログインテスト用
-      // liff.logout();
-
       if (!liff.isLoggedIn()) {
         liff.login({
           redirectUri: window.location.href,

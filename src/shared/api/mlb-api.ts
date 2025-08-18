@@ -173,7 +173,6 @@ export async function fetchStandingsApi(): Promise<Standing[]> {
  */
 export async function fetchGamesByDateApi(date: Date): Promise<Game[]> {
   const dateString = date.toISOString().split("T")[0]
-  console.log(date.toISOString())
 
   const params = new URLSearchParams()
   params.append("sportId", "1")
