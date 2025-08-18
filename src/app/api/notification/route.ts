@@ -332,7 +332,7 @@ function shouldNotifyGameToUser(
     : false
   const isAwayTeamInPlayoffSpot = gameMessageData.away.isInPlayoffSpot
 
-  // 登録チームの相手がプレーオフ圏内なら通知対象とする
+  // 登録チームの相手チームがプレーオフ圏内なら通知対象とする
   const isHomeTeamTarget = isHomeTeamRegistered && isAwayTeamInPlayoffSpot
   const isAwayTeamTarget = isAwayTeamRegistered && isHomeTeamInPlayoffSpot
 
