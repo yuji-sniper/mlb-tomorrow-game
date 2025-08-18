@@ -117,6 +117,7 @@ async function generateGameMessageDataList(
   standings: Standing[],
   games: Game[],
 ): Promise<GameMessageData[]> {
+  // MEMO: パフォーマンス向上のため、マップに変換しておく
   const teamsMap = new Map<number, Team>(teams.map((team) => [team.id, team]))
   const standingsMap = new Map<number, Standing>(
     standings.map((standing) => [standing.teamId, standing]),
@@ -160,21 +161,18 @@ async function generateGameMessageDataList(
       awayTeamPitcherLastName,
     )
 
-    const homeInfo = {
-      teamId: homeTeam.id,
-      probablePitcherId: homeTeamPitcher?.id,
-      isInPlayoffSpot: homeTeamStanding?.isInPlayoffSpot ?? false,
-    }
-    const awayInfo = {
-      teamId: awayTeam.id,
-      probablePitcherId: awayTeamPitcher?.id,
-      isInPlayoffSpot: awayTeamStanding?.isInPlayoffSpot ?? false,
-    }
-
     gameMessageDataList.push({
       gameMessage,
-      home: homeInfo,
-      away: awayInfo,
+      home: {
+        teamId: homeTeam.id,
+        probablePitcherId: homeTeamPitcher?.id,
+        isInPlayoffSpot: homeTeamStanding?.isInPlayoffSpot ?? false,
+      },
+      away: {
+        teamId: awayTeam.id,
+        probablePitcherId: awayTeamPitcher?.id,
+        isInPlayoffSpot: awayTeamStanding?.isInPlayoffSpot ?? false,
+      },
     })
   }
 
