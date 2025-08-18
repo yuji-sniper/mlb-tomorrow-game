@@ -6,5 +6,5 @@ export type Team = {
   teamName: string
   leagueId: number
   divisionId: number
-  players: Player[]
+  players?: Player[]
 }

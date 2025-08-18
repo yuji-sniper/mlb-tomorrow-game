@@ -1,8 +1,8 @@
-import type { ERROR_CODE } from "@/shared/constants/error"
+import type { ErrorCode } from "@/shared/types/error"
 
 export class CustomError extends Error {
   constructor(
-    public code: keyof typeof ERROR_CODE,
+    public code: ErrorCode,
     message?: string,
     public data?: Record<string, unknown>,
   ) {
