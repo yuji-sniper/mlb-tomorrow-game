@@ -41,6 +41,7 @@ const GAME_START_TIME_FORMAT_OPTIONS = {
 
 const CHUNK_SIZE = 200
 
+// MEMO: LINE APIのレート制限に合わせて増減調整する
 const CONCURRENCY = 10
 
 const MAX_RETRY_COUNT = 3
@@ -58,6 +59,8 @@ const RETRYABLE_ERROR_CODES: ErrorCode[] = [
  * 通知を送信する
  */
 export async function POST() {
+  const logPrefix = "[API: POST /api/notification]"
+
   try {
     const { teams, standings, games } = await fetchMlbData()
 
@@ -67,11 +70,20 @@ export async function POST() {
       games,
     )
 
-    await sendPushMessagesToUsers(gameMessageDataList)
+    const { totalCount, successCount, errorCount, skipCount } =
+      await sendPushMessagesToUsers(gameMessageDataList)
+
+    console.log(
+      logPrefix,
+      `Total: ${totalCount}`,
+      `Success: ${successCount}`,
+      `Error: ${errorCount}`,
+      `Skip: ${skipCount}`,
+    )
 
     return NextResponse.json({ message: "OK" })
   } catch (error) {
-    console.error("Notification API Error:", error)
+    console.error(logPrefix, "Error:", error)
 
     return NextResponse.json(
       { message: "Internal Server Error" },
@@ -88,9 +100,11 @@ async function fetchMlbData(): Promise<{
   standings: Standing[]
   games: Game[]
 }> {
-  const teams = await fetchTeamsApi()
-  const standings = await fetchStandingsApi()
-  const games = await fetchGamesByDateApi(new Date())
+  const [teams, standings, games] = await Promise.all([
+    fetchTeamsApi(),
+    fetchStandingsApi(),
+    fetchGamesByDateApi(new Date()),
+  ])
 
   return { teams, standings, games }
 }
@@ -220,7 +234,13 @@ function generateStandingText(standing?: Standing): string {
  */
 async function sendPushMessagesToUsers(
   gameMessageDataList: GameMessageData[],
-): Promise<void> {
+): Promise<{
+  totalCount: number
+  successCount: number
+  errorCount: number
+  skipCount: number
+}> {
+  // MEMO: 15分で有効期限が切れるので、ユーザー数が多く処理時間が長くなる場合は再発行するよう修正する
   const channelAccessToken =
     await issueLineMessagingApiStatelessChannelAccessTokenApi()
 
@@ -272,13 +292,12 @@ async function sendPushMessagesToUsers(
     await runWithConcurrency<void>(tasks, CONCURRENCY)
   }
 
-  console.log(
-    "[API: POST /api/notification]",
-    `Total: ${totalCount}`,
-    `Success: ${successCount}`,
-    `Error: ${errorCount}`,
-    `Skip: ${skipCount}`,
-  )
+  return {
+    totalCount,
+    successCount,
+    errorCount,
+    skipCount,
+  }
 }
 
 /**
