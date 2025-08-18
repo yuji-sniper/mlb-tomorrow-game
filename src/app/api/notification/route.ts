@@ -172,8 +172,8 @@ async function generateGameMessageDataList(
  *
  * 【フォーマット】
  * 09:10
- * Yankees(ア東1位｜先発:Max Fried)
- * Red Sox(ア東2位 WC｜先発:Garrett Crochet)
+ * Yankees(ア東1位｜先発:Fried)
+ * Red Sox(ア東2位 WC｜先発:Crochet)
  */
 function buildGameMessage(
   startTimeJST: string,
@@ -250,9 +250,11 @@ async function sendPushMessagesToUsers(
           return
         }
 
-        await sendWithRetry(channelAccessToken.access_token, user.lineId, [
-          { type: "text", text: message },
-        ])
+        await sendWithRetry({
+          channelAccessToken: channelAccessToken.access_token,
+          to: user.lineId,
+          messages: [{ type: "text", text: message }],
+        })
 
         successCount++
       } catch (error) {
@@ -353,11 +355,15 @@ function shouldNotifyGameToUser(
 /**
  * 送信を実行する（失敗時にリトライ）
  */
-async function sendWithRetry(
-  channelAccessToken: string,
-  to: string,
-  messages: { type: string; text: string }[],
-): Promise<void> {
+async function sendWithRetry({
+  channelAccessToken,
+  to,
+  messages,
+}: {
+  channelAccessToken: string
+  to: string
+  messages: { type: string; text: string }[]
+}): Promise<void> {
   const retryKey = crypto.randomUUID()
 
   let attemptCount = 0
