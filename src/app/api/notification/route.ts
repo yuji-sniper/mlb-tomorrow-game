@@ -33,6 +33,8 @@ type GameMessageData = {
   }
 }
 
+const GAME_START_TIME_FORMAT_LOCALE = "ja-JP"
+
 const GAME_START_TIME_FORMAT_OPTIONS = {
   timeZone: "Asia/Tokyo",
   hour: "2-digit",
@@ -142,12 +144,15 @@ async function generateGameMessageDataList(
     standings.map((standing) => [standing.teamId, standing]),
   )
 
+  const dateTimeFormatter = new Intl.DateTimeFormat(
+    GAME_START_TIME_FORMAT_LOCALE,
+    GAME_START_TIME_FORMAT_OPTIONS,
+  )
+
   const gameMessageDataList: GameMessageData[] = []
 
   for (const game of games) {
-    const startTimeJST = new Date(game.gameDate).toLocaleString("ja-JP", {
-      ...GAME_START_TIME_FORMAT_OPTIONS,
-    })
+    const startTimeJST = dateTimeFormatter.format(new Date(game.gameDate))
 
     const homeTeam = teamsMap.get(game.home.teamId)
     const awayTeam = teamsMap.get(game.away.teamId)
