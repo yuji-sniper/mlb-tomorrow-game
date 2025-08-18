@@ -1,10 +1,8 @@
-import { LEAGUE_NAME_JP } from "@/shared/constants/league"
 import { PLAYER_STATUS } from "@/shared/constants/player-status"
 import type { Game } from "@/shared/types/game"
 import type { Player, PlayerStatusCode } from "@/shared/types/player"
 import type { Standing } from "@/shared/types/standing"
 import type { Team } from "@/shared/types/team"
-import { DIVISION_ABBR_JP } from "../constants/division"
 
 /**
  * チーム一覧を取得する
