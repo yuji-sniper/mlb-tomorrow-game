@@ -442,7 +442,7 @@ async function issueChannelAccessTokenIfNeeded({
   const isInitial = token === "" || issuedAt === 0
 
   const shouldRefreshToken = () =>
-    issuedAt !== 0 && now - issuedAt > CHANNEL_ACCESS_TOKEN_REFRESH_INTERVAL_MS
+    !isInitial && now - issuedAt > CHANNEL_ACCESS_TOKEN_REFRESH_INTERVAL_MS
 
   if (isInitial || shouldRefreshToken()) {
     const res = await issueLineMessagingApiStatelessChannelAccessTokenApi()
