@@ -137,7 +137,7 @@ export async function fetchStandingsApi(): Promise<Standing[]> {
       division: { id: number }
       teamRecords: {
         team: { id: number }
-        divisionRank: number
+        divisionRank: string
         wildCardLeader?: boolean
       }[]
     }[]
@@ -152,7 +152,7 @@ export async function fetchStandingsApi(): Promise<Standing[]> {
     record.teamRecords.forEach((teamRecord) => {
       const divisionRank = teamRecord.divisionRank
       const isWildCardLeader = teamRecord.wildCardLeader ?? false
-      const isInPlayoffSpot = divisionRank === 1 || isWildCardLeader
+      const isInPlayoffSpot = divisionRank === "1" || isWildCardLeader
 
       standings.push({
         teamId: teamRecord.team.id,
