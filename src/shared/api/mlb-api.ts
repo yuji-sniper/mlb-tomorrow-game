@@ -18,6 +18,7 @@ export async function fetchTeamsApi(): Promise<Team[]> {
       id: number
       name: string
       teamName: string
+      abbreviation: string
       league: { id: number }
       division: { id: number }
     }[]
@@ -27,6 +28,7 @@ export async function fetchTeamsApi(): Promise<Team[]> {
     id: team.id,
     name: team.name,
     teamName: team.teamName,
+    abbreviation: team.abbreviation,
     leagueId: team.league.id,
     divisionId: team.division.id,
   }))

@@ -19,15 +19,21 @@ import type { Team } from "@/shared/types/team"
 import { runWithConcurrency } from "@/shared/utils/concurrency"
 import { getLastName } from "@/shared/utils/name"
 
-type GameMessageData = {
-  gameMessage: string
+type GameContentData = {
+  startTimeJST: string
   home: {
     teamId: number
+    teamName: string
+    standingText: string
+    pitcherLastName: string
     probablePitcherId?: number
     isInPlayoffSpot: boolean
   }
   away: {
     teamId: number
+    teamName: string
+    standingText: string
+    pitcherLastName: string
     probablePitcherId?: number
     isInPlayoffSpot: boolean
   }
@@ -38,7 +44,18 @@ type ChannelAccessTokenState = {
   issuedAt: number
 }
 
-const GAME_START_TIME_FORMAT_LOCALE = "ja-JP"
+type MessageObject = {
+  type: string
+  altText: string
+  contents: object
+}
+
+const DATETIME_FORMAT_LOCALE = "ja-JP"
+
+const GAME_DATE_FORMAT_OPTIONS = {
+  month: "2-digit",
+  day: "2-digit",
+} as const
 
 const GAME_START_TIME_FORMAT_OPTIONS = {
   timeZone: "Asia/Tokyo",
@@ -46,7 +63,7 @@ const GAME_START_TIME_FORMAT_OPTIONS = {
   minute: "2-digit",
 } as const
 
-const GAME_COUNT_PER_MESSAGE = 5
+const GAME_COUNT_PER_MESSAGE = 30
 
 const CHUNK_SIZE = 200
 
@@ -56,7 +73,7 @@ const CONCURRENCY = 10
 // MEMO: LINE APIのチャネルアクセストークンの有効期限が15分なので、ゆとりを持って10分で再発行する
 const CHANNEL_ACCESS_TOKEN_REFRESH_INTERVAL_MS = 1000 * 60 * 10
 
-const LINE_MESSAGE_TYPE = "text"
+const LINE_MESSAGE_TYPE = "flex"
 
 const MAX_RETRY_COUNT = 3
 
@@ -78,20 +95,20 @@ export async function POST() {
   try {
     const { teams, standings, games } = await fetchMlbData()
 
-    const gameMessageDataList = await generateGameMessageDataList(
+    const gameContentDataList = await generateGameContentDataList(
       teams,
       standings,
       games,
     )
 
-    const result = await sendPushMessagesToUsers(gameMessageDataList)
+    const result = await sendPushMessagesToUsers(gameContentDataList)
 
     console.log(
       logPrefix,
-      `Total: ${result.total}`,
-      `Success: ${result.success}`,
-      `Error: ${result.error}`,
-      `Skip: ${result.skip}`,
+      `Total:${result.total}`,
+      `Success:${result.success}`,
+      `Error:${result.error}`,
+      `Skip:${result.skip}`,
     )
 
     return NextResponse.json({ message: "OK" })
@@ -139,11 +156,11 @@ function sortGamesByStartTime(games: Game[]): Game[] {
 /**
  * 試合データを通知メッセージのデータに変換する
  */
-async function generateGameMessageDataList(
+async function generateGameContentDataList(
   teams: Team[],
   standings: Standing[],
   games: Game[],
-): Promise<GameMessageData[]> {
+): Promise<GameContentData[]> {
   // MEMO: パフォーマンス向上のため、マップに変換しておく
   const teamsMap = new Map<number, Team>(teams.map((team) => [team.id, team]))
   const standingsMap = new Map<number, Standing>(
@@ -151,11 +168,11 @@ async function generateGameMessageDataList(
   )
 
   const dateTimeFormatter = new Intl.DateTimeFormat(
-    GAME_START_TIME_FORMAT_LOCALE,
+    DATETIME_FORMAT_LOCALE,
     GAME_START_TIME_FORMAT_OPTIONS,
   )
 
-  const gameMessageDataList: GameMessageData[] = []
+  const gameContentDataList: GameContentData[] = []
 
   for (const game of games) {
     const startTimeJST = dateTimeFormatter.format(new Date(game.gameDate))
@@ -181,61 +198,28 @@ async function generateGameMessageDataList(
       ? getLastName(awayTeamPitcher.fullName)
       : " - "
 
-    const gameMessage = buildGameMessage(
+    gameContentDataList.push({
       startTimeJST,
-      homeTeam.teamName,
-      homeTeamStandingText,
-      homeTeamPitcherLastName,
-      awayTeam.teamName,
-      awayTeamStandingText,
-      awayTeamPitcherLastName,
-    )
-
-    gameMessageDataList.push({
-      gameMessage,
       home: {
         teamId: homeTeam.id,
+        teamName: homeTeam.teamName,
+        standingText: homeTeamStandingText,
+        pitcherLastName: homeTeamPitcherLastName,
         probablePitcherId: homeTeamPitcher?.id,
         isInPlayoffSpot: homeTeamStanding?.isInPlayoffSpot ?? false,
       },
       away: {
         teamId: awayTeam.id,
+        teamName: awayTeam.teamName,
+        standingText: awayTeamStandingText,
+        pitcherLastName: awayTeamPitcherLastName,
         probablePitcherId: awayTeamPitcher?.id,
         isInPlayoffSpot: awayTeamStanding?.isInPlayoffSpot ?? false,
       },
     })
   }
 
-  return gameMessageDataList
-}
-
-/**
- * 試合メッセージを生成する
- *
- * 【フォーマット】
- * 09:10
- * Yankees(ア東1位｜先発:Fried)
- * Red Sox(ア東2位 WC｜先発:Crochet)
- */
-function buildGameMessage(
-  startTimeJST: string,
-  homeTeamName: string,
-  homeTeamStandingText: string,
-  homeTeamPitcherLastName: string,
-  awayTeamName: string,
-  awayTeamStandingText: string,
-  awayTeamPitcherLastName: string,
-): string {
-  const message = [
-    `【🕐${startTimeJST}】`,
-    `${homeTeamName}（${homeTeamStandingText}）`,
-    `先発：${homeTeamPitcherLastName}`,
-    "    [vs]",
-    `${awayTeamName}（${awayTeamStandingText}）`,
-    `先発：${awayTeamPitcherLastName}`,
-  ].join("\n")
-
-  return message
+  return gameContentDataList
 }
 
 /**
@@ -254,14 +238,16 @@ function generateStandingText(standing?: Standing): string {
 
   const divisionRankText = `${divisionAbbr}${standing.divisionRank}位`
 
-  return standing.isWildCardLeader ? `${divisionRankText} WC` : divisionRankText
+  return standing.isWildCardLeader
+    ? `(${divisionRankText} WC)`
+    : `(${divisionRankText})`
 }
 
 /**
  * ユーザーごとに通知メッセージを送信する
  */
 async function sendPushMessagesToUsers(
-  gameMessageDataList: GameMessageData[],
+  gameContentDataList: GameContentData[],
 ): Promise<{
   total: number
   success: number
@@ -272,6 +258,13 @@ async function sendPushMessagesToUsers(
     token: "",
     issuedAt: 0,
   }
+
+  const date = new Date()
+  date.setDate(date.getDate() + 1)
+  const tomorrowDate = date.toLocaleDateString(
+    DATETIME_FORMAT_LOCALE,
+    GAME_DATE_FORMAT_OPTIONS,
+  )
 
   const result = {
     total: 0,
@@ -298,7 +291,8 @@ async function sendPushMessagesToUsers(
         const registeredPlayerIds =
           user.players?.map((player) => player.playerId) ?? []
         const messageObjects = buildMessageObjectsForUser(
-          gameMessageDataList,
+          tomorrowDate,
+          gameContentDataList,
           registeredTeamIds,
           registeredPlayerIds,
         )
@@ -337,45 +331,73 @@ async function sendPushMessagesToUsers(
  * ユーザーごとに通知対象の試合を選定して、通知メッセージを生成する
  */
 function buildMessageObjectsForUser(
-  gameMessageDataList: GameMessageData[],
+  tomorrowDate: string,
+  gameContentDataList: GameContentData[],
   registeredTeamIds: number[],
   registeredPlayerIds: number[],
-): { type: string; text: string }[] {
-  const dataLength = gameMessageDataList.length
+): MessageObject[] {
+  const dataLength = gameContentDataList.length
 
-  const { messageObjects } = gameMessageDataList.reduce(
-    (acc, gameMessageData, index) => {
+  const separator = {
+    type: "separator",
+    margin: "8px",
+    color: "#1E293B",
+  }
+
+  const { messageObjects } = gameContentDataList.reduce(
+    (acc, gameContentData, index) => {
+      // 通知対象の試合か判定
       const shouldNotify = shouldNotifyGameToUser(
-        gameMessageData,
+        gameContentData,
         registeredTeamIds,
         registeredPlayerIds,
       )
-
+      // 通知対象の試合ならその試合要素を追加する
       if (shouldNotify) {
-        acc.currentMessageArray.push(gameMessageData.gameMessage)
+        const gameContentJson = buildGameContentJson(
+          gameContentData.startTimeJST,
+          gameContentData.home.teamName,
+          gameContentData.home.standingText,
+          gameContentData.home.pitcherLastName,
+          gameContentData.away.teamName,
+          gameContentData.away.standingText,
+          gameContentData.away.pitcherLastName,
+        )
+        acc.currentGameContentArray.push(gameContentJson)
       }
 
       // 1メッセージあたりの試合数制限に達したか
       const isGameCountLimitReached =
-        acc.currentMessageArray.length >= GAME_COUNT_PER_MESSAGE
-      // 最後のデータかつメッセージ配列が存在するか
+        acc.currentGameContentArray.length >= GAME_COUNT_PER_MESSAGE
+
+      // 最後のデータかつメッセージ配列が存在するかどうか
       const isLastAndExistsMessageArray =
-        index === dataLength - 1 && acc.currentMessageArray.length > 0
+        index === dataLength - 1 && acc.currentGameContentArray.length > 0
 
       if (isGameCountLimitReached || isLastAndExistsMessageArray) {
-        const joinedMessage = acc.currentMessageArray.join("\n\n")
+        // コンテンツを生成
+        const gamesContents = acc.currentGameContentArray.flatMap(
+          (gameContentJson, index) =>
+            index === 0 ? [gameContentJson] : [separator, gameContentJson],
+        )
+        const fullContents = setGamesContentsToLayout(
+          gamesContents,
+          acc.messageObjects.length === 0 ? tomorrowDate : undefined,
+        )
+
         acc.messageObjects.push({
           type: LINE_MESSAGE_TYPE,
-          text: joinedMessage,
+          altText: `明日のMLB試合情報（${tomorrowDate}）`,
+          contents: fullContents,
         })
-        acc.currentMessageArray = []
+        acc.currentGameContentArray = []
       }
 
       return acc
     },
     {
-      messageObjects: [] as { type: string; text: string }[],
-      currentMessageArray: [] as string[],
+      messageObjects: [] as MessageObject[],
+      currentGameContentArray: [] as object[],
     },
   )
 
@@ -386,27 +408,27 @@ function buildMessageObjectsForUser(
  * ユーザーの登録データと試合データをもとに、通知対象の試合かどうかを判定する
  */
 function shouldNotifyGameToUser(
-  gameMessageData: GameMessageData,
+  gameContentData: GameContentData,
   registeredTeamIds: number[],
   registeredPlayerIds: number[],
 ): boolean {
   // [ホームチーム] 登録チームかどうか / 先発が登録選手かどうか / プレーオフ圏内かどうか
   const isHomeTeamRegistered = registeredTeamIds.includes(
-    gameMessageData.home.teamId,
+    gameContentData.home.teamId,
   )
-  const isHomeTeamPitcherRegistered = gameMessageData.home.probablePitcherId
-    ? registeredPlayerIds.includes(gameMessageData.home.probablePitcherId)
+  const isHomeTeamPitcherRegistered = gameContentData.home.probablePitcherId
+    ? registeredPlayerIds.includes(gameContentData.home.probablePitcherId)
     : false
-  const isHomeTeamInPlayoffSpot = gameMessageData.home.isInPlayoffSpot
+  const isHomeTeamInPlayoffSpot = gameContentData.home.isInPlayoffSpot
 
   // [アウェーチーム] 登録チームかどうか / 先発が登録選手かどうか / プレーオフ圏内かどうか
   const isAwayTeamRegistered = registeredTeamIds.includes(
-    gameMessageData.away.teamId,
+    gameContentData.away.teamId,
   )
-  const isAwayTeamPitcherRegistered = gameMessageData.away.probablePitcherId
-    ? registeredPlayerIds.includes(gameMessageData.away.probablePitcherId)
+  const isAwayTeamPitcherRegistered = gameContentData.away.probablePitcherId
+    ? registeredPlayerIds.includes(gameContentData.away.probablePitcherId)
     : false
-  const isAwayTeamInPlayoffSpot = gameMessageData.away.isInPlayoffSpot
+  const isAwayTeamInPlayoffSpot = gameContentData.away.isInPlayoffSpot
 
   // 登録チームの相手チームがプレーオフ圏内なら通知対象とする
   const isHomeTeamTarget = isHomeTeamRegistered && isAwayTeamInPlayoffSpot
@@ -426,6 +448,168 @@ function shouldNotifyGameToUser(
     isAwayTeamPitcherTarget
 
   return shouldNotify
+}
+
+/**
+ * 試合メッセージを生成する
+ *
+ * 【フォーマット】
+ * 09:10
+ * Yankees(ア東1位｜先発:Fried)
+ * Red Sox(ア東2位 WC｜先発:Crochet)
+ */
+function buildGameContentJson(
+  startTimeJST: string,
+  homeTeamName: string,
+  homeTeamStandingText: string,
+  homeTeamPitcherLastName: string,
+  awayTeamName: string,
+  awayTeamStandingText: string,
+  awayTeamPitcherLastName: string,
+) {
+  return {
+    type: "box",
+    layout: "vertical",
+    paddingAll: "10px",
+    backgroundColor: "#1E293B",
+    cornerRadius: "10px",
+    contents: [
+      {
+        type: "box",
+        layout: "baseline",
+        contents: [
+          {
+            type: "text",
+            text: "⚾️",
+            size: "sm",
+            flex: 0,
+          },
+          {
+            type: "text",
+            text: `${startTimeJST}`,
+            weight: "bold",
+            size: "sm",
+            color: "#E2E8F0",
+            flex: 0,
+            margin: "4px",
+          },
+          {
+            type: "text",
+            text: `${awayTeamName} @ ${homeTeamName}`,
+            weight: "bold",
+            size: "sm",
+            color: "#E2E8F0",
+            wrap: true,
+            margin: "8px",
+          },
+        ],
+      },
+      {
+        type: "box",
+        layout: "horizontal",
+        margin: "6px",
+        contents: [
+          {
+            type: "text",
+            text: `${awayTeamName}`,
+            weight: "bold",
+            size: "md",
+            color: "#CBD5E1",
+          },
+          {
+            type: "text",
+            text: `${homeTeamName}`,
+            weight: "bold",
+            size: "md",
+            color: "#CBD5E1",
+            align: "end",
+          },
+        ],
+      },
+      {
+        type: "box",
+        layout: "horizontal",
+        margin: "6px",
+        contents: [
+          {
+            type: "text",
+            text: `${awayTeamStandingText}`,
+            size: "xs",
+            color: "#CBD5E1",
+          },
+          {
+            type: "text",
+            text: `${homeTeamStandingText}`,
+            size: "xs",
+            color: "#CBD5E1",
+            align: "end",
+          },
+        ],
+      },
+      {
+        type: "box",
+        layout: "horizontal",
+        margin: "4px",
+        contents: [
+          {
+            type: "text",
+            text: `P: ${awayTeamPitcherLastName}`,
+            size: "xs",
+            color: "#94A3B8",
+            wrap: true,
+          },
+          {
+            type: "text",
+            text: `P: ${homeTeamPitcherLastName}`,
+            size: "xs",
+            color: "#94A3B8",
+            align: "end",
+            wrap: true,
+          },
+        ],
+      },
+    ],
+  }
+}
+
+/**
+ * 試合コンテンツをレイアウト内に配置する
+ */
+function setGamesContentsToLayout(
+  gamesContents: object[],
+  tomorrowDate?: string,
+): object {
+  const header = tomorrowDate
+    ? {
+        type: "box",
+        layout: "horizontal",
+        paddingAll: "14px",
+        backgroundColor: "#111827",
+        contents: [
+          {
+            type: "text",
+            text: `明日の試合 (${tomorrowDate})`,
+            weight: "bold",
+            size: "md",
+            color: "#F8FAFC",
+          },
+        ],
+      }
+    : undefined
+
+  return {
+    type: "bubble",
+    size: "mega",
+    header,
+    body: {
+      type: "box",
+      layout: "vertical",
+      paddingAll: "12px",
+      backgroundColor: "#0A0A0A",
+      spacing: "10px",
+      contents: gamesContents,
+    },
+  }
 }
 
 /**
@@ -469,7 +653,7 @@ async function sendWithRetry({
 }: {
   channelAccessToken: string
   to: string
-  messages: { type: string; text: string }[]
+  messages: MessageObject[]
 }): Promise<void> {
   const retryKey = crypto.randomUUID()
 

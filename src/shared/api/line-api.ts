@@ -132,10 +132,7 @@ export async function sendLinePushMessageApi(
   channelAccessToken: string,
   retryKey: string,
   to: string,
-  messages: {
-    type: string
-    text: string
-  }[],
+  messages: object[],
 ): Promise<LinePushMessageApiSuccessResponse> {
   const res = await fetch(`https://api.line.me/v2/bot/message/push`, {
     method: "POST",

@@ -4,6 +4,7 @@ export type Team = {
   id: number
   name: string
   teamName: string
+  abbreviation: string
   leagueId: number
   divisionId: number
   players?: Player[]
