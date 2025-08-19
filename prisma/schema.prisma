@@ -10,17 +10,18 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id        String   @id @default(uuid())
-  lineId    String   @unique
+  id        String       @id @default(uuid())
+  lineId    String       @unique
   players   UserPlayer[]
   teams     UserTeam[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 }
 
 model UserTeam {
@@ -31,8 +32,8 @@ model UserTeam {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId])
   @@unique([userId, teamId])
+  @@index([userId])
 }
 
 model UserPlayer {

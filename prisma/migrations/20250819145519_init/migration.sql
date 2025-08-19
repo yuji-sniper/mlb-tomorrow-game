@@ -1,21 +1,12 @@
-/*
-  Warnings:
+-- CreateTable
+CREATE TABLE "public"."User" (
+    "id" TEXT NOT NULL,
+    "lineId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
-  - You are about to drop the `UserPlayers` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `UserTeams` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropForeignKey
-ALTER TABLE "public"."UserPlayers" DROP CONSTRAINT "UserPlayers_userId_fkey";
-
--- DropForeignKey
-ALTER TABLE "public"."UserTeams" DROP CONSTRAINT "UserTeams_userId_fkey";
-
--- DropTable
-DROP TABLE "public"."UserPlayers";
-
--- DropTable
-DROP TABLE "public"."UserTeams";
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "public"."UserTeam" (
@@ -38,6 +29,9 @@ CREATE TABLE "public"."UserPlayer" (
 
     CONSTRAINT "UserPlayer_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_lineId_key" ON "public"."User"("lineId");
 
 -- CreateIndex
 CREATE INDEX "UserTeam_userId_idx" ON "public"."UserTeam"("userId");
