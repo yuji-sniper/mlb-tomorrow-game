@@ -63,7 +63,7 @@ const GAME_START_TIME_FORMAT_OPTIONS = {
   minute: "2-digit",
 } as const
 
-const GAME_COUNT_PER_MESSAGE = 30
+const GAME_COUNT_PER_MESSAGE = 10
 
 const CHUNK_SIZE = 200
 
