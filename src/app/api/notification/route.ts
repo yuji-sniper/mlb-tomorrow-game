@@ -27,7 +27,7 @@ type GameContentData = {
     standingText: string
     pitcherLastName: string
     probablePitcherId?: number
-    isInPlayoffSpot: boolean
+    isTeamInPlayoffSpot: boolean
   }
   away: {
     teamId: number
@@ -35,7 +35,7 @@ type GameContentData = {
     standingText: string
     pitcherLastName: string
     probablePitcherId?: number
-    isInPlayoffSpot: boolean
+    isTeamInPlayoffSpot: boolean
   }
 }
 
@@ -206,7 +206,7 @@ async function generateGameContentDataList(
         standingText: homeTeamStandingText,
         pitcherLastName: homeTeamPitcherLastName,
         probablePitcherId: homeTeamPitcher?.id,
-        isInPlayoffSpot: homeTeamStanding?.isInPlayoffSpot ?? false,
+        isTeamInPlayoffSpot: homeTeamStanding?.isInPlayoffSpot ?? false,
       },
       away: {
         teamId: awayTeam.id,
@@ -214,7 +214,7 @@ async function generateGameContentDataList(
         standingText: awayTeamStandingText,
         pitcherLastName: awayTeamPitcherLastName,
         probablePitcherId: awayTeamPitcher?.id,
-        isInPlayoffSpot: awayTeamStanding?.isInPlayoffSpot ?? false,
+        isTeamInPlayoffSpot: awayTeamStanding?.isInPlayoffSpot ?? false,
       },
     })
   }
@@ -450,7 +450,7 @@ function shouldNotifyGameToUser(
   const isHomeTeamPitcherRegistered = gameContentData.home.probablePitcherId
     ? registeredPlayerIds.includes(gameContentData.home.probablePitcherId)
     : false
-  const isHomeTeamInPlayoffSpot = gameContentData.home.isInPlayoffSpot
+  const isHomeTeamInPlayoffSpot = gameContentData.home.isTeamInPlayoffSpot
 
   // [アウェーチーム] 登録チームかどうか / 先発が登録選手かどうか / プレーオフ圏内かどうか
   const isAwayTeamRegistered = registeredTeamIds.includes(
@@ -459,7 +459,7 @@ function shouldNotifyGameToUser(
   const isAwayTeamPitcherRegistered = gameContentData.away.probablePitcherId
     ? registeredPlayerIds.includes(gameContentData.away.probablePitcherId)
     : false
-  const isAwayTeamInPlayoffSpot = gameContentData.away.isInPlayoffSpot
+  const isAwayTeamInPlayoffSpot = gameContentData.away.isTeamInPlayoffSpot
 
   // 登録チームの相手チームがプレーオフ圏内なら通知対象とする
   const isHomeTeamTarget = isHomeTeamRegistered && isAwayTeamInPlayoffSpot
