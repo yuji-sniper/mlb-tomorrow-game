@@ -9,15 +9,16 @@ export async function runWithConcurrency<T>(
   concurrency: number,
 ): Promise<T[]> {
   const results: T[] = []
-  let index = 0
+  const cursor = { index: 0 }
 
   const workers = Array.from({ length: concurrency }, async () => {
     while (true) {
-      const task = tasks[index++]
+      const index = cursor.index++
+
+      const task = tasks[index]
       if (!task) break
 
-      const result = await task()
-      results.push(result)
+      results[index] = await task()
     }
   })
 

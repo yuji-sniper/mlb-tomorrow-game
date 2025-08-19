@@ -24,22 +24,27 @@ export async function* iterateAllUsersByChunkWithRelations(
   unknown
 > {
   const prismaClient = tx || prisma
-  let cursor: { id: User["id"] } | undefined
 
-  for (;;) {
+  const state: {
+    cursor: { id: User["id"] } | undefined
+  } = {
+    cursor: undefined,
+  }
+
+  while (true) {
     const users = await prismaClient.user.findMany({
       take: chunkSize,
-      ...(cursor ? { skip: 1, cursor } : {}),
+      ...(state.cursor ? { skip: 1, cursor: state.cursor } : {}),
       orderBy: {
         id: "asc",
       },
       include: relations,
     })
 
-    if (users.length === 0) break
+    if (users.length === 0) return
 
     yield users
 
-    cursor = { id: users[users.length - 1].id }
+    state.cursor = { id: users[users.length - 1].id }
   }
 }
