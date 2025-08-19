@@ -1,5 +1,4 @@
-import type { PrismaClient } from "@prisma/client"
-import type { User, UserPlayer, UserTeam } from "@/shared/generated/prisma"
+import type { PrismaClient, User, UserPlayer, UserTeam } from "@prisma/client"
 import prisma from "@/shared/lib/prisma/prisma"
 
 /**
@@ -13,7 +12,7 @@ export async function* iterateAllUsersByChunkWithRelations(
   },
   tx?: Omit<
     PrismaClient,
-    "$connect" | "$disconnect" | "$on" | "$transaction" | "$use"
+    "$extends" | "$transaction" | "$disconnect" | "$connect" | "$on" | "$use"
   >,
 ): AsyncGenerator<
   (User & {

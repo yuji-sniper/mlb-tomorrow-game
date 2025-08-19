@@ -1,12 +1,11 @@
-import type { PrismaClient } from "@prisma/client"
-import type { User } from "@/shared/generated/prisma"
+import type { PrismaClient, User } from "@prisma/client"
 import prisma from "@/shared/lib/prisma/prisma"
 
 export async function createUser(
   lineId: string,
   tx?: Omit<
     PrismaClient,
-    "$connect" | "$disconnect" | "$on" | "$transaction" | "$use"
+    "$extends" | "$transaction" | "$disconnect" | "$connect" | "$on" | "$use"
   >,
 ): Promise<User> {
   const prismaClient = tx || prisma

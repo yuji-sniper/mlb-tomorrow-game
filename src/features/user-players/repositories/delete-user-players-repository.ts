@@ -5,7 +5,7 @@ export async function deleteUserPlayersByUserId(
   userId: string,
   tx?: Omit<
     PrismaClient,
-    "$connect" | "$disconnect" | "$on" | "$transaction" | "$use"
+    "$extends" | "$transaction" | "$disconnect" | "$connect" | "$on" | "$use"
   >,
 ) {
   const prismaClient = tx || prisma

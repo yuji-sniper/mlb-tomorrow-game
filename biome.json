@@ -8,7 +8,7 @@
   "files": {
     "ignoreUnknown": false,
     "includes": ["src/**/*.ts", "src/**/*.tsx"],
-    "experimentalScannerIgnores": ["src/shared/generated/**"]
+    "experimentalScannerIgnores": []
   },
   "formatter": {
     "enabled": true,

@@ -6,7 +6,7 @@ export async function createUserTeams(
   teamIds: number[],
   tx?: Omit<
     PrismaClient,
-    "$connect" | "$disconnect" | "$on" | "$transaction" | "$use"
+    "$extends" | "$transaction" | "$disconnect" | "$connect" | "$on" | "$use"
   >,
 ) {
   const prismaClient = tx || prisma

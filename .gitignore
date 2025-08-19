@@ -40,7 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-/src/shared/generated/prisma
-
 # Docker
 .docker/db/data/*
