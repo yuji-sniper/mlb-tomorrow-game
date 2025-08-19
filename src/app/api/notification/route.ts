@@ -33,6 +33,11 @@ type GameMessageData = {
   }
 }
 
+type ChannelAccessTokenState = {
+  token: string
+  issuedAt: number
+}
+
 const GAME_START_TIME_FORMAT_LOCALE = "ja-JP"
 
 const GAME_START_TIME_FORMAT_OPTIONS = {
@@ -263,12 +268,9 @@ async function sendPushMessagesToUsers(
   error: number
   skip: number
 }> {
-  const initialChannelAccessToken =
-    await issueLineMessagingApiStatelessChannelAccessTokenApi()
-
-  const channelAccessTokenState = {
-    token: initialChannelAccessToken.access_token,
-    issuedAt: Date.now(),
+  const channelAccessTokenState: ChannelAccessTokenState = {
+    token: "",
+    issuedAt: 0,
   }
 
   const result = {
@@ -282,6 +284,13 @@ async function sendPushMessagesToUsers(
     players: true,
     teams: true,
   })) {
+    // チャネルアクセストークンを発行する
+    const { token, issuedAt } = await issueChannelAccessTokenIfNeeded(
+      channelAccessTokenState,
+    )
+    channelAccessTokenState.token = token
+    channelAccessTokenState.issuedAt = issuedAt
+
     const tasks: (() => Promise<void>)[] = users.map((user) => async () => {
       try {
         // ユーザーへのメッセージを生成する
@@ -296,19 +305,6 @@ async function sendPushMessagesToUsers(
         if (messageObjects.length === 0) {
           result.skip++
           return
-        }
-
-        // 有効期限が切れる前にチャネルアクセストークンを再発行する
-        const now = Date.now()
-        const isTokenExpired =
-          now - channelAccessTokenState.issuedAt >
-          CHANNEL_ACCESS_TOKEN_REFRESH_INTERVAL_MS
-        if (isTokenExpired) {
-          const refreshedChannelAccessToken =
-            await issueLineMessagingApiStatelessChannelAccessTokenApi()
-          channelAccessTokenState.token =
-            refreshedChannelAccessToken.access_token
-          channelAccessTokenState.issuedAt = now
         }
 
         // メッセージを送信する
@@ -430,6 +426,37 @@ function shouldNotifyGameToUser(
     isAwayTeamPitcherTarget
 
   return shouldNotify
+}
+
+/**
+ * 必要に応じてチャネルアクセストークンを発行する
+ * - 初回発行
+ * - 発行されてから再発行間隔時間を経過している
+ */
+async function issueChannelAccessTokenIfNeeded({
+  token = "",
+  issuedAt = 0,
+}: Partial<ChannelAccessTokenState>): Promise<ChannelAccessTokenState> {
+  const now = Date.now()
+
+  const isInitial = token === "" || issuedAt === 0
+
+  const shouldRefreshToken = () =>
+    issuedAt !== 0 && now - issuedAt > CHANNEL_ACCESS_TOKEN_REFRESH_INTERVAL_MS
+
+  if (isInitial || shouldRefreshToken()) {
+    const res = await issueLineMessagingApiStatelessChannelAccessTokenApi()
+
+    return {
+      token: res.access_token,
+      issuedAt: now,
+    }
+  }
+
+  return {
+    token,
+    issuedAt,
+  }
 }
 
 /**
