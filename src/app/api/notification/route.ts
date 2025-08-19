@@ -89,8 +89,8 @@ const RETRYABLE_ERROR_CODES: ErrorCode[] = [
 /**
  * 通知を送信する
  */
-export async function POST() {
-  const logPrefix = "[API: POST /api/notification]"
+export async function GET() {
+  const logPrefix = "[API: GET /api/notification]"
 
   try {
     const { teams, standings, games } = await fetchMlbData()
