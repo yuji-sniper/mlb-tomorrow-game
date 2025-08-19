@@ -154,7 +154,7 @@ function sortGamesByStartTime(games: Game[]): Game[] {
 }
 
 /**
- * 試合データを通知メッセージのデータに変換する
+ * 試合データを通知メッセージ用のデータに変換する
  */
 async function generateGameContentDataList(
   teams: Team[],
@@ -328,7 +328,38 @@ async function sendPushMessagesToUsers(
 }
 
 /**
- * ユーザーごとに通知対象の試合を選定して、通知メッセージを生成する
+ * 必要に応じてチャネルアクセストークンを発行する
+ * - 初回発行
+ * - 発行されてから再発行間隔時間を経過している
+ */
+async function issueChannelAccessTokenIfNeeded({
+  token = "",
+  issuedAt = 0,
+}: Partial<ChannelAccessTokenState>): Promise<ChannelAccessTokenState> {
+  const now = Date.now()
+
+  const isInitial = token === "" || issuedAt === 0
+
+  const shouldRefreshToken = () =>
+    !isInitial && now - issuedAt > CHANNEL_ACCESS_TOKEN_REFRESH_INTERVAL_MS
+
+  if (isInitial || shouldRefreshToken()) {
+    const res = await issueLineMessagingApiStatelessChannelAccessTokenApi()
+
+    return {
+      token: res.access_token,
+      issuedAt: now,
+    }
+  }
+
+  return {
+    token,
+    issuedAt,
+  }
+}
+
+/**
+ * ユーザーごとに通知対象の試合を選定して、LINE API用のメッセージオブジェクトを生成する
  */
 function buildMessageObjectsForUser(
   tomorrowDate: string,
@@ -451,12 +482,7 @@ function shouldNotifyGameToUser(
 }
 
 /**
- * 試合メッセージを生成する
- *
- * 【フォーマット】
- * 09:10
- * Yankees(ア東1位｜先発:Fried)
- * Red Sox(ア東2位 WC｜先発:Crochet)
+ * 試合コンテンツのJSONを生成する
  */
 function buildGameContentJson(
   startTimeJST: string,
@@ -573,7 +599,7 @@ function buildGameContentJson(
 }
 
 /**
- * 試合コンテンツをレイアウト内に配置する
+ * 試合コンテンツをレイアウト内に配置したJSONを生成する
  */
 function setGamesContentsToLayout(
   gamesContents: object[],
@@ -609,37 +635,6 @@ function setGamesContentsToLayout(
       spacing: "10px",
       contents: gamesContents,
     },
-  }
-}
-
-/**
- * 必要に応じてチャネルアクセストークンを発行する
- * - 初回発行
- * - 発行されてから再発行間隔時間を経過している
- */
-async function issueChannelAccessTokenIfNeeded({
-  token = "",
-  issuedAt = 0,
-}: Partial<ChannelAccessTokenState>): Promise<ChannelAccessTokenState> {
-  const now = Date.now()
-
-  const isInitial = token === "" || issuedAt === 0
-
-  const shouldRefreshToken = () =>
-    !isInitial && now - issuedAt > CHANNEL_ACCESS_TOKEN_REFRESH_INTERVAL_MS
-
-  if (isInitial || shouldRefreshToken()) {
-    const res = await issueLineMessagingApiStatelessChannelAccessTokenApi()
-
-    return {
-      token: res.access_token,
-      issuedAt: now,
-    }
-  }
-
-  return {
-    token,
-    issuedAt,
   }
 }
 
