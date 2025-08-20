@@ -44,6 +44,16 @@ export default function RegisterPlayersDialog({
                   src={generatePlayerImageUrl(player.id)}
                   alt={player.name}
                   sx={{ width: 40, height: 40 }}
+                  slotProps={{
+                    img: {
+                      draggable: false,
+                      style: {
+                        WebkitTouchCallout: "none",
+                        WebkitUserSelect: "none",
+                        userSelect: "none",
+                      },
+                    },
+                  }}
                 />
               </ListItemAvatar>
               <ListItemText primary={player.name} />

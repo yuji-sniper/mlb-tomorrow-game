@@ -54,7 +54,12 @@ export default function SaveTeamsDialog({
                   variant="square"
                   slotProps={{
                     img: {
-                      style: { objectFit: "contain" },
+                      style: {
+                        objectFit: "contain",
+                        WebkitTouchCallout: "none",
+                        WebkitUserSelect: "none",
+                        userSelect: "none",
+                      },
                     },
                   }}
                 />

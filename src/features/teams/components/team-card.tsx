@@ -55,7 +55,18 @@ export default function TeamCard({
             objectFit: "contain",
           }}
           variant="square"
-          slotProps={{ img: { style: { objectFit: "contain" } } }}
+          slotProps={{
+            img: {
+              draggable: false,
+              style: {
+                objectFit: "contain",
+                width: "100%",
+                WebkitTouchCallout: "none",
+                WebkitUserSelect: "none",
+                userSelect: "none",
+              },
+            },
+          }}
         />
         <Typography
           variant="caption"
