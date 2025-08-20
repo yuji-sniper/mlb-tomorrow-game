@@ -63,7 +63,7 @@ const GAME_START_TIME_FORMAT_OPTIONS = {
   minute: "2-digit",
 } as const
 
-const GAME_COUNT_PER_MESSAGE = 10
+const MAX_GAME_COUNT_PER_MESSAGE = 10
 
 const CHUNK_SIZE = 200
 
@@ -421,14 +421,14 @@ function buildMessageObjectsForUser(
       }
 
       // 1メッセージあたりの試合数制限に達したか
-      const isGameCountLimitReached =
-        acc.currentGameContentArray.length >= GAME_COUNT_PER_MESSAGE
+      const isMaxGameCountReached =
+        acc.currentGameContentArray.length >= MAX_GAME_COUNT_PER_MESSAGE
 
       // 最後のデータかつメッセージ配列が存在するかどうか
       const isLastAndExistsMessageArray =
         index === dataLength - 1 && acc.currentGameContentArray.length > 0
 
-      if (isGameCountLimitReached || isLastAndExistsMessageArray) {
+      if (isMaxGameCountReached || isLastAndExistsMessageArray) {
         // コンテンツを生成
         const gamesContents = acc.currentGameContentArray.flatMap(
           (gameContentJson, index) =>
