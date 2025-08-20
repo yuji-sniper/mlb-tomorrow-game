@@ -5,12 +5,12 @@ import { fetchUserTeamsByUserId } from "@/features/user-teams/repositories/fetch
 import { findUser } from "@/features/users/repositories/find-user-repository"
 import { verifyLineTokenApi } from "@/shared/api/line-api"
 import { ERROR_CODE } from "@/shared/constants/error"
-import { CustomError } from "@/shared/errors/error"
 import type { ActionResponse } from "@/shared/types/action"
 import {
   generateActionErrorResponse,
   generateActionSuccessResponse,
 } from "@/shared/utils/action"
+import { CustomError } from "@/shared/utils/error"
 
 type InitializeActionRequest = {
   lineIdToken: string

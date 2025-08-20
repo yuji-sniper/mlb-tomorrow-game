@@ -9,7 +9,6 @@ import {
 } from "@/features/players/utils/players"
 import { fetchTeamRoster40ManApi } from "@/shared/api/mlb-api"
 import { ERROR_CODE } from "@/shared/constants/error"
-import { CustomError } from "@/shared/errors/error"
 import type { ActionResponse } from "@/shared/types/action"
 import type { Player } from "@/shared/types/player"
 import type { Team } from "@/shared/types/team"
@@ -17,6 +16,7 @@ import {
   generateActionErrorResponse,
   generateActionSuccessResponse,
 } from "@/shared/utils/action"
+import { CustomError } from "@/shared/utils/error"
 
 type FetchPitchersByTeamIdActionRequest = {
   teamId: Team["id"]

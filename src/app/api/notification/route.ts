@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { iterateAllUsersByChunkWithRelations } from "@/features/users/repositories/fetch-users-repository"
 import {
   issueLineMessagingApiStatelessChannelAccessTokenApi,
@@ -10,13 +10,13 @@ import {
   fetchTeamsApi,
 } from "@/shared/api/mlb-api"
 import { DIVISION_ABBR_JP } from "@/shared/constants/division"
-import { ERROR_CODE } from "@/shared/constants/error"
-import { CustomError } from "@/shared/errors/error"
+import { ERROR_CODE, ERROR_CODE_TO_STATUS } from "@/shared/constants/error"
 import type { ErrorCode } from "@/shared/types/error"
 import type { Game } from "@/shared/types/game"
 import type { Standing } from "@/shared/types/standing"
 import type { Team } from "@/shared/types/team"
 import { runWithConcurrency } from "@/shared/utils/concurrency"
+import { CustomError } from "@/shared/utils/error"
 import { getLastName } from "@/shared/utils/name"
 
 type GameContentData = {
@@ -89,10 +89,14 @@ const RETRYABLE_ERROR_CODES: ErrorCode[] = [
 /**
  * 通知を送信する
  */
-export async function GET() {
+export async function POST(request: NextRequest) {
   const logPrefix = "[API: GET /api/notification]"
 
   try {
+    if (!authenticate(request)) {
+      throw new CustomError(ERROR_CODE.UNAUTHORIZED)
+    }
+
     const { teams, standings, games } = await fetchMlbData()
 
     const gameContentDataList = await generateGameContentDataList(
@@ -115,11 +119,30 @@ export async function GET() {
   } catch (error) {
     console.error(logPrefix, "Error:", error)
 
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 },
-    )
+    const errorCode = (error as CustomError)?.code
+
+    switch (errorCode) {
+      case ERROR_CODE.UNAUTHORIZED:
+        return NextResponse.json(
+          { message: "Unauthorized" },
+          { status: ERROR_CODE_TO_STATUS[ERROR_CODE.UNAUTHORIZED] },
+        )
+      default:
+        return NextResponse.json(
+          { message: "Internal Server Error" },
+          { status: ERROR_CODE_TO_STATUS[ERROR_CODE.INTERNAL_SERVER_ERROR] },
+        )
+    }
   }
+}
+
+/**
+ * 認証を行う
+ */
+function authenticate(request: NextRequest) {
+  const auth = request.headers.get("Authorization")
+
+  return auth === `Bearer ${process.env.CRON_SECRET}`
 }
 
 /**

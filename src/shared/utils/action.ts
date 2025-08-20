@@ -1,9 +1,9 @@
 import { ERROR_CODE } from "@/shared/constants/error"
-import { CustomError } from "@/shared/errors/error"
 import type {
   ActionErrorResponse,
   ActionSuccessResponse,
 } from "@/shared/types/action"
+import { CustomError } from "@/shared/utils/error"
 
 /**
  * 成功レスポンスを生成

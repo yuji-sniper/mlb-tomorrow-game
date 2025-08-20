@@ -1,5 +1,5 @@
 import { ERROR_CODE } from "@/shared/constants/error"
-import { CustomError } from "@/shared/errors/error"
+import { CustomError } from "@/shared/utils/error"
 
 type VerifyLineTokenApiSuccessResponse = {
   sub: string
