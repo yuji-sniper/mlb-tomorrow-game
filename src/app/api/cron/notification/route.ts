@@ -89,7 +89,7 @@ const RETRYABLE_ERROR_CODES: ErrorCode[] = [
 /**
  * 通知を送信する
  */
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const logPrefix = "[API: GET /api/notification]"
 
   try {
