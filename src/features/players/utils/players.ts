@@ -47,17 +47,17 @@ export function sortPlayersByStatusPriority(players: Player[]): Player[] {
 }
 
 /**
- * チームIDでグループ化
+ * チームID: 選手ID[] でグループ化
  */
-export function groupPlayersByTeamId(
+export function groupPlayerIdsByTeamId(
   players: Player[],
-): Record<Team["id"], Player[]> {
+): Record<Team["id"], Player["id"][]> {
   return players.reduce(
     (acc, player) => {
       acc[player.teamId] = acc[player.teamId] || []
-      acc[player.teamId].push(player)
+      acc[player.teamId].push(player.id)
       return acc
     },
-    {} as Record<Team["id"], Player[]>,
+    {} as Record<Team["id"], Player["id"][]>,
   )
 }

@@ -8,11 +8,11 @@ import {
 import { CenterSpinner } from "../../spinner/center-spinner/center-spinner"
 
 type ConfirmDialogProps = {
-  isOpen: boolean
-  isLoading?: boolean
   title: string
   cancelLabel?: string
   submitLabel?: string
+  isOpen: boolean
+  isLoading?: boolean
   disabled?: boolean
   onCancel: () => void
   onSubmit: () => void
@@ -20,11 +20,11 @@ type ConfirmDialogProps = {
 }
 
 export default function ConfirmDialog({
-  isOpen,
-  isLoading,
   title,
   cancelLabel = "キャンセル",
   submitLabel,
+  isOpen,
+  isLoading,
   disabled,
   onCancel,
   onSubmit,

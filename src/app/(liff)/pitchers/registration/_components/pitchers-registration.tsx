@@ -1,11 +1,10 @@
 "use client"
 
-import { Box } from "@mui/material"
-import PlayersSelectionDialog from "@/features/players/components/players-selection-dialog"
-import RegisterPlayersDialog from "@/features/players/components/register-players-dialog"
+import { Typography } from "@mui/material"
+import PlayersRegisterDialog from "@/features/players/components/players-register-dialog"
 import TeamsList from "@/features/teams/components/teams-list"
 import { CountBadge } from "@/shared/components/ui/badge/count-badge/count-badge"
-import { Button } from "@/shared/components/ui/button/button"
+import ConfirmDialog from "@/shared/components/ui/dialog/confirm-dialog/confirm-dialog"
 import Title from "@/shared/components/ui/title/title"
 import { LoadingUntilInitialized } from "@/shared/contexts/initialization-context"
 import type { League } from "@/shared/types/league"
@@ -22,30 +21,29 @@ export default function PitchersRegistration({
   const {
     // 状態
     selectedTeam,
-    playersGroupByTeamId,
-    isPlayersSelectionDialogLoading,
-    isSavePlayersDialogOpen,
+    playersGroupedByTeamId,
+    isPlayersRegisterDialogLoading,
     isSubmitting,
-    // メモ化
-    selectedPlayers,
-    selectedPlayerIds,
-    isSaveButtonDisabled,
+    isUnsavedDialogOpen,
+    // メモ
+    isSubmitDisabled,
     // 関数
-    handleTeamCardClick,
-    handlePlayersSelectionDialogClose,
-    handlePlayerClick,
-    handleSaveButtonClick,
-    handleRegisterPlayersDialogCancel,
     isTeamCardActive,
-    getSelectedCountOfTeam,
-    submit,
+    isPlayerActive,
+    getRegisteredCountOfTeam,
+    handleTeamCardClick,
+    handlePlayerClick,
+    handlePlayersRegisterDialogClose,
+    handlePlayersRegisterDialogSubmit,
+    handleUnsavedDialogCancel,
+    handleUnsavedDialogSubmit,
   } = usePitchersRegistration()
 
   /**
    * チームカードに表示するバッジを取得する
    */
   const getTeamBadge = (teamId: Team["id"]) => {
-    const count = getSelectedCountOfTeam(teamId)
+    const count = getRegisteredCountOfTeam(teamId)
     return count > 0 ? <CountBadge count={count} /> : undefined
   }
 
@@ -64,37 +62,36 @@ export default function PitchersRegistration({
       />
       {/* [end]チーム一覧 */}
 
-      {/* [start]ピッチャー選択ダイアログ */}
+      {/* [start]ピッチャー登録ダイアログ */}
       {selectedTeam && (
-        <PlayersSelectionDialog
-          isOpen={!!selectedTeam}
-          onClose={handlePlayersSelectionDialogClose}
-          isLoading={isPlayersSelectionDialogLoading}
+        <PlayersRegisterDialog
           team={selectedTeam}
-          players={playersGroupByTeamId[selectedTeam.id] || []}
-          selectedPlayerIds={selectedPlayerIds}
+          players={playersGroupedByTeamId[selectedTeam.id] || []}
+          isPlayerActive={isPlayerActive}
+          isOpen={!!selectedTeam && !isUnsavedDialogOpen}
+          isLoading={isPlayersRegisterDialogLoading}
+          disabled={isSubmitting}
+          submitDisabled={isSubmitDisabled}
           onPlayerClick={handlePlayerClick}
+          onClose={handlePlayersRegisterDialogClose}
+          onSubmit={handlePlayersRegisterDialogSubmit}
         />
       )}
-      {/* [end]ピッチャー選択ダイアログ */}
+      {/* [end]ピッチャー登録ダイアログ */}
 
-      {/* [start]選手登録ボタン・ダイアログ */}
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}>
-        <Button
-          text={`選択した${selectedPlayerIds.length}人を保存`}
-          disabled={isSaveButtonDisabled}
-          onClick={handleSaveButtonClick}
-        />
-      </Box>
-      <RegisterPlayersDialog
-        isOpen={isSavePlayersDialogOpen}
-        onCancel={handleRegisterPlayersDialogCancel}
-        title="選択したピッチャーを保存しますか？"
-        players={selectedPlayers}
-        onSubmit={submit}
-        disabled={isSubmitting}
-      />
-      {/* [end]選手登録ボタン・ダイアログ */}
+      {/* [start]未保存アラートダイアログ */}
+      <ConfirmDialog
+        title="保存していません！"
+        submitLabel="はい"
+        cancelLabel="いいえ"
+        isOpen={isUnsavedDialogOpen}
+        onCancel={handleUnsavedDialogCancel}
+        onSubmit={handleUnsavedDialogSubmit}
+      >
+        <Typography align="center" color="text.secondary">
+          キャンセルしてもよろしいですか？
+        </Typography>
+      </ConfirmDialog>
     </LoadingUntilInitialized>
   )
 }

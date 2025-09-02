@@ -1,7 +1,7 @@
 "use server"
 
 import { z } from "zod"
-import { groupPlayersByTeamId } from "@/features/players/utils/players"
+import { groupPlayerIdsByTeamId } from "@/features/players/utils/players"
 import { fetchUserPlayersByUserId } from "@/features/user-players/repositories/fetch-user-playres-repository"
 import { findUser } from "@/features/users/repositories/find-user-repository"
 import { verifyLineTokenApi } from "@/shared/api/line-api"
@@ -21,7 +21,7 @@ type InitializeActionRequest = {
 }
 
 type InitializeActionResponse = {
-  registeredPlayersByTeamId: Record<Team["id"], Player[]>
+  registeredPlayerIdsByTeamId: Record<Team["id"], Player["id"][]>
 }
 
 /**
@@ -60,10 +60,10 @@ export async function initializeAction(
     const players = await fetchPlayersByIdsApi(playerIds)
 
     // 選手をチームIDでグループ化
-    const registeredPlayersByTeamId = groupPlayersByTeamId(players)
+    const registeredPlayerIdsByTeamId = groupPlayerIdsByTeamId(players)
 
     return generateActionSuccessResponse({
-      registeredPlayersByTeamId,
+      registeredPlayerIdsByTeamId,
     })
   } catch (error) {
     return generateActionErrorResponse(

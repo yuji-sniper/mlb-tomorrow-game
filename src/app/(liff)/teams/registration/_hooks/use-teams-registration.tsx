@@ -94,7 +94,7 @@ export const useTeamsRegistration: UseTeamsRegistration = () => {
    * チームカードのアクティブ状態を返す
    */
   const isTeamCardActive = (teamId: Team["id"]) => {
-    return registeredTeamIds.includes(teamId)
+    return registeredTeamIds.includes(teamId) || selectedTeam?.id === teamId
   }
 
   /**

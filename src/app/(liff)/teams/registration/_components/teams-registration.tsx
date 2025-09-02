@@ -3,9 +3,11 @@
 import TeamRegisterConfirmDialog from "@/features/teams/components/team-register-confirm-dialog"
 import TeamUnregisterConfirmDialog from "@/features/teams/components/team-unregister-confirm-dialog"
 import TeamsList from "@/features/teams/components/teams-list"
+import { Badge } from "@/shared/components/ui/badge/badge"
 import Title from "@/shared/components/ui/title/title"
 import { LoadingUntilInitialized } from "@/shared/contexts/initialization-context"
 import type { League } from "@/shared/types/league"
+import type { Team } from "@/shared/types/team"
 import { useTeamsRegistration } from "../_hooks/use-teams-registration"
 
 type TeamsRegistrationProps = {
@@ -29,6 +31,11 @@ export default function TeamsRegistration({ leagues }: TeamsRegistrationProps) {
     handleUnregisterConfirmDialogSubmit,
   } = useTeamsRegistration()
 
+  const getTeamBadge = (teamId: Team["id"]) => {
+    const badgeType = getTeamBadgeType(teamId)
+    return badgeType ? <Badge type={badgeType} /> : undefined
+  }
+
   return (
     <LoadingUntilInitialized>
       {/* [start]タイトル */}
@@ -39,7 +46,7 @@ export default function TeamsRegistration({ leagues }: TeamsRegistrationProps) {
       <TeamsList
         leagues={leagues}
         isTeamActive={isTeamCardActive}
-        getTeamBadgeType={getTeamBadgeType}
+        getTeamBadge={getTeamBadge}
         onTeamClick={handleTeamCardClick}
       />
       {/* [end]チーム選択 */}

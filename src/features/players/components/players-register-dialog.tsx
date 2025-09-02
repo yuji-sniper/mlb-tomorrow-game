@@ -13,31 +13,40 @@ import type { Player } from "@/shared/types/player"
 import type { Team } from "@/shared/types/team"
 import { generatePlayerImageUrl } from "../utils/player-image"
 
-type TeamPlayersSelectionDialogProps = {
-  isOpen: boolean
-  onClose: () => void
+type PlayersRegisterDialogProps = {
   team: Team
-  isLoading: boolean
   players: Player[]
-  selectedPlayerIds: Player["id"][]
+  isOpen: boolean
+  isLoading: boolean
+  disabled: boolean
+  submitDisabled: boolean
+  isPlayerActive: (playerId: Player["id"]) => boolean
   onPlayerClick: (player: Player) => void
+  onClose: () => void
+  onSubmit: () => void
 }
 
-export default function TeamPlayersSelectionDialog({
-  isOpen,
-  onClose,
+export default function PlayersRegisterDialog({
   team,
-  isLoading,
   players,
-  selectedPlayerIds,
+  isOpen,
+  isLoading,
+  disabled,
+  submitDisabled,
+  isPlayerActive,
   onPlayerClick,
-}: TeamPlayersSelectionDialogProps) {
+  onClose,
+  onSubmit,
+}: PlayersRegisterDialogProps) {
   return (
     <TeamDialog
+      team={team}
       isOpen={isOpen}
       isLoading={isLoading}
+      disabled={disabled}
+      submitDisabled={submitDisabled}
       onClose={onClose}
-      team={team}
+      onSubmit={onSubmit}
     >
       {players.length === 0 ? (
         <Typography align="center" color="text.secondary">
@@ -46,7 +55,7 @@ export default function TeamPlayersSelectionDialog({
       ) : (
         <List dense sx={{ p: 0, maxWidth: 280, mx: "auto" }}>
           {players.map((player) => {
-            const isSelected = selectedPlayerIds.includes(player.id)
+            const isSelected = isPlayerActive(player.id)
             return (
               <ListItem
                 key={player.id}

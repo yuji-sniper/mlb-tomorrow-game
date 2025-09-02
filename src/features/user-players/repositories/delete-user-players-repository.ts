@@ -1,8 +1,9 @@
 import type { PrismaClient } from "@prisma/client"
 import prisma from "@/shared/lib/prisma/prisma"
 
-export async function deleteUserPlayersByUserId(
+export async function deleteUserPlayersByUserIdAndPlayerIds(
   userId: string,
+  playerIds: number[],
   tx?: Omit<
     PrismaClient,
     "$extends" | "$transaction" | "$disconnect" | "$connect" | "$on" | "$use"
@@ -10,6 +11,6 @@ export async function deleteUserPlayersByUserId(
 ) {
   const prismaClient = tx || prisma
   await prismaClient.userPlayer.deleteMany({
-    where: { userId },
+    where: { userId, playerId: { in: playerIds } },
   })
 }

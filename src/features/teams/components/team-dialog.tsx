@@ -12,21 +12,29 @@ import type { Team } from "@/shared/types/team"
 import { generateTeamImageUrl } from "../utils/team-image"
 
 type TeamDialogProps = {
+  team: Team
+  closeLabel?: string
+  submitLabel?: string
   isOpen: boolean
   isLoading: boolean
+  disabled?: boolean
+  submitDisabled?: boolean
   onClose: () => void
-  team: Team
+  onSubmit: () => void
   children: React.ReactNode
-  closeLabel?: string
 }
 
 export default function TeamDialog({
-  isOpen,
-  isLoading = false,
-  onClose,
   team,
+  closeLabel = "キャンセル",
+  submitLabel = "保存",
+  isOpen,
+  isLoading,
+  disabled,
+  submitDisabled,
+  onClose,
+  onSubmit,
   children,
-  closeLabel = "閉じる",
 }: TeamDialogProps) {
   return (
     <Dialog open={isOpen} onClose={onClose} maxWidth="xs" fullWidth>
@@ -46,9 +54,17 @@ export default function TeamDialog({
       <DialogContent dividers>
         {isLoading ? <CenterSpinner /> : children}
       </DialogContent>
-      <DialogActions sx={{ justifyContent: "center" }}>
-        <Button onClick={onClose} color="primary" fullWidth>
+      <DialogActions>
+        <Button onClick={onClose} color="inherit" disabled={disabled}>
           {closeLabel}
+        </Button>
+        <Button
+          onClick={onSubmit}
+          color="primary"
+          variant="contained"
+          disabled={disabled || submitDisabled}
+        >
+          {submitLabel}
         </Button>
       </DialogActions>
     </Dialog>
