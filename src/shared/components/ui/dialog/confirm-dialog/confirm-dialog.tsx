@@ -32,7 +32,7 @@ export default function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <Dialog open={isOpen} onClose={onCancel} maxWidth="xs" fullWidth>
-      <DialogTitle fontSize="0.8rem" textAlign="center" sx={{ p: 1.5 }}>
+      <DialogTitle fontSize="1rem" textAlign="center" sx={{ p: 1.5 }}>
         {title}
       </DialogTitle>
 
