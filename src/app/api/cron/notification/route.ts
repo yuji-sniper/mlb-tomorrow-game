@@ -425,10 +425,10 @@ function buildMessageObjectsForUser(
         acc.currentGameContentArray.length >= MAX_GAME_COUNT_PER_MESSAGE
 
       // 最後のデータかつメッセージ配列が存在するかどうか
-      const isLastAndExistsMessageArray =
+      const isLastAndExistsContentArray =
         index === dataLength - 1 && acc.currentGameContentArray.length > 0
 
-      if (isMaxGameCountReached || isLastAndExistsMessageArray) {
+      if (isMaxGameCountReached || isLastAndExistsContentArray) {
         // コンテンツを生成
         const gamesContents = acc.currentGameContentArray.flatMap(
           (gameContentJson, index) =>
