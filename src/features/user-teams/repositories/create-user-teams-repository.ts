@@ -1,19 +1,20 @@
-import type { PrismaClient } from "@prisma/client"
+import type { PrismaClient, UserTeam } from "@prisma/client"
 import prisma from "@/shared/lib/prisma/prisma"
 
-export async function createUserTeams(
+export async function createUserTeamByUserIdAndTeamId(
   userId: string,
-  teamIds: number[],
+  teamId: number,
   tx?: Omit<
     PrismaClient,
     "$extends" | "$transaction" | "$disconnect" | "$connect" | "$on" | "$use"
   >,
-) {
+): Promise<UserTeam> {
   const prismaClient = tx || prisma
-  await prismaClient.userTeam.createMany({
-    data: teamIds.map((teamId) => ({
+  const userTeam = await prismaClient.userTeam.create({
+    data: {
       userId,
       teamId,
-    })),
+    },
   })
+  return userTeam
 }

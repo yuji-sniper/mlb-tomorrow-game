@@ -6,5 +6,5 @@ export default async function Page() {
   const teams = await fetchTeamsApi()
   const leagues = createLeaguesFromTeams(teams)
 
-  return <TeamsRegistration teams={teams} leagues={leagues} />
+  return <TeamsRegistration leagues={leagues} />
 }

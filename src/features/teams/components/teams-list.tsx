@@ -1,5 +1,6 @@
 import { Box, Typography } from "@mui/material"
-import type React from "react"
+import { Badge } from "@/shared/components/ui/badge/badge"
+import type { BadgeType } from "@/shared/constants/badge"
 import type { League } from "@/shared/types/league"
 import type { Team } from "@/shared/types/team"
 import TeamCard from "./team-card"
@@ -7,16 +8,24 @@ import TeamCard from "./team-card"
 type TeamsListProps = {
   leagues: League[]
   isTeamActive?: (teamId: Team["id"]) => boolean
-  getTeamBadge?: (teamId: Team["id"]) => React.ReactNode
+  getTeamBadgeType?: (teamId: Team["id"]) => BadgeType | undefined
   onTeamClick: (team: Team) => void
 }
 
 export default function TeamsList({
   leagues,
   isTeamActive,
-  getTeamBadge,
+  getTeamBadgeType,
   onTeamClick,
 }: TeamsListProps) {
+  const getTeamBadge = (teamId: Team["id"]) => {
+    if (!getTeamBadgeType) {
+      return undefined
+    }
+    const badgeType = getTeamBadgeType(teamId)
+    return badgeType ? <Badge type={badgeType} /> : undefined
+  }
+
   return (
     <>
       {leagues.map((league) => (

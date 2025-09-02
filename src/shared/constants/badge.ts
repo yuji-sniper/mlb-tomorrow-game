@@ -1,6 +1,4 @@
 export const BADGE_TYPE = {
-  ADD: "add",
-  REMOVE: "remove",
   CHECK: "check",
 } as const
 

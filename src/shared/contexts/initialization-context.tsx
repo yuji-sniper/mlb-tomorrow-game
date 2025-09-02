@@ -31,12 +31,12 @@ export const InitializationProvider = ({
   )
 }
 
-export const useInitialization = () => {
+export const useInitializationContext = () => {
   const context = useContext(InitializationContext)
 
   if (!context) {
     throw new Error(
-      "useInitialization must be used within a InitializationProvider",
+      "useInitializationContext must be used within a InitializationProvider",
     )
   }
 
@@ -48,7 +48,7 @@ export function LoadingUntilInitialized({
 }: {
   children: React.ReactNode
 }) {
-  const { isInitialized } = useInitialization()
+  const { isInitialized } = useInitializationContext()
 
   if (!isInitialized) {
     return <FullScreenSpinner />

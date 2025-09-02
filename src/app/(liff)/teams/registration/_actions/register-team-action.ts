@@ -1,9 +1,8 @@
 "use server"
 
 import { z } from "zod"
-import { createUserTeams } from "@/features/user-teams/repositories/create-user-teams-repository"
-import { deleteUserTeamsByUserId } from "@/features/user-teams/repositories/delete-user-teams-repository"
-import { fetchUserTeamsByUserId } from "@/features/user-teams/repositories/fetch-user-teams-repository"
+import { createUserTeamByUserIdAndTeamId } from "@/features/user-teams/repositories/create-user-teams-repository"
+import { findUserTeamByUserIdAndTeamId } from "@/features/user-teams/repositories/find-user-team-repository"
 import { createUser } from "@/features/users/repositories/create-user-repository"
 import { findUser } from "@/features/users/repositories/find-user-repository"
 import { verifyLineTokenApi } from "@/shared/api/line-api"
@@ -17,26 +16,24 @@ import {
 } from "@/shared/utils/action"
 import { CustomError } from "@/shared/utils/error"
 
-type RegisterTeamsActionRequest = {
+type RegisterTeamActionRequest = {
   lineIdToken: string
-  selectedTeamIds: Team["id"][]
+  teamId: Team["id"]
 }
 
-type RegisterTeamsActionResponse = {
-  registeredTeamIds: number[]
-}
+type RegisterTeamActionResponse = {}
 
 /**
  * チーム登録アクション
  */
-export async function registerTeamsAction(
-  request: RegisterTeamsActionRequest,
-): Promise<ActionResponse<RegisterTeamsActionResponse>> {
+export async function registerTeamAction(
+  request: RegisterTeamActionRequest,
+): Promise<ActionResponse<RegisterTeamActionResponse>> {
   try {
     // リクエストボディ取得
     const schema = z.object({
       lineIdToken: z.string(),
-      selectedTeamIds: z.array(z.number()),
+      teamId: z.number(),
     })
     const parsedRequest = schema.safeParse(request)
     if (!parsedRequest.success) {
@@ -46,38 +43,32 @@ export async function registerTeamsAction(
         z.treeifyError(parsedRequest.error),
       )
     }
-    const { lineIdToken, selectedTeamIds } = parsedRequest.data
+    const { lineIdToken, teamId } = parsedRequest.data
 
     // LINE ID取得
     const lineVerifyData = await verifyLineTokenApi(lineIdToken)
     const lineId = lineVerifyData.sub
 
     // DBトランザクション
-    const registeredTeamIds = await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       // ユーザー取得 or 作成
       const user =
         (await findUser(lineId, tx)) ?? (await createUser(lineId, tx))
 
-      // ユーザーとチームの紐づけを更新
-      await deleteUserTeamsByUserId(user.id, tx)
-      if (selectedTeamIds.length > 0) {
-        await createUserTeams(user.id, selectedTeamIds, tx)
-      }
-
       // ユーザーとチームの紐づけを取得
-      const userTeams = await fetchUserTeamsByUserId(user.id, tx)
+      const userTeam = await findUserTeamByUserIdAndTeamId(user.id, teamId, tx)
 
-      // ユーザーとチームの紐づけのチームIDを取得
-      return userTeams.map((userTeam) => userTeam.teamId)
+      // ユーザーとチームの紐づけが存在しない場合は作成
+      if (!userTeam) {
+        await createUserTeamByUserIdAndTeamId(user.id, teamId, tx)
+      }
     })
 
-    return generateActionSuccessResponse({
-      registeredTeamIds,
-    })
+    return generateActionSuccessResponse({})
   } catch (error) {
     return generateActionErrorResponse(
-      "teams-registration-action:saveUserTeamsAction",
-      "Failed to save user teams",
+      "teams-registration-action:registerTeamAction",
+      "Failed to register team",
       error,
     )
   }

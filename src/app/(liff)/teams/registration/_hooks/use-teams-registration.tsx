@@ -1,74 +1,44 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { BADGE_TYPE, type BadgeType } from "@/shared/constants/badge"
 import { ERROR_CODE } from "@/shared/constants/error"
 import { useErrorHandlerContext } from "@/shared/contexts/error-handler-context"
-import { useInitialization } from "@/shared/contexts/initialization-context"
+import { useInitializationContext } from "@/shared/contexts/initialization-context"
 import { useLiffContext } from "@/shared/contexts/liff-context"
 import { useSnackbarContext } from "@/shared/contexts/snackbar-context"
 import type { Team } from "@/shared/types/team"
 import { initializeAction } from "../_actions/initialize-action"
-import { registerTeamsAction } from "../_actions/register-teams-action"
+import { registerTeamAction } from "../_actions/register-team-action"
+import { unregisterTeamAction } from "../_actions/unregister-team-action"
 
-type UseTeamsRegistration = (teams: Team[]) => {
+type UseTeamsRegistration = () => {
   // 状態
-  isOpenSaveTeamsDialog: boolean
+  selectedTeam?: Team
+  isOpenRegisterConfirmDialog: boolean
+  isOpenUnregisterConfirmDialog: boolean
   isSubmitting: boolean
-  // メモ化
-  selectedTeams: Team[]
-  isSaveButtonDisabled: boolean
   // 関数
-  handleTeamCardClick: (team: Team) => void
-  handleSaveButtonClick: () => void
-  handleSaveTeamsDialogCancel: () => void
   isTeamCardActive: (teamId: Team["id"]) => boolean
   getTeamBadgeType: (teamId: Team["id"]) => BadgeType | undefined
-  submit: () => Promise<void>
+  handleTeamCardClick: (team: Team) => void
+  handleRegisterConfirmDialogCancel: () => void
+  handleRegisterConfirmDialogSubmit: () => void
+  handleUnregisterConfirmDialogCancel: () => void
+  handleUnregisterConfirmDialogSubmit: () => void
 }
 
-export const useTeamsRegistration: UseTeamsRegistration = (teams: Team[]) => {
-  const { isInitialized, setIsInitialized } = useInitialization()
+export const useTeamsRegistration: UseTeamsRegistration = () => {
+  const { isInitialized, setIsInitialized } = useInitializationContext()
   const { liff, relogin } = useLiffContext()
   const { handleError } = useErrorHandlerContext()
   const { showSuccessSnackbar, showErrorSnackbar } = useSnackbarContext()
-  const [selectedTeamIds, setSelectedTeamIds] = useState<Team["id"][]>([])
-  const [newSelectedTeamIds, setNewSelectedTeamIds] = useState<Team["id"][]>([])
-  const [isOpenSaveTeamsDialog, setIsOpenSaveTeamsDialog] = useState(false)
+
+  const [selectedTeam, setSelectedTeam] = useState<Team | undefined>()
+  const [registeredTeamIds, setRegisteredTeamIds] = useState<Team["id"][]>([])
+  const [isOpenRegisterConfirmDialog, setIsOpenRegisterConfirmDialog] =
+    useState(false)
+  const [isOpenUnregisterConfirmDialog, setIsOpenUnregisterConfirmDialog] =
+    useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-
-  /**
-   * 選択されているチーム
-   */
-  const selectedTeams = useMemo(
-    () => teams.filter((team) => newSelectedTeamIds.includes(team.id)),
-    [teams, newSelectedTeamIds],
-  )
-
-  /**
-   * 追加されたチーム
-   */
-  const addedTeamIds = useMemo(
-    () => newSelectedTeamIds.filter((id) => !selectedTeamIds.includes(id)),
-    [newSelectedTeamIds, selectedTeamIds],
-  )
-
-  /**
-   * 削除されたチーム
-   */
-  const removedTeamIds = useMemo(
-    () => selectedTeamIds.filter((id) => !newSelectedTeamIds.includes(id)),
-    [selectedTeamIds, newSelectedTeamIds],
-  )
-
-  /**
-   * 保存ボタンの無効化判定
-   */
-  const isSaveButtonDisabled = useMemo(
-    () =>
-      isOpenSaveTeamsDialog ||
-      isSubmitting ||
-      (addedTeamIds.length === 0 && removedTeamIds.length === 0),
-    [isOpenSaveTeamsDialog, isSubmitting, addedTeamIds, removedTeamIds],
-  )
 
   /**
    * 初期化
@@ -101,8 +71,7 @@ export const useTeamsRegistration: UseTeamsRegistration = (teams: Team[]) => {
       const { registeredTeamIds } = response.data
 
       // データをセット
-      setSelectedTeamIds(registeredTeamIds)
-      setNewSelectedTeamIds(registeredTeamIds)
+      setRegisteredTeamIds(registeredTeamIds)
 
       setIsInitialized(true)
     } catch (error) {
@@ -122,57 +91,43 @@ export const useTeamsRegistration: UseTeamsRegistration = (teams: Team[]) => {
   }, [initialize])
 
   /**
-   * チームの選択を切り替える
-   */
-  const handleTeamCardClick = (team: Team) => {
-    setNewSelectedTeamIds((prev) =>
-      prev.includes(team.id)
-        ? prev.filter((id) => id !== team.id)
-        : [...prev, team.id],
-    )
-  }
-
-  /**
-   * 保存ボタンをクリックする
-   */
-  const handleSaveButtonClick = () => {
-    setIsOpenSaveTeamsDialog(true)
-  }
-
-  /**
-   * 保存ダイアログを閉じる
-   */
-  const handleSaveTeamsDialogCancel = () => {
-    setIsOpenSaveTeamsDialog(false)
-  }
-
-  /**
    * チームカードのアクティブ状態を返す
    */
   const isTeamCardActive = (teamId: Team["id"]) => {
-    return newSelectedTeamIds.includes(teamId)
+    return registeredTeamIds.includes(teamId)
   }
 
   /**
    * チームカードに表示するバッジタイプを取得する
    */
   const getTeamBadgeType = (teamId: Team["id"]) => {
-    if (removedTeamIds.includes(teamId)) {
-      return BADGE_TYPE.REMOVE
-    }
-    if (addedTeamIds.includes(teamId)) {
-      return BADGE_TYPE.ADD
-    }
-    if (selectedTeamIds.includes(teamId)) {
-      return BADGE_TYPE.CHECK
-    }
-    return
+    return registeredTeamIds.includes(teamId) ? BADGE_TYPE.CHECK : undefined
   }
 
   /**
-   * 送信処理
+   * チームカードをクリックする
    */
-  const submit = async () => {
+  const handleTeamCardClick = (team: Team) => {
+    setSelectedTeam(team)
+    if (registeredTeamIds.includes(team.id)) {
+      setIsOpenUnregisterConfirmDialog(true)
+    } else {
+      setIsOpenRegisterConfirmDialog(true)
+    }
+  }
+
+  /**
+   * 登録確認ダイアログを閉じる
+   */
+  const handleRegisterConfirmDialogCancel = () => {
+    setSelectedTeam(undefined)
+    setIsOpenRegisterConfirmDialog(false)
+  }
+
+  /**
+   * 登録確認ダイアログ送信処理
+   */
+  const handleRegisterConfirmDialogSubmit = async () => {
     setIsSubmitting(true)
 
     try {
@@ -187,12 +142,17 @@ export const useTeamsRegistration: UseTeamsRegistration = (teams: Team[]) => {
         return
       }
 
+      // チームが選択されていない場合はエラー
+      if (!selectedTeam) {
+        throw new Error("team is not selected")
+      }
+
       // 送信APIを呼び出し
       const request = {
         lineIdToken,
-        selectedTeamIds: newSelectedTeamIds,
+        teamId: selectedTeam.id,
       }
-      const response = await registerTeamsAction(request)
+      const response = await registerTeamAction(request)
       if (!response.ok) {
         if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
           relogin()
@@ -200,34 +160,95 @@ export const useTeamsRegistration: UseTeamsRegistration = (teams: Team[]) => {
         }
         throw new Error(response.error.message)
       }
-      const { registeredTeamIds } = response.data
 
       // データをセット
-      setSelectedTeamIds(registeredTeamIds)
+      setRegisteredTeamIds([...registeredTeamIds, selectedTeam.id])
 
-      showSuccessSnackbar("チームを保存しました")
+      showSuccessSnackbar("チームを登録しました")
     } catch (error) {
       console.error(error)
-      showErrorSnackbar("チームの保存に失敗しました")
+      showErrorSnackbar("チームの登録に失敗しました")
     } finally {
       setIsSubmitting(false)
-      setIsOpenSaveTeamsDialog(false)
+      setSelectedTeam(undefined)
+      setIsOpenRegisterConfirmDialog(false)
+    }
+  }
+
+  /**
+   * 登録解除確認ダイアログを閉じる
+   */
+  const handleUnregisterConfirmDialogCancel = () => {
+    setSelectedTeam(undefined)
+    setIsOpenUnregisterConfirmDialog(false)
+  }
+
+  /**
+   * 登録解除確認ダイアログ送信処理
+   */
+  const handleUnregisterConfirmDialogSubmit = async () => {
+    setIsSubmitting(true)
+
+    try {
+      if (!liff) {
+        throw new Error("LIFF is not initialized")
+      }
+
+      // LINE IDトークン取得
+      const lineIdToken = liff.getIDToken()
+      if (!lineIdToken) {
+        relogin()
+        return
+      }
+
+      // チームが選択されていない場合はエラー
+      if (!selectedTeam) {
+        throw new Error("team is not selected")
+      }
+
+      // 送信APIを呼び出し
+      const request = {
+        lineIdToken,
+        teamId: selectedTeam.id,
+      }
+      const response = await unregisterTeamAction(request)
+      if (!response.ok) {
+        if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
+          relogin()
+          return
+        }
+        throw new Error(response.error.message)
+      }
+
+      // データをセット
+      setRegisteredTeamIds(
+        registeredTeamIds.filter((id) => id !== selectedTeam.id),
+      )
+
+      showSuccessSnackbar("チームの登録を解除しました")
+    } catch (error) {
+      console.error(error)
+      showErrorSnackbar("チームの登録解除に失敗しました")
+    } finally {
+      setIsSubmitting(false)
+      setSelectedTeam(undefined)
+      setIsOpenUnregisterConfirmDialog(false)
     }
   }
 
   return {
     // 状態
-    isOpenSaveTeamsDialog,
+    selectedTeam,
+    isOpenRegisterConfirmDialog,
+    isOpenUnregisterConfirmDialog,
     isSubmitting,
-    // メモ化
-    selectedTeams,
-    isSaveButtonDisabled,
     // 関数
-    handleTeamCardClick,
-    handleSaveButtonClick,
-    handleSaveTeamsDialogCancel,
     isTeamCardActive,
     getTeamBadgeType,
-    submit,
+    handleTeamCardClick,
+    handleRegisterConfirmDialogCancel,
+    handleRegisterConfirmDialogSubmit,
+    handleUnregisterConfirmDialogCancel,
+    handleUnregisterConfirmDialogSubmit,
   }
 }

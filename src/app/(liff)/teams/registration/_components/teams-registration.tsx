@@ -1,48 +1,33 @@
 "use client"
 
-import { Box } from "@mui/material"
-import SaveTeamsDialog from "@/features/teams/components/save-teams-dialog"
+import TeamRegisterConfirmDialog from "@/features/teams/components/team-register-confirm-dialog"
+import TeamUnregisterConfirmDialog from "@/features/teams/components/team-unregister-confirm-dialog"
 import TeamsList from "@/features/teams/components/teams-list"
-import { Badge } from "@/shared/components/ui/badge/badge"
-import { Button } from "@/shared/components/ui/button/button"
 import Title from "@/shared/components/ui/title/title"
 import { LoadingUntilInitialized } from "@/shared/contexts/initialization-context"
 import type { League } from "@/shared/types/league"
-import type { Team } from "@/shared/types/team"
 import { useTeamsRegistration } from "../_hooks/use-teams-registration"
 
 type TeamsRegistrationProps = {
-  teams: Team[]
   leagues: League[]
 }
 
-export default function TeamsRegistration({
-  teams,
-  leagues,
-}: TeamsRegistrationProps) {
+export default function TeamsRegistration({ leagues }: TeamsRegistrationProps) {
   const {
     // 状態
-    isOpenSaveTeamsDialog,
+    selectedTeam,
+    isOpenRegisterConfirmDialog,
+    isOpenUnregisterConfirmDialog,
     isSubmitting,
-    // メモ化
-    selectedTeams,
-    isSaveButtonDisabled,
     // 関数
-    handleTeamCardClick,
-    handleSaveButtonClick,
-    handleSaveTeamsDialogCancel,
     isTeamCardActive,
     getTeamBadgeType,
-    submit,
-  } = useTeamsRegistration(teams)
-
-  /**
-   * チームカードに表示するバッジを取得する
-   */
-  const getTeamBadge = (teamId: Team["id"]) => {
-    const badgeType = getTeamBadgeType(teamId)
-    return badgeType ? <Badge type={badgeType} /> : undefined
-  }
+    handleTeamCardClick,
+    handleRegisterConfirmDialogCancel,
+    handleRegisterConfirmDialogSubmit,
+    handleUnregisterConfirmDialogCancel,
+    handleUnregisterConfirmDialogSubmit,
+  } = useTeamsRegistration()
 
   return (
     <LoadingUntilInitialized>
@@ -54,28 +39,30 @@ export default function TeamsRegistration({
       <TeamsList
         leagues={leagues}
         isTeamActive={isTeamCardActive}
-        getTeamBadge={getTeamBadge}
+        getTeamBadgeType={getTeamBadgeType}
         onTeamClick={handleTeamCardClick}
       />
       {/* [end]チーム選択 */}
 
-      {/* [start]チーム保存ボタン・ダイアログ */}
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}>
-        <Button
-          text="保存"
-          disabled={isSaveButtonDisabled}
-          onClick={handleSaveButtonClick}
-        />
-      </Box>
-      <SaveTeamsDialog
-        isOpen={isOpenSaveTeamsDialog}
-        onCancel={handleSaveTeamsDialogCancel}
-        title="選択したチームを保存しますか？"
-        selectedTeams={selectedTeams}
-        onSubmit={submit}
+      {/* [start]登録確認ダイアログ */}
+      <TeamRegisterConfirmDialog
+        isOpen={isOpenRegisterConfirmDialog}
+        onCancel={handleRegisterConfirmDialogCancel}
+        onSubmit={handleRegisterConfirmDialogSubmit}
         disabled={isSubmitting}
+        selectedTeam={selectedTeam}
       />
-      {/* [end]チーム保存ボタン・ダイアログ */}
+      {/* [end]登録確認ダイアログ */}
+
+      {/* [start]登録解除確認ダイアログ */}
+      <TeamUnregisterConfirmDialog
+        isOpen={isOpenUnregisterConfirmDialog}
+        onCancel={handleUnregisterConfirmDialogCancel}
+        onSubmit={handleUnregisterConfirmDialogSubmit}
+        disabled={isSubmitting}
+        selectedTeam={selectedTeam}
+      />
+      {/* [end]登録解除確認ダイアログ */}
     </LoadingUntilInitialized>
   )
 }
