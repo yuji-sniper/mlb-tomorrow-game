@@ -32,7 +32,7 @@ export default function PitchersRegistration({
     isPlayersRegisterDialogSubmitDisabled,
     isUnsavedDialogOpen,
     // メモ
-    isModifiedPlayers,
+    isPlayersModified,
     // 関数
     isTeamCardActive,
     isPlayerActive,
@@ -103,7 +103,7 @@ export default function PitchersRegistration({
           isLoading={isPlayersRegisterDialogLoading}
           closeDisabled={isPlayersRegisterDialogCloseDisabled}
           submitDisabled={
-            isPlayersRegisterDialogSubmitDisabled || !isModifiedPlayers
+            isPlayersRegisterDialogSubmitDisabled || !isPlayersModified
           }
           onPlayerClick={handlePlayerClick}
           onClose={handlePlayersRegisterDialogClose}

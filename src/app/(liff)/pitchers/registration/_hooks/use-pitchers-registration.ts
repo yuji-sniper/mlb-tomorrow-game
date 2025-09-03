@@ -20,7 +20,7 @@ type UsePitchersRegistration = () => {
   isPlayersRegisterDialogSubmitDisabled: boolean
   isUnsavedDialogOpen: boolean
   // メモ
-  isModifiedPlayers: boolean
+  isPlayersModified: boolean
   // 関数
   isTeamCardActive: (teamId: Team["id"]) => boolean
   isPlayerActive: (playerId: Player["id"]) => boolean
@@ -72,7 +72,7 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
   /**
    * 選手の選択を変更したかどうか
    */
-  const isModifiedPlayers = useMemo(() => {
+  const isPlayersModified = useMemo(() => {
     if (!selectedTeam) {
       return false
     }
@@ -249,7 +249,7 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
    */
   const handlePlayersRegisterDialogClose = () => {
     // 変更があるのに閉じる場合は未保存アラートダイアログを表示
-    if (isModifiedPlayers) {
+    if (isPlayersModified) {
       openUnsavedDialogAfter(async () => {
         closePlayersRegisterDialog()
       })
@@ -344,7 +344,7 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
     isPlayersRegisterDialogSubmitDisabled,
     isUnsavedDialogOpen,
     // メモ
-    isModifiedPlayers,
+    isPlayersModified,
     // 関数
     isTeamCardActive,
     isPlayerActive,
