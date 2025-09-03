@@ -304,6 +304,8 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
           ...prev,
           [selectedTeam.id]: selectedPlayerIds,
         }))
+
+        resetSelections()
       })
 
       return { ok: true }
