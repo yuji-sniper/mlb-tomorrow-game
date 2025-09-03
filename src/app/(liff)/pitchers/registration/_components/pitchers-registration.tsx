@@ -114,7 +114,7 @@ export default function PitchersRegistration({
 
       {/* [start]未保存アラートダイアログ */}
       <ConfirmDialog
-        title="保存していません！"
+        title="※保存していません！"
         submitLabel="はい"
         cancelLabel="いいえ"
         isOpen={isUnsavedDialogOpen}
