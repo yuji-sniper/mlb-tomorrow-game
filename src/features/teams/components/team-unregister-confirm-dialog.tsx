@@ -7,7 +7,7 @@ type TeamUnregisterConfirmDialogProps = {
   isOpen: boolean
   onCancel: () => void
   onSubmit: () => void
-  disabled: boolean
+  isSubmitDisabled: boolean
   selectedTeam?: Team
 }
 
@@ -15,7 +15,7 @@ export default function TeamUnregisterConfirmDialog({
   isOpen,
   onCancel,
   onSubmit,
-  disabled,
+  isSubmitDisabled,
   selectedTeam,
 }: TeamUnregisterConfirmDialogProps) {
   return (
@@ -25,7 +25,7 @@ export default function TeamUnregisterConfirmDialog({
       title="チームの登録を解除しますか？"
       submitLabel="解除"
       onSubmit={onSubmit}
-      disabled={disabled}
+      isSubmitDisabled={isSubmitDisabled}
     >
       {selectedTeam ? (
         <Box

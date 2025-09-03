@@ -6,6 +6,7 @@ type UseDialog = () => {
   isCloseDisabled: boolean
   isSubmitDisabled: boolean
   open: (fn?: () => Promise<void>) => Promise<void>
+  openAfter: (fn?: () => Promise<void>) => Promise<void>
   close: (fn?: () => void) => void
   submit: (fn?: () => Promise<void>) => Promise<void>
 }
@@ -17,7 +18,7 @@ export const useDialog: UseDialog = () => {
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false)
 
   /**
-   * ダイアログを開く
+   * ダイアログを開く（非同期処理前）
    */
   const open = async (fn?: () => Promise<void>) => {
     setIsSubmitDisabled(true)
@@ -31,6 +32,23 @@ export const useDialog: UseDialog = () => {
       throw error
     } finally {
       setIsLoading(false)
+      setIsSubmitDisabled(false)
+    }
+  }
+
+  /**
+   * ダイアログを開く（非同期処理後）
+   */
+  const openAfter = async (fn?: () => Promise<void>) => {
+    setIsSubmitDisabled(true)
+
+    try {
+      await fn?.()
+      setIsOpen(true)
+    } catch (error) {
+      setIsOpen(false)
+      throw error
+    } finally {
       setIsSubmitDisabled(false)
     }
   }
@@ -74,6 +92,7 @@ export const useDialog: UseDialog = () => {
     isCloseDisabled,
     isSubmitDisabled,
     open,
+    openAfter,
     close,
     submit,
   }

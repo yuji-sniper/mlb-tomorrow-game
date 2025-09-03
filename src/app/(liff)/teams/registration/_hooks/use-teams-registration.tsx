@@ -4,7 +4,7 @@ import { ERROR_CODE } from "@/shared/constants/error"
 import { useErrorHandlerContext } from "@/shared/contexts/error-handler-context"
 import { useInitializationContext } from "@/shared/contexts/initialization-context"
 import { useLiffContext } from "@/shared/contexts/liff-context"
-import { useSnackbarContext } from "@/shared/contexts/snackbar-context"
+import { useDialog } from "@/shared/hooks/use-dialog"
 import type { Team } from "@/shared/types/team"
 import { initializeAction } from "../_actions/initialize-action"
 import { registerTeamAction } from "../_actions/register-team-action"
@@ -13,32 +13,49 @@ import { unregisterTeamAction } from "../_actions/unregister-team-action"
 type UseTeamsRegistration = () => {
   // 状態
   selectedTeam?: Team
-  isOpenRegisterConfirmDialog: boolean
-  isOpenUnregisterConfirmDialog: boolean
-  isSubmitting: boolean
+  isRegisterConfirmDialogOpen: boolean
+  isUnregisterConfirmDialogOpen: boolean
+  isRegisterConfirmDialogSubmitDisabled: boolean
+  isUnregisterConfirmDialogSubmitDisabled: boolean
   // 関数
   isTeamCardActive: (teamId: Team["id"]) => boolean
   getTeamBadgeType: (teamId: Team["id"]) => BadgeType | undefined
   handleTeamCardClick: (team: Team) => void
   handleRegisterConfirmDialogCancel: () => void
-  handleRegisterConfirmDialogSubmit: () => void
+  handleRegisterConfirmDialogSubmit: () => Promise<{ ok: boolean }>
   handleUnregisterConfirmDialogCancel: () => void
-  handleUnregisterConfirmDialogSubmit: () => void
+  handleUnregisterConfirmDialogSubmit: () => Promise<{ ok: boolean }>
 }
 
 export const useTeamsRegistration: UseTeamsRegistration = () => {
   const { isInitialized, setIsInitialized } = useInitializationContext()
   const { liff, relogin } = useLiffContext()
   const { handleError } = useErrorHandlerContext()
-  const { showSuccessSnackbar, showErrorSnackbar } = useSnackbarContext()
 
   const [selectedTeam, setSelectedTeam] = useState<Team | undefined>()
   const [registeredTeamIds, setRegisteredTeamIds] = useState<Team["id"][]>([])
-  const [isOpenRegisterConfirmDialog, setIsOpenRegisterConfirmDialog] =
-    useState(false)
-  const [isOpenUnregisterConfirmDialog, setIsOpenUnregisterConfirmDialog] =
-    useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  /**
+   * 登録確認ダイアログのフック
+   */
+  const {
+    isOpen: isRegisterConfirmDialogOpen,
+    isSubmitDisabled: isRegisterConfirmDialogSubmitDisabled,
+    openAfter: openRegisterConfirmDialogAfter,
+    close: closeRegisterConfirmDialog,
+    submit: submitRegisterConfirmDialog,
+  } = useDialog()
+
+  /**
+   * 登録解除確認ダイアログのフック
+   */
+  const {
+    isOpen: isUnregisterConfirmDialogOpen,
+    isSubmitDisabled: isUnregisterConfirmDialogSubmitDisabled,
+    openAfter: openUnregisterConfirmDialogAfter,
+    close: closeUnregisterConfirmDialog,
+    submit: submitUnregisterConfirmDialog,
+  } = useDialog()
 
   /**
    * 初期化
@@ -108,11 +125,14 @@ export const useTeamsRegistration: UseTeamsRegistration = () => {
    * チームカードをクリックする
    */
   const handleTeamCardClick = (team: Team) => {
-    setSelectedTeam(team)
     if (registeredTeamIds.includes(team.id)) {
-      setIsOpenUnregisterConfirmDialog(true)
+      openUnregisterConfirmDialogAfter(async () => {
+        setSelectedTeam(team)
+      })
     } else {
-      setIsOpenRegisterConfirmDialog(true)
+      openRegisterConfirmDialogAfter(async () => {
+        setSelectedTeam(team)
+      })
     }
   }
 
@@ -120,58 +140,60 @@ export const useTeamsRegistration: UseTeamsRegistration = () => {
    * 登録確認ダイアログを閉じる
    */
   const handleRegisterConfirmDialogCancel = () => {
-    setSelectedTeam(undefined)
-    setIsOpenRegisterConfirmDialog(false)
+    closeRegisterConfirmDialog(() => {
+      setSelectedTeam(undefined)
+    })
   }
 
   /**
    * 登録確認ダイアログ送信処理
    */
   const handleRegisterConfirmDialogSubmit = async () => {
-    setIsSubmitting(true)
-
     try {
-      if (!liff) {
-        throw new Error("LIFF is not initialized")
-      }
+      await submitRegisterConfirmDialog(async () => {
+        if (!liff) {
+          throw new Error("LIFF is not initialized")
+        }
 
-      // LINE IDトークン取得
-      const lineIdToken = liff.getIDToken()
-      if (!lineIdToken) {
-        relogin()
-        return
-      }
-
-      // チームが選択されていない場合はエラー
-      if (!selectedTeam) {
-        throw new Error("team is not selected")
-      }
-
-      // 送信APIを呼び出し
-      const request = {
-        lineIdToken,
-        teamId: selectedTeam.id,
-      }
-      const response = await registerTeamAction(request)
-      if (!response.ok) {
-        if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
+        // LINE IDトークン取得
+        const lineIdToken = liff.getIDToken()
+        if (!lineIdToken) {
           relogin()
           return
         }
-        throw new Error(response.error.message)
-      }
 
-      // データをセット
-      setRegisteredTeamIds([...registeredTeamIds, selectedTeam.id])
+        // チームが選択されていない場合はエラー
+        if (!selectedTeam) {
+          throw new Error("team is not selected")
+        }
 
-      showSuccessSnackbar("チームを登録しました")
+        // 送信APIを呼び出し
+        const request = {
+          lineIdToken,
+          teamId: selectedTeam.id,
+        }
+        const response = await registerTeamAction(request)
+        if (!response.ok) {
+          if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
+            relogin()
+            return
+          }
+          throw new Error(response.error.message)
+        }
+
+        // データをセット
+        setRegisteredTeamIds([...registeredTeamIds, selectedTeam.id])
+      })
+
+      return { ok: true }
     } catch (error) {
       console.error(error)
-      showErrorSnackbar("チームの登録に失敗しました")
+
+      return { ok: false }
     } finally {
-      setIsSubmitting(false)
-      setSelectedTeam(undefined)
-      setIsOpenRegisterConfirmDialog(false)
+      closeRegisterConfirmDialog(() => {
+        setSelectedTeam(undefined)
+      })
     }
   }
 
@@ -179,69 +201,72 @@ export const useTeamsRegistration: UseTeamsRegistration = () => {
    * 登録解除確認ダイアログを閉じる
    */
   const handleUnregisterConfirmDialogCancel = () => {
-    setSelectedTeam(undefined)
-    setIsOpenUnregisterConfirmDialog(false)
+    closeUnregisterConfirmDialog(() => {
+      setSelectedTeam(undefined)
+    })
   }
 
   /**
    * 登録解除確認ダイアログ送信処理
    */
   const handleUnregisterConfirmDialogSubmit = async () => {
-    setIsSubmitting(true)
-
     try {
-      if (!liff) {
-        throw new Error("LIFF is not initialized")
-      }
+      await submitUnregisterConfirmDialog(async () => {
+        if (!liff) {
+          throw new Error("LIFF is not initialized")
+        }
 
-      // LINE IDトークン取得
-      const lineIdToken = liff.getIDToken()
-      if (!lineIdToken) {
-        relogin()
-        return
-      }
-
-      // チームが選択されていない場合はエラー
-      if (!selectedTeam) {
-        throw new Error("team is not selected")
-      }
-
-      // 送信APIを呼び出し
-      const request = {
-        lineIdToken,
-        teamId: selectedTeam.id,
-      }
-      const response = await unregisterTeamAction(request)
-      if (!response.ok) {
-        if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
+        // LINE IDトークン取得
+        const lineIdToken = liff.getIDToken()
+        if (!lineIdToken) {
           relogin()
           return
         }
-        throw new Error(response.error.message)
-      }
 
-      // データをセット
-      setRegisteredTeamIds(
-        registeredTeamIds.filter((id) => id !== selectedTeam.id),
-      )
+        // チームが選択されていない場合はエラー
+        if (!selectedTeam) {
+          throw new Error("team is not selected")
+        }
 
-      showSuccessSnackbar("チームの登録を解除しました")
+        // 送信APIを呼び出し
+        const request = {
+          lineIdToken,
+          teamId: selectedTeam.id,
+        }
+        const response = await unregisterTeamAction(request)
+        if (!response.ok) {
+          if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
+            relogin()
+            return
+          }
+          throw new Error(response.error.message)
+        }
+
+        // データをセット
+        setRegisteredTeamIds(
+          registeredTeamIds.filter((id) => id !== selectedTeam.id),
+        )
+      })
+
+      return { ok: true }
     } catch (error) {
       console.error(error)
-      showErrorSnackbar("チームの登録解除に失敗しました")
+
+      return { ok: false }
     } finally {
-      setIsSubmitting(false)
-      setSelectedTeam(undefined)
-      setIsOpenUnregisterConfirmDialog(false)
+      closeUnregisterConfirmDialog(() => {
+        setSelectedTeam(undefined)
+      })
     }
   }
 
   return {
     // 状態
     selectedTeam,
-    isOpenRegisterConfirmDialog,
-    isOpenUnregisterConfirmDialog,
-    isSubmitting,
+    isRegisterConfirmDialogOpen,
+    isUnregisterConfirmDialogOpen,
+    isRegisterConfirmDialogSubmitDisabled,
+    isUnregisterConfirmDialogSubmitDisabled,
     // 関数
     isTeamCardActive,
     getTeamBadgeType,

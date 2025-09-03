@@ -65,7 +65,7 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
    */
   const {
     isOpen: isUnsavedDialogOpen,
-    open: openUnsavedDialog,
+    openAfter: openUnsavedDialogAfter,
     close: closeUnsavedDialog,
   } = useDialog()
 
@@ -189,7 +189,7 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
    */
   const handleTeamCardClick = async (team: Team): Promise<{ ok: boolean }> => {
     try {
-      openPlayersRegisterDialog(async () => {
+      await openPlayersRegisterDialog(async () => {
         setSelectedTeam(team)
         setSelectedPlayerIds(registeredPlayerIdsByTeamId[team.id] || [])
 
@@ -250,13 +250,13 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
   const handlePlayersRegisterDialogClose = () => {
     // 変更があるのに閉じる場合は未保存アラートダイアログを表示
     if (isModifiedPlayers) {
-      openUnsavedDialog(async () => {
+      openUnsavedDialogAfter(async () => {
         closePlayersRegisterDialog()
       })
       return
     }
 
-    closePlayersRegisterDialog(async () => {
+    closePlayersRegisterDialog(() => {
       resetSelections()
     })
   }
@@ -268,7 +268,7 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
     ok: boolean
   }> => {
     try {
-      submitPlayersRegisterDialog(async () => {
+      await submitPlayersRegisterDialog(async () => {
         if (!liff) {
           throw new Error("LIFF is not initialized")
         }
@@ -320,16 +320,18 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
    * 未保存アラートダイアログのキャンセルボタンを押した時の処理
    */
   const handleUnsavedDialogCancel = () => {
-    closeUnsavedDialog()
-    openPlayersRegisterDialog()
+    openPlayersRegisterDialog(async () => {
+      closeUnsavedDialog()
+    })
   }
 
   /**
    * 未保存アラートダイアログの送信ボタンを押した時の処理
    */
   const handleUnsavedDialogSubmit = () => {
-    resetSelections()
-    closeUnsavedDialog()
+    closeUnsavedDialog(() => {
+      resetSelections()
+    })
   }
 
   return {
