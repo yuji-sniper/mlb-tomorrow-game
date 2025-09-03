@@ -3,7 +3,7 @@ import { ERROR_CODE } from "@/shared/constants/error"
 import { useErrorHandlerContext } from "@/shared/contexts/error-handler-context"
 import { useInitializationContext } from "@/shared/contexts/initialization-context"
 import { useLiffContext } from "@/shared/contexts/liff-context"
-import { useSnackbarContext } from "@/shared/contexts/snackbar-context"
+import { useDialog } from "@/shared/hooks/use-dialog"
 import type { Player } from "@/shared/types/player"
 import type { Team } from "@/shared/types/team"
 import { fetchPitchersByTeamIdAction } from "../_actions/fetch-pitchers-by-team-id-action"
@@ -13,20 +13,22 @@ import { registerPitchersAction } from "../_actions/register-pitchers-action"
 type UsePitchersRegistration = () => {
   // 状態
   selectedTeam: Team | undefined
-  playersGroupedByTeamId: Record<Team["id"], Player[]>
+  currentTeamPlayers: Player[]
+  isPlayersRegisterDialogOpen: boolean
   isPlayersRegisterDialogLoading: boolean
-  isSubmitting: boolean
+  isPlayersRegisterDialogCloseDisabled: boolean
+  isPlayersRegisterDialogSubmitDisabled: boolean
   isUnsavedDialogOpen: boolean
   // メモ
-  isSubmitDisabled: boolean
+  isModifiedPlayers: boolean
   // 関数
   isTeamCardActive: (teamId: Team["id"]) => boolean
   isPlayerActive: (playerId: Player["id"]) => boolean
   getRegisteredCountOfTeam: (teamId: Team["id"]) => number
-  handleTeamCardClick: (team: Team) => void
+  handleTeamCardClick: (team: Team) => Promise<{ ok: boolean }>
   handlePlayerClick: (player: Player) => void
   handlePlayersRegisterDialogClose: () => void
-  handlePlayersRegisterDialogSubmit: () => void
+  handlePlayersRegisterDialogSubmit: () => Promise<{ ok: boolean }>
   handleUnsavedDialogCancel: () => void
   handleUnsavedDialogSubmit: () => void
 }
@@ -35,48 +37,65 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
   const { isInitialized, setIsInitialized } = useInitializationContext()
   const { liff, relogin } = useLiffContext()
   const { handleError } = useErrorHandlerContext()
-  const { showSuccessSnackbar, showErrorSnackbar } = useSnackbarContext()
 
   const [selectedTeam, setSelectedTeam] = useState<Team>()
+  const [currentTeamPlayers, setCurrentTeamPlayers] = useState<Player[]>([])
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<Player["id"][]>([])
   const [playersGroupedByTeamId, setPlayersGroupedByTeamId] = useState<
     Record<Team["id"], Player[]>
   >({})
-  const [isPlayersRegisterDialogLoading, setIsPlayersRegisterDialogLoading] =
-    useState(false)
   const [registeredPlayerIdsByTeamId, setRegisteredPlayerIdsByTeamId] =
     useState<Record<Team["id"], Player["id"][]>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isUnsavedDialogOpen, setIsUnsavedDialogOpen] = useState(false)
 
   /**
-   * ピッチャー登録ダイアログをリセットする
+   * ピッチャー登録ダイアログのフック
    */
-  const resetPlayersRegisterDialog = () => {
-    setSelectedTeam(undefined)
-    setSelectedPlayerIds([])
-    setIsPlayersRegisterDialogLoading(false)
-  }
+  const {
+    isOpen: isPlayersRegisterDialogOpen,
+    isLoading: isPlayersRegisterDialogLoading,
+    isCloseDisabled: isPlayersRegisterDialogCloseDisabled,
+    isSubmitDisabled: isPlayersRegisterDialogSubmitDisabled,
+    open: openPlayersRegisterDialog,
+    close: closePlayersRegisterDialog,
+    submit: submitPlayersRegisterDialog,
+  } = useDialog()
 
   /**
-   * 登録ボタンの無効状態を返す
+   * 未保存アラートダイアログのフック
    */
-  const isSubmitDisabled = useMemo(() => {
+  const {
+    isOpen: isUnsavedDialogOpen,
+    open: openUnsavedDialog,
+    close: closeUnsavedDialog,
+  } = useDialog()
+
+  /**
+   * 選手の選択を変更したかどうか
+   */
+  const isModifiedPlayers = useMemo(() => {
     if (!selectedTeam) {
-      return true
+      return false
     }
 
     const registeredPlayerIds =
       registeredPlayerIdsByTeamId[selectedTeam.id] || []
 
-    // 登録された選手IDと選択された選手IDの長さが同じ場合は無効
+    // 登録された選手IDと選択された選手IDの長さが違う場合は変更あり
     if (registeredPlayerIds.length !== selectedPlayerIds.length) {
-      return false
+      return true
     }
 
-    // 登録された選手IDと選択された選手IDが一致する場合は無効
-    return registeredPlayerIds.every((id) => selectedPlayerIds.includes(id))
+    // 登録中の選手IDと選択中の選手IDが一致しない場合は変更あり
+    return registeredPlayerIds.some((id) => !selectedPlayerIds.includes(id))
   }, [selectedTeam, selectedPlayerIds, registeredPlayerIdsByTeamId])
+
+  /**
+   * 選択状態をリセットする
+   */
+  const resetSelections = () => {
+    setSelectedTeam(undefined)
+    setSelectedPlayerIds([])
+  }
 
   /**
    * 初期化
@@ -131,67 +150,81 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
   /**
    * チームカードのアクティブ状態を返す
    */
-  const isTeamCardActive = (teamId: Team["id"]) => {
-    return (
-      selectedTeam?.id === teamId ||
-      registeredPlayerIdsByTeamId[teamId]?.length > 0
-    )
-  }
+  const isTeamCardActive = useCallback(
+    (teamId: Team["id"]) => {
+      return (
+        selectedTeam?.id === teamId ||
+        registeredPlayerIdsByTeamId[teamId]?.length > 0
+      )
+    },
+    [selectedTeam, registeredPlayerIdsByTeamId],
+  )
 
   /**
    * 選手のアクティブ状態を返す
    */
-  const isPlayerActive = (playerId: Player["id"]) => {
-    if (!selectedTeam) {
-      return false
-    }
+  const isPlayerActive = useCallback(
+    (playerId: Player["id"]) => {
+      if (!selectedTeam) {
+        return false
+      }
 
-    return selectedPlayerIds.includes(playerId)
-  }
+      return selectedPlayerIds.includes(playerId)
+    },
+    [selectedTeam, selectedPlayerIds],
+  )
 
   /**
    * チームのピッチャー登録数を返す
    */
-  const getRegisteredCountOfTeam = (teamId: Team["id"]) => {
-    return registeredPlayerIdsByTeamId[teamId]?.length || 0
-  }
+  const getRegisteredCountOfTeam = useCallback(
+    (teamId: Team["id"]) => {
+      return registeredPlayerIdsByTeamId[teamId]?.length || 0
+    },
+    [registeredPlayerIdsByTeamId],
+  )
 
   /**
    * チームカードクリック時の処理
    */
-  const handleTeamCardClick = async (team: Team) => {
-    setSelectedTeam(team)
-    setIsPlayersRegisterDialogLoading(true)
-    setSelectedPlayerIds(registeredPlayerIdsByTeamId[team.id] || [])
-
+  const handleTeamCardClick = async (team: Team): Promise<{ ok: boolean }> => {
     try {
-      // チームのピッチャーがすでに取得済みの場合は、そのままダイアログを開く
-      const players = playersGroupedByTeamId[team.id]
-      if (players) {
-        setIsPlayersRegisterDialogLoading(false)
-        return
-      }
+      openPlayersRegisterDialog(async () => {
+        setSelectedTeam(team)
+        setSelectedPlayerIds(registeredPlayerIdsByTeamId[team.id] || [])
 
-      // チームのピッチャーを取得
-      const request = {
-        teamId: team.id,
-      }
-      const response = await fetchPitchersByTeamIdAction(request)
-      if (!response.ok) {
-        throw new Error(response.error.message)
-      }
-      const { players: fetchedPlayers } = response.data
+        // チームのピッチャーがすでに取得済みの場合は、そのままダイアログを開く
+        const players = playersGroupedByTeamId[team.id]
+        if (players) {
+          setCurrentTeamPlayers(players)
+          return
+        }
 
-      // データをセット
-      setPlayersGroupedByTeamId((prev) => ({
-        ...prev,
-        [team.id]: fetchedPlayers,
-      }))
+        // チームのピッチャーを取得
+        const request = {
+          teamId: team.id,
+        }
+        const response = await fetchPitchersByTeamIdAction(request)
+        if (!response.ok) {
+          throw new Error(response.error.message)
+        }
+        const { players: fetchedPlayers } = response.data
+
+        // データをセット
+        setPlayersGroupedByTeamId((prev) => ({
+          ...prev,
+          [team.id]: fetchedPlayers,
+        }))
+        setCurrentTeamPlayers(fetchedPlayers)
+      })
+
+      return { ok: true }
     } catch (error) {
+      resetSelections()
+
       console.error(error)
-      showErrorSnackbar("ピッチャーの取得に失敗しました")
-    } finally {
-      setIsPlayersRegisterDialogLoading(false)
+
+      return { ok: false }
     }
   }
 
@@ -202,6 +235,7 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
     // 選手の選択状態を切り替える
     setSelectedPlayerIds((prev) => {
       const isSelected = prev.some((id) => id === player.id)
+
       if (isSelected) {
         return prev.filter((id) => id !== player.id)
       } else {
@@ -214,63 +248,69 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
    * 選手選択ダイアログを閉じる
    */
   const handlePlayersRegisterDialogClose = () => {
-    if (!isSubmitDisabled) {
-      setIsUnsavedDialogOpen(true)
+    // 変更があるのに閉じる場合は未保存アラートダイアログを表示
+    if (isModifiedPlayers) {
+      openUnsavedDialog(async () => {
+        closePlayersRegisterDialog()
+      })
       return
     }
 
-    resetPlayersRegisterDialog()
+    closePlayersRegisterDialog(async () => {
+      resetSelections()
+    })
   }
 
   /**
    * ピッチャーの登録を行う
    */
-  const handlePlayersRegisterDialogSubmit = async () => {
-    setIsSubmitting(true)
-
+  const handlePlayersRegisterDialogSubmit = async (): Promise<{
+    ok: boolean
+  }> => {
     try {
-      if (!liff) {
-        throw new Error("LIFF is not initialized")
-      }
+      submitPlayersRegisterDialog(async () => {
+        if (!liff) {
+          throw new Error("LIFF is not initialized")
+        }
 
-      if (!selectedTeam) {
-        throw new Error("Team is not selected")
-      }
+        if (!selectedTeam) {
+          throw new Error("Team is not selected")
+        }
 
-      // LINE IDトークン取得
-      const lineIdToken = liff.getIDToken()
-      if (!lineIdToken) {
-        relogin()
-        return
-      }
-
-      // 登録APIを呼び出し
-      const request = {
-        lineIdToken,
-        oldPlayerIds: registeredPlayerIdsByTeamId[selectedTeam.id] || [],
-        newPlayerIds: selectedPlayerIds,
-      }
-      const response = await registerPitchersAction(request)
-      if (!response.ok) {
-        if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
+        // LINE IDトークン取得
+        const lineIdToken = liff.getIDToken()
+        if (!lineIdToken) {
           relogin()
           return
         }
-        throw new Error(response.error.message)
-      }
 
-      // データをセット
-      setRegisteredPlayerIdsByTeamId((prev) => ({
-        ...prev,
-        [selectedTeam.id]: selectedPlayerIds,
-      }))
+        // 登録APIを呼び出し
+        const request = {
+          lineIdToken,
+          oldPlayerIds: registeredPlayerIdsByTeamId[selectedTeam.id] || [],
+          newPlayerIds: selectedPlayerIds,
+        }
+        const response = await registerPitchersAction(request)
+        if (!response.ok) {
+          if (response.error.code === ERROR_CODE.UNAUTHORIZED) {
+            relogin()
+            return
+          }
+          throw new Error(response.error.message)
+        }
 
-      showSuccessSnackbar("ピッチャーを登録しました")
+        // データをセット
+        setRegisteredPlayerIdsByTeamId((prev) => ({
+          ...prev,
+          [selectedTeam.id]: selectedPlayerIds,
+        }))
+      })
+
+      return { ok: true }
     } catch (error) {
       console.error(error)
-      showErrorSnackbar("ピッチャーの登録に失敗しました")
-    } finally {
-      setIsSubmitting(false)
+
+      return { ok: false }
     }
   }
 
@@ -278,25 +318,29 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
    * 未保存アラートダイアログのキャンセルボタンを押した時の処理
    */
   const handleUnsavedDialogCancel = () => {
-    setIsUnsavedDialogOpen(false)
+    closeUnsavedDialog()
+    openPlayersRegisterDialog()
   }
 
   /**
    * 未保存アラートダイアログの送信ボタンを押した時の処理
    */
   const handleUnsavedDialogSubmit = () => {
-    setIsUnsavedDialogOpen(false)
-    resetPlayersRegisterDialog()
+    resetSelections()
+    closeUnsavedDialog()
   }
 
   return {
     // 状態
     selectedTeam,
-    playersGroupedByTeamId,
+    currentTeamPlayers,
+    isPlayersRegisterDialogOpen,
     isPlayersRegisterDialogLoading,
-    isSubmitDisabled,
-    isSubmitting,
+    isPlayersRegisterDialogCloseDisabled,
+    isPlayersRegisterDialogSubmitDisabled,
     isUnsavedDialogOpen,
+    // メモ
+    isModifiedPlayers,
     // 関数
     isTeamCardActive,
     isPlayerActive,

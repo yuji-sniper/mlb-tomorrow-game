@@ -1,12 +1,14 @@
 "use client"
 
 import { Typography } from "@mui/material"
+import { useCallback } from "react"
 import PlayersRegisterDialog from "@/features/players/components/players-register-dialog"
 import TeamsList from "@/features/teams/components/teams-list"
 import { CountBadge } from "@/shared/components/ui/badge/count-badge/count-badge"
 import ConfirmDialog from "@/shared/components/ui/dialog/confirm-dialog/confirm-dialog"
 import Title from "@/shared/components/ui/title/title"
 import { LoadingUntilInitialized } from "@/shared/contexts/initialization-context"
+import { useSnackbarContext } from "@/shared/contexts/snackbar-context"
 import type { League } from "@/shared/types/league"
 import type { Team } from "@/shared/types/team"
 import { usePitchersRegistration } from "../_hooks/use-pitchers-registration"
@@ -18,15 +20,19 @@ type PitchersRegistrationProps = {
 export default function PitchersRegistration({
   leagues,
 }: PitchersRegistrationProps) {
+  const { showErrorSnackbar, showSuccessSnackbar } = useSnackbarContext()
+
   const {
     // 状態
     selectedTeam,
-    playersGroupedByTeamId,
+    currentTeamPlayers,
+    isPlayersRegisterDialogOpen,
     isPlayersRegisterDialogLoading,
-    isSubmitting,
+    isPlayersRegisterDialogCloseDisabled,
+    isPlayersRegisterDialogSubmitDisabled,
     isUnsavedDialogOpen,
     // メモ
-    isSubmitDisabled,
+    isModifiedPlayers,
     // 関数
     isTeamCardActive,
     isPlayerActive,
@@ -42,9 +48,34 @@ export default function PitchersRegistration({
   /**
    * チームカードに表示するバッジを取得する
    */
-  const getTeamBadge = (teamId: Team["id"]) => {
-    const count = getRegisteredCountOfTeam(teamId)
-    return count > 0 ? <CountBadge count={count} /> : undefined
+  const getTeamBadge = useCallback(
+    (teamId: Team["id"]) => {
+      const count = getRegisteredCountOfTeam(teamId)
+      return count > 0 ? <CountBadge count={count} /> : undefined
+    },
+    [getRegisteredCountOfTeam],
+  )
+
+  /**
+   * チームカードクリック
+   */
+  const onTeamCardClick = async (team: Team) => {
+    const result = await handleTeamCardClick(team)
+
+    if (!result.ok) {
+      showErrorSnackbar("ピッチャーの取得に失敗しました")
+    }
+  }
+
+  /**
+   * ピッチャー登録ダイアログ送信
+   */
+  const onPlayersRegisterDialogSubmit = async () => {
+    const result = await handlePlayersRegisterDialogSubmit()
+
+    result.ok
+      ? showSuccessSnackbar("ピッチャーを登録しました")
+      : showErrorSnackbar("ピッチャーの登録に失敗しました")
   }
 
   return (
@@ -58,7 +89,7 @@ export default function PitchersRegistration({
         leagues={leagues}
         isTeamActive={isTeamCardActive}
         getTeamBadge={getTeamBadge}
-        onTeamClick={handleTeamCardClick}
+        onTeamClick={onTeamCardClick}
       />
       {/* [end]チーム一覧 */}
 
@@ -66,15 +97,17 @@ export default function PitchersRegistration({
       {selectedTeam && (
         <PlayersRegisterDialog
           team={selectedTeam}
-          players={playersGroupedByTeamId[selectedTeam.id] || []}
+          players={currentTeamPlayers}
           isPlayerActive={isPlayerActive}
-          isOpen={!!selectedTeam && !isUnsavedDialogOpen}
+          isOpen={isPlayersRegisterDialogOpen}
           isLoading={isPlayersRegisterDialogLoading}
-          disabled={isSubmitting}
-          submitDisabled={isSubmitDisabled}
+          closeDisabled={isPlayersRegisterDialogCloseDisabled}
+          submitDisabled={
+            isPlayersRegisterDialogSubmitDisabled || !isModifiedPlayers
+          }
           onPlayerClick={handlePlayerClick}
           onClose={handlePlayersRegisterDialogClose}
-          onSubmit={handlePlayersRegisterDialogSubmit}
+          onSubmit={onPlayersRegisterDialogSubmit}
         />
       )}
       {/* [end]ピッチャー登録ダイアログ */}
@@ -92,6 +125,7 @@ export default function PitchersRegistration({
           キャンセルしてもよろしいですか？
         </Typography>
       </ConfirmDialog>
+      {/* [end]未保存アラートダイアログ */}
     </LoadingUntilInitialized>
   )
 }

@@ -13,7 +13,8 @@ type ConfirmDialogProps = {
   submitLabel?: string
   isOpen: boolean
   isLoading?: boolean
-  disabled?: boolean
+  isCancelDisabled?: boolean
+  isSubmitDisabled?: boolean
   onCancel: () => void
   onSubmit: () => void
   children: React.ReactNode
@@ -25,7 +26,8 @@ export default function ConfirmDialog({
   submitLabel,
   isOpen,
   isLoading,
-  disabled,
+  isCancelDisabled,
+  isSubmitDisabled,
   onCancel,
   onSubmit,
   children,
@@ -42,7 +44,7 @@ export default function ConfirmDialog({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onCancel} color="inherit" disabled={disabled}>
+        <Button onClick={onCancel} color="inherit" disabled={isCancelDisabled}>
           {cancelLabel}
         </Button>
 
@@ -50,7 +52,7 @@ export default function ConfirmDialog({
           onClick={onSubmit}
           color="primary"
           variant="contained"
-          disabled={disabled}
+          disabled={isSubmitDisabled}
         >
           {submitLabel}
         </Button>

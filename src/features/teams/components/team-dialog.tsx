@@ -17,7 +17,7 @@ type TeamDialogProps = {
   submitLabel?: string
   isOpen: boolean
   isLoading: boolean
-  disabled?: boolean
+  closeDisabled?: boolean
   submitDisabled?: boolean
   onClose: () => void
   onSubmit: () => void
@@ -30,7 +30,7 @@ export default function TeamDialog({
   submitLabel = "保存",
   isOpen,
   isLoading,
-  disabled,
+  closeDisabled,
   submitDisabled,
   onClose,
   onSubmit,
@@ -55,14 +55,14 @@ export default function TeamDialog({
         {isLoading ? <CenterSpinner /> : children}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="inherit" disabled={disabled}>
+        <Button onClick={onClose} color="inherit" disabled={closeDisabled}>
           {closeLabel}
         </Button>
         <Button
           onClick={onSubmit}
           color="primary"
           variant="contained"
-          disabled={disabled || submitDisabled}
+          disabled={submitDisabled}
         >
           {submitLabel}
         </Button>

@@ -18,7 +18,7 @@ type PlayersRegisterDialogProps = {
   players: Player[]
   isOpen: boolean
   isLoading: boolean
-  disabled: boolean
+  closeDisabled: boolean
   submitDisabled: boolean
   isPlayerActive: (playerId: Player["id"]) => boolean
   onPlayerClick: (player: Player) => void
@@ -31,7 +31,7 @@ export default function PlayersRegisterDialog({
   players,
   isOpen,
   isLoading,
-  disabled,
+  closeDisabled,
   submitDisabled,
   isPlayerActive,
   onPlayerClick,
@@ -43,7 +43,7 @@ export default function PlayersRegisterDialog({
       team={team}
       isOpen={isOpen}
       isLoading={isLoading}
-      disabled={disabled}
+      closeDisabled={closeDisabled}
       submitDisabled={submitDisabled}
       onClose={onClose}
       onSubmit={onSubmit}
