@@ -23,8 +23,10 @@ export default function TeamsRegistration({ leagues }: TeamsRegistrationProps) {
     // 状態
     selectedTeam,
     isRegisterConfirmDialogOpen,
-    isUnregisterConfirmDialogOpen,
+    isRegisterConfirmDialogCancelDisabled,
     isRegisterConfirmDialogSubmitDisabled,
+    isUnregisterConfirmDialogOpen,
+    isUnregisterConfirmDialogCancelDisabled,
     isUnregisterConfirmDialogSubmitDisabled,
     // 関数
     isTeamCardActive,
@@ -87,9 +89,10 @@ export default function TeamsRegistration({ leagues }: TeamsRegistrationProps) {
       {/* [start]登録確認ダイアログ */}
       <TeamRegisterConfirmDialog
         isOpen={isRegisterConfirmDialogOpen}
+        isCancelDisabled={isRegisterConfirmDialogCancelDisabled}
+        isSubmitDisabled={isRegisterConfirmDialogSubmitDisabled}
         onCancel={handleRegisterConfirmDialogCancel}
         onSubmit={onRegisterConfirmDialogSubmit}
-        disabled={isRegisterConfirmDialogSubmitDisabled}
         selectedTeam={selectedTeam}
       />
       {/* [end]登録確認ダイアログ */}
@@ -97,9 +100,10 @@ export default function TeamsRegistration({ leagues }: TeamsRegistrationProps) {
       {/* [start]登録解除確認ダイアログ */}
       <TeamUnregisterConfirmDialog
         isOpen={isUnregisterConfirmDialogOpen}
+        isCancelDisabled={isUnregisterConfirmDialogCancelDisabled}
+        isSubmitDisabled={isUnregisterConfirmDialogSubmitDisabled}
         onCancel={handleUnregisterConfirmDialogCancel}
         onSubmit={onUnregisterConfirmDialogSubmit}
-        isSubmitDisabled={isUnregisterConfirmDialogSubmitDisabled}
         selectedTeam={selectedTeam}
       />
       {/* [end]登録解除確認ダイアログ */}

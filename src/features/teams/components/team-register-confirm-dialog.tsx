@@ -5,27 +5,30 @@ import { generateTeamImageUrl } from "../utils/team-image"
 
 type TeamRegisterConfirmDialogProps = {
   isOpen: boolean
+  isCancelDisabled: boolean
+  isSubmitDisabled: boolean
   onCancel: () => void
   onSubmit: () => void
-  disabled: boolean
   selectedTeam?: Team
 }
 
 export default function TeamRegisterConfirmDialog({
   isOpen,
+  isCancelDisabled,
+  isSubmitDisabled,
   onCancel,
   onSubmit,
-  disabled,
   selectedTeam,
 }: TeamRegisterConfirmDialogProps) {
   return (
     <ConfirmDialog
-      isOpen={isOpen}
-      onCancel={onCancel}
       title="チームを登録しますか？"
       submitLabel="登録"
+      isOpen={isOpen}
+      isCancelDisabled={isCancelDisabled}
+      isSubmitDisabled={isSubmitDisabled}
+      onCancel={onCancel}
       onSubmit={onSubmit}
-      disabled={disabled}
     >
       {selectedTeam ? (
         <Box

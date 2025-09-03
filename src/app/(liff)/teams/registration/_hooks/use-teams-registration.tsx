@@ -14,8 +14,10 @@ type UseTeamsRegistration = () => {
   // 状態
   selectedTeam?: Team
   isRegisterConfirmDialogOpen: boolean
-  isUnregisterConfirmDialogOpen: boolean
+  isRegisterConfirmDialogCancelDisabled: boolean
   isRegisterConfirmDialogSubmitDisabled: boolean
+  isUnregisterConfirmDialogOpen: boolean
+  isUnregisterConfirmDialogCancelDisabled: boolean
   isUnregisterConfirmDialogSubmitDisabled: boolean
   // 関数
   isTeamCardActive: (teamId: Team["id"]) => boolean
@@ -40,6 +42,7 @@ export const useTeamsRegistration: UseTeamsRegistration = () => {
    */
   const {
     isOpen: isRegisterConfirmDialogOpen,
+    isCloseDisabled: isRegisterConfirmDialogCancelDisabled,
     isSubmitDisabled: isRegisterConfirmDialogSubmitDisabled,
     openAfter: openRegisterConfirmDialogAfter,
     close: closeRegisterConfirmDialog,
@@ -51,6 +54,7 @@ export const useTeamsRegistration: UseTeamsRegistration = () => {
    */
   const {
     isOpen: isUnregisterConfirmDialogOpen,
+    isCloseDisabled: isUnregisterConfirmDialogCancelDisabled,
     isSubmitDisabled: isUnregisterConfirmDialogSubmitDisabled,
     openAfter: openUnregisterConfirmDialogAfter,
     close: closeUnregisterConfirmDialog,
@@ -264,8 +268,10 @@ export const useTeamsRegistration: UseTeamsRegistration = () => {
     // 状態
     selectedTeam,
     isRegisterConfirmDialogOpen,
-    isUnregisterConfirmDialogOpen,
+    isRegisterConfirmDialogCancelDisabled,
     isRegisterConfirmDialogSubmitDisabled,
+    isUnregisterConfirmDialogOpen,
+    isUnregisterConfirmDialogCancelDisabled,
     isUnregisterConfirmDialogSubmitDisabled,
     // 関数
     isTeamCardActive,
