@@ -74,8 +74,8 @@ export default function PitchersRegistration({
     const result = await handlePlayersRegisterDialogSubmit()
 
     result.ok
-      ? showSuccessSnackbar("ピッチャーを登録しました")
-      : showErrorSnackbar("ピッチャーの登録に失敗しました")
+      ? showSuccessSnackbar("ピッチャー登録を保存しました")
+      : showErrorSnackbar("ピッチャー登録の保存に失敗しました")
   }
 
   return (
