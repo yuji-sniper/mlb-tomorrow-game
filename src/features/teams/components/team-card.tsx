@@ -29,7 +29,7 @@ export default function TeamCard({
         border: "3px solid",
         borderColor: isActive ? "primary.main" : "white",
         bgcolor: "white",
-        opacity: isActive ? 0.83 : 1,
+        opacity: isActive ? 0.8 : 1,
       }}
     >
       <CardContent
