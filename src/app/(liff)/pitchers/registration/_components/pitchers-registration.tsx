@@ -121,7 +121,9 @@ export default function PitchersRegistration({
         onCancel={handleUnsavedDialogCancel}
         onSubmit={handleUnsavedDialogSubmit}
       >
-        <Typography color="text.secondary">キャンセルしますか？</Typography>
+        <Typography color="text.secondary">
+          未保存のままキャンセルしますか？
+        </Typography>
       </ConfirmDialog>
       {/* [end]未保存アラートダイアログ */}
     </LoadingUntilInitialized>
