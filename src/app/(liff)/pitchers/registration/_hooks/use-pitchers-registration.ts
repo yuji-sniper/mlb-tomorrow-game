@@ -90,14 +90,6 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
   }, [selectedTeam, selectedPlayerIds, registeredPlayerIdsByTeamId])
 
   /**
-   * 選択状態をリセットする
-   */
-  const resetSelections = () => {
-    setSelectedTeam(undefined)
-    setSelectedPlayerIds([])
-  }
-
-  /**
    * 初期化
    */
   const initialize = useCallback(async () => {
@@ -193,10 +185,12 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
         setSelectedTeam(team)
         setSelectedPlayerIds(registeredPlayerIdsByTeamId[team.id] || [])
 
+        const registeredPlayerIds = registeredPlayerIdsByTeamId[team.id] || []
+
         // チームのピッチャーがすでに取得済みの場合は、そのままダイアログを開く
         const players = playersGroupedByTeamId[team.id]
         if (players) {
-          setCurrentTeamPlayers(players)
+          setCurrentTeamPlayersOrderedByRegistered(players, registeredPlayerIds)
           return
         }
 
@@ -215,7 +209,10 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
           ...prev,
           [team.id]: fetchedPlayers,
         }))
-        setCurrentTeamPlayers(fetchedPlayers)
+        setCurrentTeamPlayersOrderedByRegistered(
+          fetchedPlayers,
+          registeredPlayerIds,
+        )
       })
 
       return { ok: true }
@@ -332,6 +329,42 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
     closeUnsavedDialog(() => {
       resetSelections()
     })
+  }
+
+  /** Private Functions **/
+
+  /**
+   * 選択状態をリセットする
+   */
+  const resetSelections = () => {
+    setSelectedTeam(undefined)
+    setSelectedPlayerIds([])
+  }
+
+  /**
+   * 選手を、登録中の選手を先頭にして並べ替える
+   */
+  const setCurrentTeamPlayersOrderedByRegistered = (
+    players: Player[],
+    registeredPlayerIds: Player["id"][],
+  ) => {
+    if (registeredPlayerIds.length === 0) {
+      setCurrentTeamPlayers(players)
+      return
+    }
+
+    const registeredPlayerIdsSet = new Set(registeredPlayerIds)
+
+    const registered: Player[] = []
+    const unregistered: Player[] = []
+
+    players.forEach((player) => {
+      registeredPlayerIdsSet.has(player.id)
+        ? registered.push(player)
+        : unregistered.push(player)
+    })
+
+    setCurrentTeamPlayers([...registered, ...unregistered])
   }
 
   return {
