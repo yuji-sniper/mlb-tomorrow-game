@@ -140,13 +140,9 @@ export async function GET(request: NextRequest) {
  * 認証を行う
  */
 function authenticate(request: NextRequest) {
-  const auth = request.headers.get("Authorization")
+  const requestApiKey = request.headers.get("x-api-key")
 
-  console.log("auth", auth)
-
-  return true
-
-  // return auth === `Bearer ${process.env.CRON_SECRET}`
+  return requestApiKey === process.env.API_KEY
 }
 
 /**
