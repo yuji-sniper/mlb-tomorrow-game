@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * 認証を行う
+ * APIキー認証
  */
 function authenticate(request: NextRequest) {
   const requestApiKey = request.headers.get("x-api-key")
