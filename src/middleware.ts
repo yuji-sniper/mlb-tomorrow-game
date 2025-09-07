@@ -47,7 +47,5 @@ async function rateLimit(request: NextRequest) {
 
   const { success } = await rateLimit.limit(ip)
 
-  console.log(ip, success)
-
   return success
 }
