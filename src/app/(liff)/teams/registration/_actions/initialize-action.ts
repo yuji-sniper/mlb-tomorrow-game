@@ -54,9 +54,13 @@ export async function initializeAction(
     // ユーザーとチームの紐づけのチームIDを取得
     const registeredTeamIds = userTeams.map((userTeam) => userTeam.teamId)
 
-    return generateActionSuccessResponse({
-      registeredTeamIds,
-    })
+    return generateActionSuccessResponse(
+      "teams-registration-action:initializeAction",
+      "Success to initialize teams registration",
+      {
+        registeredTeamIds,
+      },
+    )
   } catch (error) {
     return generateActionErrorResponse(
       "teams-registration-action:initializeAction",

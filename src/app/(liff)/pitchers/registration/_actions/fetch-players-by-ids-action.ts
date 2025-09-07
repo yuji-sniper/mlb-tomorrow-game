@@ -43,9 +43,13 @@ export async function fetchPlayersByIdsAction(
     // 選手の取得APIを呼び出し
     const players = await fetchPlayersByIdsApi(playerIds)
 
-    return generateActionSuccessResponse({
-      players,
-    })
+    return generateActionSuccessResponse(
+      "pitchers-registration-form-action:fetchPlayersByIdsAction",
+      "Success to fetch players by ids",
+      {
+        players,
+      },
+    )
   } catch (error) {
     return generateActionErrorResponse(
       "pitchers-registration-form-action:fetchPlayersByIdsAction",

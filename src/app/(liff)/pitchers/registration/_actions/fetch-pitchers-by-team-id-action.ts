@@ -53,9 +53,13 @@ export async function fetchPitchersByTeamIdAction(
     const uniquePitchers = removeDuplicatePlayers(pitchers)
     const sortedPitchers = sortPlayersByStatusPriority(uniquePitchers)
 
-    return generateActionSuccessResponse({
-      players: sortedPitchers,
-    })
+    return generateActionSuccessResponse(
+      "pitchers-registration-form-action:fetchPitchersByTeamIdAction",
+      "Success to fetch pitchers by team id",
+      {
+        players: sortedPitchers,
+      },
+    )
   } catch (error) {
     return generateActionErrorResponse(
       "pitchers-registration-form-action:fetchPitchersByTeamIdAction",

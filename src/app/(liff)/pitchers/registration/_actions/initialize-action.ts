@@ -62,9 +62,13 @@ export async function initializeAction(
     // 選手をチームIDでグループ化
     const registeredPlayerIdsByTeamId = groupPlayerIdsByTeamId(players)
 
-    return generateActionSuccessResponse({
-      registeredPlayerIdsByTeamId,
-    })
+    return generateActionSuccessResponse(
+      "pitchers-registration-form-action:initializeAction",
+      "Success to initialize pitchers registration form",
+      {
+        registeredPlayerIdsByTeamId,
+      },
+    )
   } catch (error) {
     return generateActionErrorResponse(
       "pitchers-registration-form-action:initializeAction",

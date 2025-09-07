@@ -64,7 +64,11 @@ export async function registerTeamAction(
       }
     })
 
-    return generateActionSuccessResponse({})
+    return generateActionSuccessResponse(
+      "teams-registration-action:registerTeamAction",
+      "Success to register team",
+      {},
+    )
   } catch (error) {
     return generateActionErrorResponse(
       "teams-registration-action:registerTeamAction",

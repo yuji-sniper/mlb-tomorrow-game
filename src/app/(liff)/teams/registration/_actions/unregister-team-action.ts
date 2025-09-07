@@ -56,7 +56,11 @@ export async function unregisterTeamAction(
       await deleteUserTeamByUserIdAndTeamId(user.id, teamId, tx)
     })
 
-    return generateActionSuccessResponse({})
+    return generateActionSuccessResponse(
+      "teams-registration-action:unregisterTeamAction",
+      "Success to unregister team",
+      {},
+    )
   } catch (error) {
     return generateActionErrorResponse(
       "teams-registration-action:unregisterTeamAction",
