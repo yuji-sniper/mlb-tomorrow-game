@@ -29,6 +29,11 @@ async function rateLimit(request: NextRequest) {
     return true
   }
 
+  const userAgent = request.headers.get("user-agent")
+  if (userAgent?.includes("vercel")) {
+    return true
+  }
+
   const forwardedFor = request.headers.get("x-forwarded-for")
   const ip =
     forwardedFor?.split(",")[0]?.trim() ??
