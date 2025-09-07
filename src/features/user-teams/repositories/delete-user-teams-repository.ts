@@ -10,8 +10,14 @@ export async function deleteUserTeamByUserIdAndTeamId(
     "$extends" | "$transaction" | "$disconnect" | "$connect" | "$on" | "$use"
   >,
 ) {
-  const prismaClient = tx || prisma
-  await prismaClient.userTeam.delete({
-    where: { userId_teamId: { userId, teamId } },
-  })
+  try {
+    const prismaClient = tx || prisma
+    await prismaClient.userTeam.delete({
+      where: { userId_teamId: { userId, teamId } },
+    })
+  } catch (error) {
+    throw new Error(
+      `[delete-user-teams-repository:deleteUserTeamByUserIdAndTeamId](userId=${userId}, teamId=${teamId}) ${error}`,
+    )
+  }
 }

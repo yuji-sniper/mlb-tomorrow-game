@@ -15,6 +15,7 @@ import {
   generateActionSuccessResponse,
 } from "@/shared/utils/action"
 import { CustomError } from "@/shared/utils/error"
+import { logError, logInfo } from "@/shared/utils/log"
 
 type RegisterTeamActionRequest = {
   lineIdToken: string
@@ -29,6 +30,8 @@ type RegisterTeamActionResponse = {}
 export async function registerTeamAction(
   request: RegisterTeamActionRequest,
 ): Promise<ActionResponse<RegisterTeamActionResponse>> {
+  const logPrefix = "register-team-action:registerTeamAction"
+
   try {
     // リクエストボディ取得
     const schema = z.object({
@@ -64,16 +67,12 @@ export async function registerTeamAction(
       }
     })
 
-    return generateActionSuccessResponse(
-      "teams-registration-action:registerTeamAction",
-      "Success to register team",
-      {},
-    )
+    logInfo(logPrefix, "Success to register team.")
+
+    return generateActionSuccessResponse({})
   } catch (error) {
-    return generateActionErrorResponse(
-      "teams-registration-action:registerTeamAction",
-      "Failed to register team",
-      error,
-    )
+    logError(logPrefix, error)
+
+    return generateActionErrorResponse("Failed to register team.", error)
   }
 }

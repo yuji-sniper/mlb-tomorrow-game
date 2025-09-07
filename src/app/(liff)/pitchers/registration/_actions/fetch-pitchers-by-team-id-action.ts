@@ -17,6 +17,7 @@ import {
   generateActionSuccessResponse,
 } from "@/shared/utils/action"
 import { CustomError } from "@/shared/utils/error"
+import { logError } from "@/shared/utils/log"
 
 type FetchPitchersByTeamIdActionRequest = {
   teamId: Team["id"]
@@ -32,6 +33,9 @@ type FetchPitchersByTeamIdActionResponse = {
 export async function fetchPitchersByTeamIdAction(
   request: FetchPitchersByTeamIdActionRequest,
 ): Promise<ActionResponse<FetchPitchersByTeamIdActionResponse>> {
+  const logPrefix =
+    "fetch-pitchers-by-team-id-action:fetchPitchersByTeamIdAction"
+
   try {
     // リクエストパラメータ取得
     const schema = z.object({
@@ -53,17 +57,14 @@ export async function fetchPitchersByTeamIdAction(
     const uniquePitchers = removeDuplicatePlayers(pitchers)
     const sortedPitchers = sortPlayersByStatusPriority(uniquePitchers)
 
-    return generateActionSuccessResponse(
-      "pitchers-registration-form-action:fetchPitchersByTeamIdAction",
-      "Success to fetch pitchers by team id",
-      {
-        players: sortedPitchers,
-      },
-    )
+    return generateActionSuccessResponse({
+      players: sortedPitchers,
+    })
   } catch (error) {
+    logError(logPrefix, error)
+
     return generateActionErrorResponse(
-      "pitchers-registration-form-action:fetchPitchersByTeamIdAction",
-      "Failed to fetch pitchers by team id",
+      "Failed to fetch pitchers by team id.",
       error,
     )
   }

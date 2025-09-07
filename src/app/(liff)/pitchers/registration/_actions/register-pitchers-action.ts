@@ -15,6 +15,7 @@ import {
   generateActionSuccessResponse,
 } from "@/shared/utils/action"
 import { CustomError } from "@/shared/utils/error"
+import { logError, logInfo } from "@/shared/utils/log"
 
 type RegisterPitchersActionRequest = {
   lineIdToken: string
@@ -30,6 +31,8 @@ type RegisterPitchersActionResponse = {}
 export async function registerPitchersAction(
   request: RegisterPitchersActionRequest,
 ): Promise<ActionResponse<RegisterPitchersActionResponse>> {
+  const logPrefix = "pitchers-registration-action:registerPitchersAction"
+
   try {
     // リクエストボディ取得
     const schema = z.object({
@@ -75,16 +78,12 @@ export async function registerPitchersAction(
       }
     })
 
-    return generateActionSuccessResponse(
-      "pitchers-registration-action:registerPitchersAction",
-      "Success to register pitchers.",
-      {},
-    )
+    logInfo(logPrefix, "Success to register pitchers.")
+
+    return generateActionSuccessResponse({})
   } catch (error) {
-    return generateActionErrorResponse(
-      "pitchers-registration-action:registerPitchersAction",
-      "Failed to register pitchers.",
-      error,
-    )
+    logError(logPrefix, error)
+
+    return generateActionErrorResponse("Failed to register pitchers.", error)
   }
 }

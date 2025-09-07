@@ -11,6 +11,7 @@ import {
   generateActionSuccessResponse,
 } from "@/shared/utils/action"
 import { CustomError } from "@/shared/utils/error"
+import { logError } from "@/shared/utils/log"
 
 type InitializeActionRequest = {
   lineIdToken: string
@@ -26,6 +27,8 @@ type InitializeActionResponse = {
 export async function initializeAction(
   request: InitializeActionRequest,
 ): Promise<ActionResponse<InitializeActionResponse>> {
+  const logPrefix = "initialize-action:initializeAction"
+
   try {
     // リクエストパラメータ取得
     const schema = z.object({
@@ -54,17 +57,14 @@ export async function initializeAction(
     // ユーザーとチームの紐づけのチームIDを取得
     const registeredTeamIds = userTeams.map((userTeam) => userTeam.teamId)
 
-    return generateActionSuccessResponse(
-      "teams-registration-action:initializeAction",
-      "Success to initialize teams registration",
-      {
-        registeredTeamIds,
-      },
-    )
+    return generateActionSuccessResponse({
+      registeredTeamIds,
+    })
   } catch (error) {
+    logError(logPrefix, error)
+
     return generateActionErrorResponse(
-      "teams-registration-action:initializeAction",
-      "Failed to initialize teams registration",
+      "Failed to initialize teams registration.",
       error,
     )
   }

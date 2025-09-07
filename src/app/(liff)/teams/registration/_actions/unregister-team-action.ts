@@ -13,6 +13,7 @@ import {
   generateActionSuccessResponse,
 } from "@/shared/utils/action"
 import { CustomError } from "@/shared/utils/error"
+import { logError, logInfo } from "@/shared/utils/log"
 
 type UnregisterTeamActionRequest = {
   lineIdToken: string
@@ -24,6 +25,8 @@ type UnregisterTeamActionResponse = {}
 export async function unregisterTeamAction(
   request: UnregisterTeamActionRequest,
 ): Promise<ActionResponse<UnregisterTeamActionResponse>> {
+  const logPrefix = "unregister-team-action:unregisterTeamAction"
+
   try {
     // リクエストボディ取得
     const schema = z.object({
@@ -56,16 +59,12 @@ export async function unregisterTeamAction(
       await deleteUserTeamByUserIdAndTeamId(user.id, teamId, tx)
     })
 
-    return generateActionSuccessResponse(
-      "teams-registration-action:unregisterTeamAction",
-      "Success to unregister team",
-      {},
-    )
+    logInfo(logPrefix, "Success to unregister team.")
+
+    return generateActionSuccessResponse({})
   } catch (error) {
-    return generateActionErrorResponse(
-      "teams-registration-action:unregisterTeamAction",
-      "Failed to unregister team",
-      error,
-    )
+    logError(logPrefix, error)
+
+    return generateActionErrorResponse("Failed to unregister team.", error)
   }
 }

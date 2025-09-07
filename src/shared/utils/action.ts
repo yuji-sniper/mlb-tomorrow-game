@@ -11,12 +11,8 @@ import { CustomError } from "@/shared/utils/error"
  * @returns
  */
 export function generateActionSuccessResponse<T>(
-  logPrefix: string,
-  logMessage: string,
   data: T,
 ): ActionSuccessResponse<T> {
-  console.log(`[${logPrefix}]`, logMessage)
-
   return {
     ok: true,
     data,
@@ -25,21 +21,14 @@ export function generateActionSuccessResponse<T>(
 
 /**
  * エラーレスポンスを生成
- * @param logPrefix
  * @param defaultMessage
  * @param error
  * @returns
  */
 export function generateActionErrorResponse(
-  logPrefix: string,
-  defaultLogMessage: string,
+  defaultMessage: string,
   error: unknown,
 ): ActionErrorResponse {
-  const logError = (shouldLogAsError: boolean = true) => {
-    const logMethod = shouldLogAsError ? console.error : console.log
-    logMethod(`[${logPrefix}]`, error)
-  }
-
   const createErrorResponse = (
     code: keyof typeof ERROR_CODE,
     message: string,
@@ -51,24 +40,17 @@ export function generateActionErrorResponse(
 
   // CustomErrorの場合
   if (error instanceof CustomError) {
-    const shouldLogAsError = error.code === ERROR_CODE.INTERNAL_SERVER_ERROR
-    logError(shouldLogAsError)
     return createErrorResponse(error.code, error.message, error.data)
   }
 
   // Errorの場合
   if (error instanceof Error) {
-    logError()
     return createErrorResponse(
       ERROR_CODE.INTERNAL_SERVER_ERROR,
-      error.message || defaultLogMessage,
+      error.message || defaultMessage,
     )
   }
 
   // その他のエラーの場合
-  logError()
-  return createErrorResponse(
-    ERROR_CODE.INTERNAL_SERVER_ERROR,
-    defaultLogMessage,
-  )
+  return createErrorResponse(ERROR_CODE.INTERNAL_SERVER_ERROR, defaultMessage)
 }

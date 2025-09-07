@@ -15,6 +15,7 @@ import {
   generateActionSuccessResponse,
 } from "@/shared/utils/action"
 import { CustomError } from "@/shared/utils/error"
+import { logError } from "@/shared/utils/log"
 
 type InitializeActionRequest = {
   lineIdToken: string
@@ -30,6 +31,8 @@ type InitializeActionResponse = {
 export async function initializeAction(
   request: InitializeActionRequest,
 ): Promise<ActionResponse<InitializeActionResponse>> {
+  const logPrefix = "initialize-action:initializeAction"
+
   try {
     // リクエストパラメータ取得
     const schema = z.object({
@@ -62,17 +65,14 @@ export async function initializeAction(
     // 選手をチームIDでグループ化
     const registeredPlayerIdsByTeamId = groupPlayerIdsByTeamId(players)
 
-    return generateActionSuccessResponse(
-      "pitchers-registration-form-action:initializeAction",
-      "Success to initialize pitchers registration form",
-      {
-        registeredPlayerIdsByTeamId,
-      },
-    )
+    return generateActionSuccessResponse({
+      registeredPlayerIdsByTeamId,
+    })
   } catch (error) {
+    logError(logPrefix, error)
+
     return generateActionErrorResponse(
-      "pitchers-registration-form-action:initializeAction",
-      "Failed to initialize pitchers registration form",
+      "Failed to initialize pitchers registration form.",
       error,
     )
   }
