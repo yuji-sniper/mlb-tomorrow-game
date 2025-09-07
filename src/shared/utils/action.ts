@@ -11,8 +11,12 @@ import { CustomError } from "@/shared/utils/error"
  * @returns
  */
 export function generateActionSuccessResponse<T>(
+  logPrefix: string,
+  logMessage: string,
   data: T,
 ): ActionSuccessResponse<T> {
+  console.log(`[${logPrefix}]`, logMessage)
+
   return {
     ok: true,
     data,
@@ -28,7 +32,7 @@ export function generateActionSuccessResponse<T>(
  */
 export function generateActionErrorResponse(
   logPrefix: string,
-  defaultMessage: string,
+  defaultLogMessage: string,
   error: unknown,
 ): ActionErrorResponse {
   const logError = (shouldLogAsError: boolean = true) => {
@@ -57,11 +61,14 @@ export function generateActionErrorResponse(
     logError()
     return createErrorResponse(
       ERROR_CODE.INTERNAL_SERVER_ERROR,
-      error.message || defaultMessage,
+      error.message || defaultLogMessage,
     )
   }
 
   // その他のエラーの場合
   logError()
-  return createErrorResponse(ERROR_CODE.INTERNAL_SERVER_ERROR, defaultMessage)
+  return createErrorResponse(
+    ERROR_CODE.INTERNAL_SERVER_ERROR,
+    defaultLogMessage,
+  )
 }

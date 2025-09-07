@@ -9,8 +9,14 @@ export async function deleteUserPlayersByUserIdAndPlayerIds(
     "$extends" | "$transaction" | "$disconnect" | "$connect" | "$on" | "$use"
   >,
 ) {
-  const prismaClient = tx || prisma
-  await prismaClient.userPlayer.deleteMany({
-    where: { userId, playerId: { in: playerIds } },
-  })
+  try {
+    const prismaClient = tx || prisma
+    await prismaClient.userPlayer.deleteMany({
+      where: { userId, playerId: { in: playerIds } },
+    })
+  } catch (error) {
+    throw new Error(
+      `[delete-user-players-repository:deleteUserPlayersByUserIdAndPlayerIds](userId=${userId}, playerIds=${playerIds}) ${error}`,
+    )
+  }
 }

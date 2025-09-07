@@ -47,22 +47,21 @@ export async function registerPitchersAction(
     }
     const { lineIdToken, oldPlayerIds, newPlayerIds } = parsedRequest.data
 
+    // LINE ID取得
+    const lineVerifyData = await verifyLineTokenApi(lineIdToken)
+    const lineId = lineVerifyData.sub
+
+    // ユーザー取得 or 作成
+    const user = (await findUser(lineId)) ?? (await createUser(lineId))
+
     // 削除対象の選手IDと追加対象の選手IDを取得
     const deletePlayerIds = oldPlayerIds.filter(
       (id) => !newPlayerIds.includes(id),
     )
     const addPlayerIds = newPlayerIds.filter((id) => !oldPlayerIds.includes(id))
 
-    // LINE ID取得
-    const lineVerifyData = await verifyLineTokenApi(lineIdToken)
-    const lineId = lineVerifyData.sub
-
     // DBトランザクション
     await prisma.$transaction(async (tx) => {
-      // ユーザー取得 or 作成
-      const user =
-        (await findUser(lineId, tx)) ?? (await createUser(lineId, tx))
-
       // ユーザーと選手の紐づけを更新
       if (deletePlayerIds.length > 0) {
         await deleteUserPlayersByUserIdAndPlayerIds(
@@ -76,11 +75,15 @@ export async function registerPitchersAction(
       }
     })
 
-    return generateActionSuccessResponse({})
+    return generateActionSuccessResponse(
+      "pitchers-registration-action:registerPitchersAction",
+      "Success to register pitchers.",
+      {},
+    )
   } catch (error) {
     return generateActionErrorResponse(
       "pitchers-registration-action:registerPitchersAction",
-      "Failed to register pitchers",
+      "Failed to register pitchers.",
       error,
     )
   }

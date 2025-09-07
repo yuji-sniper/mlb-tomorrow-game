@@ -9,11 +9,17 @@ export async function createUserPlayers(
     "$extends" | "$transaction" | "$disconnect" | "$connect" | "$on" | "$use"
   >,
 ) {
-  const prismaClient = tx || prisma
-  await prismaClient.userPlayer.createMany({
-    data: playerIds.map((playerId) => ({
-      userId,
-      playerId,
-    })),
-  })
+  try {
+    const prismaClient = tx || prisma
+    await prismaClient.userPlayer.createMany({
+      data: playerIds.map((playerId) => ({
+        userId,
+        playerId,
+      })),
+    })
+  } catch (error) {
+    throw new Error(
+      `[create-user-players-repository:createUserPlayers](userId=${userId}, playerIds=${playerIds}) ${error}`,
+    )
+  }
 }
