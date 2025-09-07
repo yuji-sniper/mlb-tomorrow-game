@@ -5,6 +5,12 @@ import { type NextRequest, NextResponse } from "next/server"
 const RATE_LIMIT_COUNT = 10
 const RATE_LIMIT_DURATION = "10s"
 
+export const config = {
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)",
+  ],
+}
+
 export async function middleware(request: NextRequest) {
   // レートリミット
   const rateLimitSuccess = await rateLimit(request)
