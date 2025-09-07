@@ -194,10 +194,6 @@ export const useTeamsRegistration: UseTeamsRegistration = () => {
       console.error(error)
 
       return { ok: false }
-    } finally {
-      closeRegisterConfirmDialog(() => {
-        setSelectedTeam(undefined)
-      })
     }
   }
 
