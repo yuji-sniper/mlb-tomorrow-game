@@ -16,6 +16,7 @@ export async function createUserPlayers(
         userId,
         playerId,
       })),
+      skipDuplicates: true,
     })
   } catch (error) {
     throw new Error(
