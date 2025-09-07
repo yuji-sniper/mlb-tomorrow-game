@@ -47,6 +47,13 @@ export const usePitchersRegistration: UsePitchersRegistration = () => {
   const [registeredPlayerIdsByTeamId, setRegisteredPlayerIdsByTeamId] =
     useState<Record<Team["id"], Player["id"][]>>({})
 
+  console.log("registeredPlayerIdsByTeamId", registeredPlayerIdsByTeamId)
+  console.log("selectedPlayerIds", selectedPlayerIds)
+  console.log(
+    "currentTeamPlayerIds",
+    currentTeamPlayers.map((player) => player.id),
+  )
+
   /**
    * ピッチャー登録ダイアログのフック
    */
