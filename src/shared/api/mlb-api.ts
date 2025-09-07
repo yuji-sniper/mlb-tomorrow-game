@@ -98,13 +98,13 @@ export async function fetchPlayersByIdsApi(
     people: {
       id: number
       fullName: string
-      currentTeam: { id: number }
+      currentTeam: { id: number; parentOrgId?: number }
     }[]
   } = await res.json()
 
   const players: Player[] = data.people.map((person) => ({
     id: person.id,
-    teamId: person.currentTeam.id,
+    teamId: person.currentTeam.parentOrgId ?? person.currentTeam.id,
     name: person.fullName,
     positionCode: "",
     statusCode: "",
