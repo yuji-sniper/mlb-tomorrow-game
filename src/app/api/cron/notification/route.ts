@@ -637,7 +637,7 @@ function setGamesContentsToLayout(
         contents: [
           {
             type: "text",
-            text: `明日の試合 (${tomorrowDate})`,
+            text: `明日の注目試合 (${tomorrowDate})`,
             weight: "bold",
             size: "md",
             color: "#F8FAFC",
