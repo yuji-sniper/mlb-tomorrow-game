@@ -99,6 +99,10 @@ export async function POST(request: NextRequest) {
 
     const { teams, standings, games } = await fetchMlbData()
 
+    if (games.length === 0) {
+      return NextResponse.json({ message: "No games found" })
+    }
+
     const gameContentDataList = await generateGameContentDataList(
       teams,
       standings,

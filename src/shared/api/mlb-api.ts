@@ -194,7 +194,7 @@ export async function fetchGamesByDateApi(date: Date): Promise<Game[]> {
 
   const data: {
     dates: {
-      games: {
+      games?: {
         gamePk: number
         gameDate: string
         teams: {
@@ -210,6 +210,10 @@ export async function fetchGamesByDateApi(date: Date): Promise<Game[]> {
       }[]
     }[]
   } = await res.json()
+
+  if (!data.dates[0].games) {
+    return []
+  }
 
   const games: Game[] = []
   data.dates[0].games.forEach((game) => {
