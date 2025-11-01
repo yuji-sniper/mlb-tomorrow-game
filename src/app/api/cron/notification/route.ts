@@ -88,6 +88,7 @@ const RETRYABLE_ERROR_CODES: ErrorCode[] = [
 
 /**
  * 通知を送信する
+ * TODO: EventBridgeのAPI Destinationだと5秒でタイムアウトするから、Lambdaを経由させたい。
  */
 export async function POST(request: NextRequest) {
   const logPrefix = "[API: POST /api/notification]"
