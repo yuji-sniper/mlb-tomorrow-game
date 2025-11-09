@@ -211,7 +211,9 @@ export async function fetchGamesByDateApi(date: Date): Promise<Game[]> {
     }[]
   } = await res.json()
 
-  if (!data.dates[0].games) {
+  console.log(data)
+
+  if (!data.dates[0]?.games) {
     return []
   }
 

@@ -17,3 +17,15 @@ export async function findUser(
 
   return user
 }
+
+export async function countUsers(
+  tx?: Omit<
+    PrismaClient,
+    "$extends" | "$transaction" | "$disconnect" | "$connect" | "$on" | "$use"
+  >,
+): Promise<number> {
+  const prismaClient = tx || prisma
+  const count = await prismaClient.user.count()
+
+  return count
+}

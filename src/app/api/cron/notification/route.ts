@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { iterateAllUsersByChunkWithRelations } from "@/features/users/repositories/fetch-users-repository"
+import { countUsers } from "@/features/users/repositories/find-user-repository"
 import {
   issueLineMessagingApiStatelessChannelAccessTokenApi,
   sendLinePushMessageApi,
@@ -94,13 +95,17 @@ export async function POST(request: NextRequest) {
   const logPrefix = "[API: POST /api/notification]"
 
   try {
-    if (!authenticate(request)) {
-      throw new CustomError(ERROR_CODE.UNAUTHORIZED)
-    }
+    // if (!authenticate(request)) {
+    //   throw new CustomError(ERROR_CODE.UNAUTHORIZED)
+    // }
 
     const { teams, standings, games } = await fetchMlbData()
 
     if (games.length === 0) {
+      // supabaseの無料プランは7日間アクセスがないとスリープするので、ユーザー数を取得クエリを実行してスリープを回避する
+      const count = await countUsers()
+      console.log(logPrefix, `Total users: ${count}`)
+
       return NextResponse.json({ message: "No games found" })
     }
 
