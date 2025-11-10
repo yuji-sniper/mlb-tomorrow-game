@@ -95,9 +95,9 @@ export async function POST(request: NextRequest) {
   const logPrefix = "[API: POST /api/notification]"
 
   try {
-    // if (!authenticate(request)) {
-    //   throw new CustomError(ERROR_CODE.UNAUTHORIZED)
-    // }
+    if (!authenticate(request)) {
+      throw new CustomError(ERROR_CODE.UNAUTHORIZED)
+    }
 
     const { teams, standings, games } = await fetchMlbData()
 
